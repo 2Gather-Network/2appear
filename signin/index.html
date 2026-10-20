@@ -136,13 +136,13 @@ window._safeNavGo = window._safeNavGo || function (el) {
       }
     }
   } catch (e) {}
-  var next = asked || '/events/';
-  if (next.charAt(0) !== '/' || next.indexOf('//') === 0) { next = '/events/'; asked = ''; }
-  if (next.indexOf('/signin') === 0) { next = '/events/'; asked = ''; }
+  var next = asked || '/';
+  if (next.charAt(0) !== '/' || next.indexOf('//') === 0) { next = '/'; asked = ''; }
+  if (next.indexOf('/signin') === 0) { next = '/'; asked = ''; }
 
 
   var email = '';
-  var nextNew = asked ? next : '/events/';
+  var nextNew = asked ? next : '/';
   try { cwGoogleMount({ slot: document.getElementById('cw-g-slot'), card: document.querySelector('.card'), mode: 'signin', next: next, nextNew: nextNew }); } catch (e) {}
 
   function tell(which, msg, good) {
