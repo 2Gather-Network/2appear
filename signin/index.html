@@ -166,7 +166,7 @@ window._safeNavGo = window._safeNavGo || function (el) {
       'Your six digit code is on its way to ' + email + '. It takes a few seconds to arrive, and it expires in 15 minutes.';
     document.getElementById('code').focus();
 
-    fetch(GS_URL + '?action=sendSigninPin&email=' + encodeURIComponent(email))
+    fetch(GS_URL + '?action=sendSigninPin&from=2appear&email=' + encodeURIComponent(email))
       .then(function (r) { return r.json(); })
       .then(function () {
         btn.disabled = false;
@@ -222,7 +222,7 @@ window._safeNavGo = window._safeNavGo || function (el) {
   });
 
   document.getElementById('again').addEventListener('click', function () {
-    fetch(GS_URL + '?action=sendSigninPin&email=' + encodeURIComponent(email));
+    fetch(GS_URL + '?action=sendSigninPin&from=2appear&email=' + encodeURIComponent(email));
     tell('say2', 'Another code is on its way to ' + email + '.', true);
   });
 
@@ -244,7 +244,7 @@ window._safeNavGo = window._safeNavGo || function (el) {
 
     var btn3 = document.getElementById('create');
     fetch(GS_URL + '?action=verifySigninPin&email=' + encodeURIComponent(email) +
-          '&code=' + encodeURIComponent(code) + signup)
+          '&code=' + encodeURIComponent(code) + '&from=2appear' + signup)
       .then(function (r) { return r.json(); })
       .then(function (d) {
         if (d && d.status === 'new') {
