@@ -26,6 +26,7 @@
     if (q && q.indexOf('=') === -1) { name = decodeURIComponent(q).trim().toLowerCase(); }
     else { name = String(new URLSearchParams(location.search).get('name') || '').trim().toLowerCase(); }
   } catch (e) {}
+  if (!name) { try { var _sp = new URLSearchParams(location.search), _k = Array.from(_sp.keys())[0] || ''; if (_k && !_sp.get(_k)) { name = _k.trim().toLowerCase(); } } catch (e) {} }
   name = name.replace(/\/+$/, '');
   if (!name) { location.replace('/'); return; }
 
