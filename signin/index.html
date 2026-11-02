@@ -58,8 +58,8 @@
   .tick input{width:18px;height:18px;flex-shrink:0;margin:1px 0 0;accent-color:var(--brand);}
 </style>
   <script src="https://2gather.network/nav/identity.js"></script>
-  <script src="https://2gather.network/nav/firststop.js?v=6"></script>
-  <script src="https://2gather.network/nav/google-signin.js"></script>
+  <script src="https://2gather.network/nav/firststop.js?v=7"></script>
+  <script src="https://2gather.network/nav/google-signin.js?v=12"></script>
 <style>body{overflow-x:clip;overflow-wrap:break-word;}</style>
 <style>@media(max-width:768px){input:not([type=checkbox]):not([type=radio]):not([type=range]),select,textarea{font-size:16px !important;}}</style>
 </head>
@@ -267,6 +267,7 @@ window._safeNavGo = window._safeNavGo || function (el) {
             localStorage.setItem('cw-id', d.appearId);
             if (firstName) { localStorage.setItem('cw-first', firstName); }
             localStorage.setItem('appear-id', d.appearId);
+            if (d.photo) { localStorage.setItem('cw-photo', d.photo); localStorage.setItem('cw-photo-for', d.appearId); localStorage.setItem('cw-photo-at', String(Date.now())); }
             lastEmailRemember(email);
             if (d.editToken) {
               localStorage.setItem('cw-token', d.editToken);
