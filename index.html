@@ -35,16 +35,27 @@
   .half{background:var(--panel);border:1px solid var(--panel-line);border-radius:14px;padding:20px 22px;min-width:0;}
   .half h2{font-size:18px;font-weight:800;margin:0 0 8px;}
   .half p{font-size:15px;line-height:1.65;color:var(--soft);margin:0;}
+  .build{margin:22px 0 0;background:var(--panel);border:1px solid var(--panel-line);border-radius:14px;padding:20px 22px;display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;}
+  .build[hidden]{display:none;}
+  .build p{font-size:16px;line-height:1.5;color:var(--soft);margin:0;max-width:46ch;}
+  .build a{display:inline-block;background:var(--brand);color:#fff;font-size:16px;font-weight:800;text-decoration:none;border-radius:999px;padding:12px 24px;}
+  .build a:focus-visible{outline:3px solid var(--ink);outline-offset:2px;}
   @media(max-width:700px){.card{padding:22px 20px;}h1{font-size:25px;}.halves{grid-template-columns:1fr;}}
 </style>
 <script>window.CW_SIGNIN="/signin/?next="+encodeURIComponent(location.pathname+location.search);window.CW_SIGNUP="/signup/?next="+encodeURIComponent(location.pathname+location.search);</script>
 <script src="https://2gather.network/nav/identity.js?v=57"></script>
+<script src="https://2gather.network/nav/firststop.js?v=9"></script>
 <script src="https://2gather.network/nav/topbar.js" defer></script>
 </head>
 <body>
 <div class="wrap">
   <div class="card">
     <h1>Appear in your network. Make your network appear.</h1>
+
+    <div class="build" id="build" hidden>
+      <p>Add your photo, where you are and a language so people can find you.</p>
+      <a href="/intro/start">Build my page</a>
+    </div>
 
     <div class="halves">
       <div class="half">
@@ -59,5 +70,14 @@
 
   </div>
 </div>
+<script>
+(function () {
+  var me = (window.CW && CW.me) ? CW.me() : { known: false, id: '' };
+  if (!me.known || !me.id || !CW.pageReady) { return; }
+  CW.pageReady(me.id, function (ready) {
+    if (ready === false) { document.getElementById('build').hidden = false; }
+  });
+})();
+</script>
 </body>
 </html>

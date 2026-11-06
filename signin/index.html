@@ -58,7 +58,7 @@
   .tick input{width:18px;height:18px;flex-shrink:0;margin:1px 0 0;accent-color:var(--brand);}
 </style>
   <script src="https://2gather.network/nav/identity.js"></script>
-  <script src="https://2gather.network/nav/firststop.js?v=8"></script>
+  <script src="https://2gather.network/nav/firststop.js?v=9"></script>
   <script src="https://2gather.network/nav/google-signin.js?v=13"></script>
 <style>body{overflow-x:clip;overflow-wrap:break-word;}</style>
 <style>@media(max-width:768px){input:not([type=checkbox]):not([type=radio]):not([type=range]),select,textarea{font-size:16px !important;}}</style>
@@ -145,7 +145,7 @@ window._safeNavGo = window._safeNavGo || function (el) {
 
 
   var email = '';
-  var nextNew = asked ? next : '/';
+  var nextNew = asked ? next : '/intro/start';
   try { cwGoogleMount({ slot: document.getElementById('cw-g-slot'), card: document.querySelector('.card'), mode: 'signin', next: next, nextNew: nextNew }); } catch (e) {}
 
   function tell(which, msg, good) {
