@@ -325,7 +325,7 @@ window._safeNavGo = window._safeNavGo || function (el) {
     if (!document.getElementById('agree').checked) { tell('say3', 'Please read the terms and tick the box to agree.', false); return; }
     if (!document.getElementById('over18').checked) { tell('say3', 'Please confirm you are at least 18.', false); return; }
     firstName = fv;
-    signup = '&first=' + encodeURIComponent(fv) + '&last=' + encodeURIComponent(lv) + '&terms=1&age=1' + refParam();
+    signup = '&first=' + encodeURIComponent(fv) + '&last=' + encodeURIComponent(lv) + '&terms=1&age=1&conduct=1' + refParam();
     var b3 = document.getElementById('create');
     b3.disabled = true;
     b3.textContent = 'Creating\u2026';
