@@ -16,7 +16,7 @@
 <meta name="robots" content="noindex, nofollow">
 <meta name="referrer" content="no-referrer">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Stop invitations · 2Appear</title>
+<title>Manage invitations · 2Appear</title>
 <style>
   :root{ --bg:#1F699E; --brand:#1F699E; --ink:#1A2E42; --soft:#2F3D4F; --line:#DDE4EE; --card:#fff; }
   *{box-sizing:border-box;}
@@ -32,32 +32,65 @@
   .cw-status.info{background:#E8F2F9;color:var(--ink);padding:10px 14px;font-size:13.5px;font-weight:400;line-height:1.5;}
   .cw-status:empty{display:none;}
   @media(max-width:600px){.cw-card{padding:18px 16px;}}
+  .cw-cpill{display:flex;align-items:center;gap:9px;width:100%;background:#fff;border:1px solid #DDE3EA;border-radius:24px;padding:10px 18px;font:700 15px 'Nunito Sans',sans-serif;color:#5A6878;cursor:pointer;text-align:left;min-height:44px;}
+  .cw-cpill .c{width:16px;height:16px;border-radius:50%;border:1.5px solid #7A8796;box-sizing:border-box;display:inline-flex;align-items:center;justify-content:center;color:#fff;flex:none;margin-left:auto;}
+  .cw-cpill.on{border:1.5px solid #1F699E;background:#F2F8FC;color:#1A2E42;box-shadow:0 0 0 2px #fff,0 0 0 3.5px #1F699E;}
+  .cw-cpill.on .c{background:#1F699E;border-color:#1F699E;}
+  .cw-fhelp{font-size:13.5px;line-height:1.5;color:var(--soft);margin:6px 0 16px 18px;}
+  .hidden{display:none!important;}
 </style>
 <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:opsz,wght@6..12,400;6..12,600;6..12,700;6..12,800&display=swap" rel="stylesheet">
 <link rel="icon" href="/favicon.ico">
 </head>
 <body>
   <div class="cw-card">
-    <h1 class="cw-pq">Stop invitations from 2Appear</h1>
-    <p class="cw-statement" id="lede">After this, nobody can send you an event or group invitation from 2Appear.</p>
-    <button type="button" class="cw-btn solid form" id="stop">Stop invitations</button>
+    <h1 class="cw-pq">Manage invitations from 2Appear</h1>
+    <div id="choices" role="radiogroup" aria-label="Manage invitations from 2Appear">
+      <div class="pair hidden" data-k="e">
+        <button type="button" class="cw-cpill" role="radio" aria-checked="false" data-s="one">Just this event<span class="c"></span></button>
+        <p class="cw-fhelp">After this, you won't receive any communications or invites from anyone from this event via 2Appear.</p>
+        <button type="button" class="cw-cpill" role="radio" aria-checked="false" data-s="all">All events<span class="c"></span></button>
+        <p class="cw-fhelp">After this, nobody can send you an event or group invitation from 2Appear.</p>
+      </div>
+      <div class="pair hidden" data-k="g">
+        <button type="button" class="cw-cpill" role="radio" aria-checked="false" data-s="one">Just this group<span class="c"></span></button>
+        <p class="cw-fhelp">After this, you won't receive any communications or invites from anyone from this group via 2Appear.</p>
+        <button type="button" class="cw-cpill" role="radio" aria-checked="false" data-s="all">All groups<span class="c"></span></button>
+        <p class="cw-fhelp">After this, nobody can send you group communications via 2Appear.</p>
+      </div>
+    </div>
+    <button type="button" class="cw-btn solid form" id="stop" disabled>Stop invitations</button>
     <p class="cw-status info" id="say" role="status"></p>
   </div>
 <script>
 (function(){
   var q = new URLSearchParams(location.search);
-  var i = String(q.get('i') || ''), t = String(q.get('t') || '');
-  var btn = document.getElementById('stop'), say = document.getElementById('say');
-  if (!i || !t) { btn.style.display = 'none'; document.getElementById('lede').style.display = 'none'; say.textContent = 'This link has already been used or is no longer valid.'; return; }
+  var i = String(q.get('i') || ''), t = String(q.get('t') || ''), k = q.get('k') === 'g' ? 'g' : 'e';
+  var btn = document.getElementById('stop'), say = document.getElementById('say'), box = document.getElementById('choices');
+  var pair = document.querySelector('.pair[data-k="' + k + '"]'), pick = null;
+  if (!i || !t) { box.style.display = 'none'; btn.style.display = 'none'; say.textContent = 'This link has already been used or is no longer valid.'; return; }
+  pair.classList.remove('hidden');
+  pair.querySelectorAll('.cw-cpill').forEach(function (b) {
+    b.addEventListener('click', function () {
+      pair.querySelectorAll('.cw-cpill').forEach(function (x) { x.classList.remove('on'); x.setAttribute('aria-checked', 'false'); });
+      b.classList.add('on'); b.setAttribute('aria-checked', 'true'); pick = b; btn.disabled = false;
+    });
+  });
   btn.addEventListener('click', function(){
+    if (!pick) return;
     btn.disabled = true;
     say.textContent = 'Stopping…';
-    fetch('https://cw-api-gate.jessieupp.workers.dev?action=stopEventInvites&i=' + encodeURIComponent(i) + '&t=' + encodeURIComponent(t), { referrerPolicy: 'no-referrer' })
+    fetch('https://cw-api-gate.jessieupp.workers.dev?action=stopEventInvites&i=' + encodeURIComponent(i) + '&t=' + encodeURIComponent(t) + '&s=' + pick.getAttribute('data-s'), { referrerPolicy: 'no-referrer' })
       .then(function(r){ return r.json(); })
       .then(function(d){
-        say.textContent = (d && d.message) ? d.message : 'That did not go through. Try again in a moment.';
-        if (d && d.status) { btn.style.display = 'none'; document.getElementById('lede').style.display = 'none'; }
-        else { btn.disabled = false; }
+        if (d && d.status === 'ok') {
+          var line = String(pick.nextElementSibling.textContent || '').replace(/^After this, /, '');
+          say.textContent = line.charAt(0).toUpperCase() + line.slice(1);
+          box.style.display = 'none'; btn.style.display = 'none';
+        } else if (d && d.status) {
+          say.textContent = d.message || 'This link has already been used or is no longer valid.';
+          box.style.display = 'none'; btn.style.display = 'none';
+        } else { btn.disabled = false; say.textContent = 'That did not go through. Try again in a moment.'; }
       })
       .catch(function(){ btn.disabled = false; say.textContent = 'Could not reach the server. Try again in a moment.'; });
   });
