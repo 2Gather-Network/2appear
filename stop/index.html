@@ -43,7 +43,7 @@
   var q = new URLSearchParams(location.search);
   var i = String(q.get('i') || ''), t = String(q.get('t') || '');
   var btn = document.getElementById('stop'), say = document.getElementById('say');
-  if (!i || !t) { btn.style.display = 'none'; say.textContent = 'This link has already been used or is no longer valid.'; return; }
+  if (!i || !t) { btn.style.display = 'none'; document.getElementById('lede').style.display = 'none'; say.textContent = 'This link has already been used or is no longer valid.'; return; }
   btn.addEventListener('click', function(){
     btn.disabled = true;
     say.textContent = 'Stopping…';
@@ -51,7 +51,7 @@
       .then(function(r){ return r.json(); })
       .then(function(d){
         say.textContent = (d && d.message) ? d.message : 'That did not go through. Try again in a moment.';
-        if (d && d.status === 'ok') { btn.style.display = 'none'; document.getElementById('lede').style.display = 'none'; }
+        if (d && d.status) { btn.style.display = 'none'; document.getElementById('lede').style.display = 'none'; }
         else { btn.disabled = false; }
       })
       .catch(function(){ btn.disabled = false; say.textContent = 'Could not reach the server. Try again in a moment.'; });
