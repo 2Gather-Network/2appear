@@ -50,7 +50,7 @@
         <button type="button" class="cw-cpill" role="radio" aria-checked="false" data-s="one">Just this event<span class="c"></span></button>
         <p class="cw-fhelp">After this, you won't receive any communications or invites from anyone from this event via 2Appear.</p>
         <button type="button" class="cw-cpill" role="radio" aria-checked="false" data-s="all">All events<span class="c"></span></button>
-        <p class="cw-fhelp">After this, nobody can send you an event or group invitation from 2Appear.</p>
+        <p class="cw-fhelp">After this, nobody can send you an event invitation from 2Appear.</p>
       </div>
       <div class="pair hidden" data-k="g">
         <button type="button" class="cw-cpill" role="radio" aria-checked="false" data-s="one">Just this group<span class="c"></span></button>
@@ -86,6 +86,7 @@
         if (d && d.status === 'ok') {
           var line = String(pick.nextElementSibling.textContent || '').replace(/^After this, /, '');
           say.textContent = line.charAt(0).toUpperCase() + line.slice(1);
+          if (pick.getAttribute('data-s') === 'one') { say.appendChild(document.createElement('br')); say.appendChild(document.createTextNode('To stop more, use the link in any other invitation from 2Appear.')); }
           box.style.display = 'none'; btn.style.display = 'none';
         } else if (d && d.status) {
           say.textContent = d.message || 'This link has already been used or is no longer valid.';
