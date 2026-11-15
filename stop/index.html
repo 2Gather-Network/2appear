@@ -1,0 +1,62 @@
+<!doctype html>
+<!--
+  Copyright 2026 DayBalancer LLC. All rights reserved.
+
+  The code and the content here power Creating.Works, DayBalancer, Appear Network,
+  and 2Gather. They are published so they can be read, audited, and dated.
+
+  Running either as a separate offering requires a license, whether you brand it as
+  ours or as your own, and whether or not money changes hands.
+
+  hello@creating.works
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex, nofollow">
+<meta name="referrer" content="no-referrer">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Stop invitations · 2Appear</title>
+<style>
+  body{margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;
+       background:#1F699E;color:#1A2E42;font-family:'Nunito Sans','DM Sans','Inter',system-ui,-apple-system,sans-serif;}
+  .card{background:#fff;border-radius:14px;padding:24px 28px;margin:16px;max-width:460px;width:100%;box-sizing:border-box;}
+  h1{font-size:22px;font-weight:800;margin:0 0 8px;line-height:1.25;}
+  p{font-size:15px;line-height:1.55;margin:0 0 16px;color:#2F3D4F;}
+  .btn{background:#1F699E;color:#fff;border:0;padding:11px 22px;border-radius:26px;font-family:inherit;font-size:15px;font-weight:700;cursor:pointer;min-height:44px;}
+  .btn:disabled{opacity:.5;cursor:not-allowed;}
+  #say{margin:14px 0 0;}
+  #say:empty{display:none;}
+</style>
+<link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:opsz,wght@6..12,400;6..12,600;6..12,700;6..12,800&display=swap" rel="stylesheet">
+<link rel="icon" href="/favicon.ico">
+</head>
+<body>
+  <div class="card">
+    <h1>Stop invitations from 2Appear</h1>
+    <p id="lede">After this, nobody can send you an event or group invitation from 2Appear.</p>
+    <button type="button" class="btn" id="stop">Stop invitations</button>
+    <p id="say" role="status"></p>
+  </div>
+<script>
+(function(){
+  var q = new URLSearchParams(location.search);
+  var i = String(q.get('i') || ''), t = String(q.get('t') || '');
+  var btn = document.getElementById('stop'), say = document.getElementById('say');
+  if (!i || !t) { btn.style.display = 'none'; say.textContent = 'This link has already been used or is no longer valid.'; return; }
+  btn.addEventListener('click', function(){
+    btn.disabled = true;
+    say.textContent = 'Stopping…';
+    fetch('https://cw-api-gate.jessieupp.workers.dev?action=stopEventInvites&i=' + encodeURIComponent(i) + '&t=' + encodeURIComponent(t), { referrerPolicy: 'no-referrer' })
+      .then(function(r){ return r.json(); })
+      .then(function(d){
+        say.textContent = (d && d.message) ? d.message : 'That did not go through. Try again in a moment.';
+        if (d && d.status === 'ok') { btn.style.display = 'none'; document.getElementById('lede').style.display = 'none'; }
+        else { btn.disabled = false; }
+      })
+      .catch(function(){ btn.disabled = false; say.textContent = 'Could not reach the server. Try again in a moment.'; });
+  });
+})();
+</script>
+</body>
+</html>
