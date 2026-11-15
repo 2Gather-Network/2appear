@@ -40,6 +40,8 @@
   .build p{font-size:16px;line-height:1.5;color:var(--soft);margin:0;max-width:46ch;}
   .build a{display:inline-block;background:var(--brand);color:#fff;font-size:15px;font-weight:700;text-decoration:none;border-radius:24px;padding:10px 18px;font-family:inherit;}
   .build a:focus-visible{outline:3px solid var(--ink);outline-offset:2px;}
+  .build.editonly{background:none;border:0;padding:0;}
+  .build.editonly a{font-size:13px;padding:7px 14px;}
   @media(max-width:700px){.card{padding:22px 20px;}h1{font-size:25px;}.halves{grid-template-columns:1fr;}}
 </style>
 <script>window.CW_SIGNIN="/signin/?next="+encodeURIComponent(location.pathname+location.search);window.CW_SIGNUP="/signup/?next="+encodeURIComponent(location.pathname+location.search);</script>
@@ -55,6 +57,10 @@
     <div class="build" id="build" hidden>
       <p>Add your photo, where you are and a language so people can find you.</p>
       <a href="/intro/start">Build my page</a>
+    </div>
+
+    <div class="build editonly" id="editme" hidden>
+      <a href="/me/?mine=1">Edit my profile</a>
     </div>
 
     <div class="halves">
@@ -76,6 +82,7 @@
   if (!me.known || !me.id || !CW.pageReady) { return; }
   CW.pageReady(me.id, function (ready) {
     if (ready === false) { document.getElementById('build').hidden = false; }
+    else if (ready === true) { document.getElementById('editme').hidden = false; }
   });
 })();
 </script>
