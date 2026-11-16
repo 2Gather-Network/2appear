@@ -59,8 +59,8 @@
   .tick a{color:var(--brand);font-weight:700;}
   .tick input{width:18px;height:18px;flex-shrink:0;margin:1px 0 0;accent-color:var(--brand);}
 </style>
-  <script src="https://2gather.network/nav/identity.js"></script>
-  <script src="https://2gather.network/nav/firststop.js?v=9"></script>
+  <script src="https://2gather.network/nav/identity.js?v=69"></script>
+  <script src="https://2gather.network/nav/firststop.js?v=11"></script>
   <script src="https://2gather.network/nav/google-signin.js?v=13"></script>
 <style>body{overflow-x:clip;overflow-wrap:break-word;}</style>
 <style>@media(max-width:768px){input:not([type=checkbox]):not([type=radio]):not([type=range]),select,textarea{font-size:16px !important;}}</style>
@@ -254,7 +254,7 @@ window._safeNavGo = window._safeNavGo || function (el) {
     btn.textContent = 'Checking…';
 
     fetch(GS_URL + '?action=verifySigninPin&email=' + encodeURIComponent(email) +
-          '&code=' + encodeURIComponent(code) + '&from=2appear')
+          '&code=' + encodeURIComponent(code) + '&from=2appear' + '&carry=1')
       .then(function (r) { return r.json(); })
       .then(function (d) {
         if (d && d.status === 'ok' && d.appearId) {
@@ -274,7 +274,7 @@ window._safeNavGo = window._safeNavGo || function (el) {
           btn.textContent = 'One moment\u2026';
           CW.firstStop(d.appearId, nextNew, function (where) {
             window.location.href = where;
-          });
+          }, d.carry);
         } else {
           btn.disabled = false;
           btn.textContent = 'Set up my profile';
