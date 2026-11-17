@@ -291,7 +291,7 @@
     var host = el('div', 'ask');
     b.appendChild(host);
     var tiles = t.parentNode;
-    var DEST = { msg: '/network/', inv: '/mygroups/?tab=invites', ev: '/events/', match: '/network/', grp: '/mygroups/', bm: '/network/bookmarks/' };
+    var DEST = { msg: '/messages/', inv: '/mygroups/?tab=invites', ev: '/events/', match: '/network/', grp: '/mygroups/', bm: '/network/bookmarks/' };
     var trail = [];
     var START = { q: '', hideQ: true, opts: [opt('Yes, ask me', 'deep', { crumb: 'Begin', primary: true })] };
     function resolve(n) { return n === 'deep' ? { q: DEEP.q, opts: DEEP.opts.map(function (o) { return opt(o.t, SECOND[key], { crumb: o.crumb }); }) } : n; }
