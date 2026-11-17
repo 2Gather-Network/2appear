@@ -93,6 +93,7 @@
       </div>
     </div>
 
+    <p class="empty" id="loadfail" hidden>This did not load. Reload the page to try again.</p>
     <div id="intro">
     <h1>Appear in your network. Make your network appear.</h1>
 
@@ -124,11 +125,26 @@
   var GS = 'https://cw-api-gate.jessieupp.workers.dev';
   var MSG = 'https://cw-messages.jessieupp.workers.dev';
   var me = (window.CW && CW.me) ? CW.me() : { known: false, id: '' };
-  if (!me.known || !me.id || !CW.pageReady) { return; }
-  CW.pageReady(me.id, function (ready) {
+  if (!me.known || !me.id) { return; }
+  readyCheck(function (ready) {
     if (ready === false) { document.getElementById('build').hidden = false; }
     else if (ready === true) { dashboard(); }
+    else { document.getElementById('loadfail').hidden = false; }
   });
+
+  function blank(v) { return v == null || String(v).trim() === ''; }
+  function readyCheck(cb) {
+    fetch(GS + '?action=getIntake&appearId=' + encodeURIComponent(me.id) + pass())
+      .then(function (r) { return r.json(); })
+      .then(function (d) {
+        if (!d || d.status === 'error' || d.found === false) { cb(null); return; }
+        var row = d.data || {};
+        var photo = !blank(row.photoURL) || !blank(row.photo);
+        try { if (!photo && localStorage.getItem('cw-photo-for') === me.id && localStorage.getItem('cw-photo')) { photo = true; } } catch (e) {}
+        cb(photo && !blank(row.location) && !blank(row.languages));
+      })
+      .catch(function () { cb(null); });
+  }
 
   function el(tag, cls, text) {
     var n = document.createElement(tag);
