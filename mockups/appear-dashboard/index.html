@@ -72,6 +72,7 @@
   .cw-fq{font-size:16px;font-weight:700;color:var(--ink);margin:0 0 4px;}
   .cw-fchips{display:flex;gap:8px;flex-wrap:wrap;}
   .cw-fchip{background:#fff;border:1.5px solid #DDE4EE;border-radius:22px;padding:8px 16px;font-size:14px;font-weight:600;color:var(--ink);cursor:pointer;user-select:none;font-family:inherit;text-decoration:none;display:inline-block;}
+  .cw-fchips.pair{justify-content:space-between;}
   .cw-fchip.quiet{background:transparent;}
   .cw-fchip.on{background:var(--brand);color:#fff;border-color:var(--brand);}
   .cw-fchip:focus-visible{outline:3px solid var(--ink);outline-offset:2px;}
@@ -231,7 +232,7 @@
     var tiles = t.parentNode;
     var viewHref = t.querySelector('.view').getAttribute('href');
     var trail = [];
-    var START = { q: '', hideQ: true, opts: [opt('Yes, ask me', 'deep', { crumb: 'Begin' }), opt('Not yet', null, { close: true })] };
+    var START = { q: '', hideQ: true, opts: [opt('Not yet', null, { close: true }), opt('Yes, ask me', 'deep', { crumb: 'Begin', primary: true })] };
     function resolve(n) { return n === 'deep' ? { q: DEEP.q, opts: DEEP.opts.map(function (o) { return opt(o.t, SECOND[key]); }) } : n; }
 
     var h2 = t.querySelector('h2'), titleNode = h2.firstChild, fullTitle = titleNode.nodeValue;
@@ -270,7 +271,7 @@
       if (node.more && !node.search) { opts = node.opts; }
       var longest = opts.some(function (o) { return words(o.t) > 3; });
       var asRadio = longest;
-      var holder = el('div', asRadio ? 'cw-rad' : 'cw-fchips');
+      var holder = el('div', asRadio ? 'cw-rad' : (node === START ? 'cw-fchips pair' : 'cw-fchips'));
       var sel = [], cont = null;
       function advance(chosen, label) {
         var o = chosen[0];
@@ -287,7 +288,7 @@
           lab.appendChild(inp); lab.appendChild(document.createTextNode(' ' + o.t));
           parent.appendChild(lab);
         } else {
-          var c = el('button', o.close ? 'cw-fchip quiet' : 'cw-fchip', o.t); c.type = 'button';
+          var c = el('button', o.primary ? 'cw-fchip on' : (o.close ? 'cw-fchip quiet' : 'cw-fchip'), o.t); c.type = 'button';
           c.addEventListener('click', function () { advance([o], o.t); });
           parent.appendChild(c);
         }
