@@ -582,6 +582,8 @@
     function settled() {
       if (!bodies.every(function (x) { return x.childNodes.length > 0; })) { return; }
       lede.textContent = 'Here is what is waiting for you.'; lede.classList.remove('wait'); mo.disconnect();
+      emptyAsk(tile('t-ev'), 'No events for you yet.', 'ev');
+      emptyAsk(tile('t-match'), 'No matches yet.', 'match');
     }
     var mo = new MutationObserver(settled);
     bodies.forEach(function (x) { mo.observe(x, { childList: true }); });
@@ -591,8 +593,6 @@
     if (first) { document.getElementById('greet').textContent = 'Welcome back, ' + first + '.'; }
     if (!pass()) { ['t-msg', 't-inv', 't-grp', 't-bm'].forEach(function (k) { failed(tile(k)); }); }
     else { loadMessages(); loadInvites(); loadGroups(); loadBookmarks(); }
-    emptyAsk(tile('t-ev'), 'No events for you yet.', 'ev');
-    emptyAsk(tile('t-match'), 'No matches yet.', 'match');
   }
 
   function loadMessages() {
