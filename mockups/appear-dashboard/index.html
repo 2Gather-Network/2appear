@@ -217,7 +217,7 @@
   };
   var SECOND = { msg: N.msg, inv: N.inv, ev: N.ev, match: N.matchOn, grp: N.grp, bm: N.bm };
   var NAMES = { msg: 'Messages', inv: 'Invites', ev: 'Events', match: 'Matches', grp: 'Groups', bm: 'Bookmarks' };
-  var DEEP = { q: 'How would you like to begin?', hideQ: true, opts: [opt('Show me what is here'), opt('I have something specific in mind'), opt('I am not sure where to start. What do you suggest?')] };
+  var DEEP = { q: 'How would you like to begin?', opts: [opt('Show me what is here'), opt('I have something specific in mind'), opt('I am not sure where to start. What do you suggest?')] };
 
   function words(s) { return String(s).trim().split(/\s+/).length; }
 
@@ -228,8 +228,8 @@
     var tiles = t.parentNode;
     var viewHref = t.querySelector('.view').getAttribute('href');
     var trail = [];
-    var START = { q: 'Would you like to be asked a few questions?', opts: [opt('Yes, ask me', 'deep'), opt('Not yet', null, { close: true })] };
-    function resolve(n) { return n === 'deep' ? { q: DEEP.q, hideQ: true, opts: DEEP.opts.map(function (o) { return opt(o.t, SECOND[key]); }) } : n; }
+    var START = { q: '', hideQ: true, opts: [opt('Yes, ask me', 'deep'), opt('Not yet', null, { close: true })] };
+    function resolve(n) { return n === 'deep' ? { q: DEEP.q, opts: DEEP.opts.map(function (o) { return opt(o.t, SECOND[key]); }) } : n; }
 
     function focus(on) {
       if (on) { tiles.classList.add('focus'); t.classList.add('open'); }
@@ -257,14 +257,14 @@
     function render(node, expanded) {
       host.innerHTML = '';
       focus(trail.length > 0);
-      if (trail.length === 0) { host.appendChild(el('p', 'cw-fh', 'None yet. How would you like to begin?')); }
+      if (trail.length === 0) { host.appendChild(el('p', 'empty', 'None yet. Would you like to be asked how to begin here?')); }
       else { host.appendChild(crumbs(trail.length)); }
       node = resolve(node);
       if (!node.hideQ) { host.appendChild(el('p', 'cw-fq', node.q)); }
       var opts = node.opts, searchMode = !!node.search;
       if (node.more && !node.search) { opts = node.opts; }
       var longest = opts.some(function (o) { return words(o.t) > 3; });
-      var asRadio = longest || node.hideQ;
+      var asRadio = longest;
       var holder = el('div', asRadio ? 'cw-rad' : 'cw-fchips');
       var sel = [];
       function advance(chosen, label) {
