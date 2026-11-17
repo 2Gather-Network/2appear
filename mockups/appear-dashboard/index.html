@@ -94,7 +94,8 @@
   .tiles.focus{grid-template-columns:1fr;}
   .ft{display:flex;justify-content:space-between;align-items:center;margin-top:14px;}
   .dash.focus .greet,.dash.focus .lede{display:none;}
-  .ft .cw-btn{min-width:96px;text-align:center;}
+  .ft .cw-btn{min-width:72px;text-align:center;padding-left:12px;padding-right:12px;}
+  .cw-fchips.right{justify-content:flex-end;}
   .ftl{display:flex;gap:8px;}
   .tile .view{display:none;}
   .tile h2{padding-right:0;}
@@ -273,7 +274,7 @@
       if (node.more && !node.search) { opts = node.opts; }
       var longest = opts.some(function (o) { return words(o.t) > 3; });
       var asRadio = longest;
-      var holder = el('div', asRadio ? 'cw-rad' : 'cw-fchips');
+      var holder = el('div', asRadio ? 'cw-rad' : (node === START ? 'cw-fchips right' : 'cw-fchips'));
       var sel = [], cont = null;
       function advance(chosen, label) {
         var o = chosen[0];
