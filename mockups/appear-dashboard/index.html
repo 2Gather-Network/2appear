@@ -107,6 +107,17 @@
   .mnl[hidden]{display:none;}
   .mni{display:block;width:100%;text-align:left;background:transparent;border:0;border-radius:10px;padding:10px 12px;font-family:inherit;font-size:14px;font-weight:600;color:var(--ink);cursor:pointer;}
   .mni:hover,.mni:focus-visible{background:#EEF2F7;outline:none;}
+  .ikp{font-family:inherit;font-size:13.5px;padding:7px 14px;border-radius:20px;cursor:pointer;background:#fff;border:1px solid #C9DFF3;color:#1F699E;font-weight:600;}
+  .ikp.on{background:#1F699E;border-color:#1F699E;color:#fff;font-weight:700;}
+  .ikp.ot{border:1.5px solid #1F699E;font-weight:700;}
+  .ikp:focus-visible{outline:3px solid var(--ink);outline-offset:2px;}
+  .ikr{display:flex;flex-wrap:wrap;gap:7px;}
+  .ikd{border:1.5px dashed #1F699E;border-radius:12px;padding:12px 14px 13px;background:#F7FBFF;margin:4px 0 8px;}
+  .ikt{font-size:12.5px;color:#4B5A6D;margin:0 0 8px;}
+  .ikd input,.ikd textarea{width:100%;box-sizing:border-box;border:1.5px solid #DDE3EA;background:#fff;border-radius:10px;padding:8px 10px;font:inherit;font-size:13.5px;color:#1A2E42;outline:none;margin-bottom:8px;resize:none;}
+  .ikd .bad{border-color:#C4501A;}
+  .ike{font-size:13px;color:#7A2410;margin:-4px 0 8px;}
+  .ike[hidden]{display:none;}
   #t-add{display:none;}
   .tiles.focus #t-add.open{display:block;}
   .dash.focus .hdr{display:none;}
@@ -385,9 +396,9 @@
     var btn = document.getElementById('editbtn'), list = document.getElementById('editlist');
     var panel = tile('t-add'), tiles = panel.parentNode, dash = document.getElementById('dash');
     var KIND = {
-      interest: { crumb: 'Add an interest', q: 'What interest would you like to add?', ph: 'Search my interests', hash: '#interests' },
-      offer: { crumb: 'Add something I’m offering', q: 'What would you like to offer?', ph: 'Search what I offer', hash: '#offering' },
-      need: { crumb: 'Add something I need', q: 'What do you need?', ph: 'Search what I need', hash: '#needs' }
+      interest: { crumb: 'Add an interest', hash: '#interests' },
+      offer: { crumb: 'Add something I\u2019m offering', q: 'What would you like to offer?', card: 'Something I\u2019m offering', detailPh: 'Details: what exactly are you offering? (required)', hash: '#offering' },
+      need: { crumb: 'Add something I need', q: 'What do you need?', card: 'Something I need', detailPh: 'Details: what exactly are you seeking? (required)', hash: '#needs' }
     };
     function shut() { list.hidden = true; btn.setAttribute('aria-expanded', 'false'); }
     function closeAll() {
@@ -397,30 +408,141 @@
     btn.addEventListener('click', function () { if (list.hidden) { openMenu(); } else { shut(); } });
     document.addEventListener('keydown', function (e) { if (e.key === 'Escape') { shut(); } });
     document.addEventListener('click', function (e) { if (!box.contains(e.target)) { shut(); } });
+    var WP = null;
+    function loadWords() {
+      if (WP) { return WP; }
+      WP = fetch(GS + '?action=getCategories&words=1').then(function (r) { return r.json(); }).then(function (d) {
+        if (!d || !d.words || !d.words.length) { throw new Error('none'); }
+        var W = { list: [], byId: {}, kids: {} };
+        d.words.forEach(function (r) {
+          var w = { id: r[0], word: r[1], kindOf: r[2] || '', cats: String(r[3] || '').split('|').map(function (x) { return x.trim(); }).filter(Boolean), asked: String(r[4] || '').toLowerCase() };
+          if (!w.id || !w.word || w.asked.trim() === 'stage') { return; }
+          W.list.push(w); W.byId[w.id] = w;
+        });
+        W.list.forEach(function (w) { if (w.kindOf && W.byId[w.kindOf]) { (W.kids[w.kindOf] = W.kids[w.kindOf] || []).push(w); } });
+        var fits = function (w) { return w.asked.indexOf('enjoy') > -1 || (W.kids[w.id] || []).some(fits); };
+        var node = function (w, depth) { return { name: w.word, kids: depth > 6 ? [] : (W.kids[w.id] || []).filter(fits).map(function (k) { return node(k, depth + 1); }) }; };
+        var by = {};
+        W.list.forEach(function (w) { if (w.kindOf && W.byId[w.kindOf]) { return; } if (!fits(w)) { return; } w.cats.forEach(function (c) { (by[c] = by[c] || []).push(node(w, 0)); }); });
+        var order = (d.categories || []).map(function (c) { return c.label; });
+        var names = order.filter(function (c) { return by[c]; }).concat(Object.keys(by).filter(function (c) { return order.indexOf(c) < 0; }));
+        return { names: names, by: by };
+      });
+      WP.catch(function () { WP = null; });
+      return WP;
+    }
+    function ikPill(label, on, other) {
+      var p = el('button', 'ikp' + (on ? ' on' : '') + (other ? ' ot' : ''), label); p.type = 'button'; return p;
+    }
+    function draftCard(typeLabel, detailPh) {
+      var card = el('div', 'ikd');
+      card.appendChild(el('div', 'ikt', typeLabel));
+      var t = el('input'); t.type = 'text'; t.placeholder = 'Title (required)'; t.setAttribute('aria-label', 'Title');
+      var e1 = el('div', 'ike', 'Add a title first.'); e1.hidden = true;
+      var d = el('textarea'); d.rows = 2; d.placeholder = detailPh; d.setAttribute('aria-label', 'Details');
+      var e2 = el('div', 'ike', 'Add the details first.'); e2.hidden = true;
+      card.appendChild(t); card.appendChild(e1); card.appendChild(d); card.appendChild(e2);
+      t.addEventListener('input', function () { if (t.value.trim()) { e1.hidden = true; t.classList.remove('bad'); } });
+      d.addEventListener('input', function () { if (d.value.trim()) { e2.hidden = true; d.classList.remove('bad'); } });
+      card.check = function () {
+        var ok = true;
+        if (!t.value.trim()) { e1.hidden = false; t.classList.add('bad'); ok = false; }
+        if (!d.value.trim()) { e2.hidden = false; d.classList.add('bad'); ok = false; }
+        return ok;
+      };
+      return card;
+    }
     function showKind(k) {
       var d = KIND[k], b = panel.querySelector('.body');
       b.innerHTML = '';
-      var crumbs = el('div', 'bc');
-      var ep = el('a', '', 'Edit profile'); ep.href = '#';
-      ep.addEventListener('click', function (e) { e.preventDefault(); closeAll(); });
-      crumbs.appendChild(ep); crumbs.appendChild(el('i', '', '›')); crumbs.appendChild(el('b', '', d.crumb));
-      b.appendChild(crumbs);
-      b.appendChild(el('p', 'cw-fq', d.q));
-      var sb = el('div', 'cw-search'), inp = el('input');
-      inp.type = 'text'; inp.placeholder = d.ph; inp.setAttribute('aria-label', d.ph);
-      sb.appendChild(inp); b.appendChild(sb);
+      var state = { path: [], sel: null, other: false };
+      var crumbsEl = el('div', 'bc'), mid = el('div', 'ikm');
+      b.appendChild(crumbsEl);
+      if (k !== 'interest') { b.appendChild(el('p', 'cw-fq', d.q)); }
+      b.appendChild(mid);
       var lk = el('p', 'addlink'), a = el('a', '', 'Edit on my profile instead');
       a.href = '/me/?mine=1' + d.hash; lk.appendChild(a); b.appendChild(lk);
       var ft = el('div', 'ft'), grp = el('div', 'ftl');
       var cl = el('button', 'cw-btn ghost sm', 'Close'); cl.type = 'button';
       cl.addEventListener('click', function () { closeAll(); });
       var bk = el('button', 'cw-btn ghost sm', 'Back'); bk.type = 'button';
-      bk.addEventListener('click', function () { closeAll(); openMenu(); });
+      bk.addEventListener('click', function () {
+        if (k === 'interest' && state.path.length) { state.path.pop(); drawInterest(); return; }
+        closeAll(); openMenu();
+      });
       grp.appendChild(cl); grp.appendChild(bk);
       var add = el('button', 'cw-btn solid sm', 'Add'); add.type = 'button';
       ft.appendChild(grp); ft.appendChild(add); b.appendChild(ft);
+      var card = null, tree = null;
+      add.addEventListener('click', function () {
+        if (card) { card.check(); return; }
+      });
+      function crumbs() {
+        crumbsEl.innerHTML = '';
+        var ep = el('a', '', 'Edit profile'); ep.href = '#';
+        ep.addEventListener('click', function (e) { e.preventDefault(); closeAll(); });
+        crumbsEl.appendChild(ep); crumbsEl.appendChild(el('i', '', '›'));
+        if (k !== 'interest') { crumbsEl.appendChild(el('b', '', d.crumb)); return; }
+        var ai = el('a', '', d.crumb); ai.href = '#';
+        ai.addEventListener('click', function (e) { e.preventDefault(); state.path = []; state.other = false; drawInterest(); });
+        crumbsEl.appendChild(ai);
+        crumbsEl.appendChild(el('i', '', '›'));
+        if (!state.path.length && !state.other) { crumbsEl.appendChild(el('b', '', 'All categories')); return; }
+        var all = el('a', '', 'All categories'); all.href = '#';
+        all.addEventListener('click', function (e) { e.preventDefault(); state.path = []; state.other = false; drawInterest(); });
+        crumbsEl.appendChild(all);
+        state.path.forEach(function (seg, i) {
+          crumbsEl.appendChild(el('i', '', '›'));
+          if (i === state.path.length - 1) { crumbsEl.appendChild(el('b', '', seg)); return; }
+          var l = el('a', '', seg); l.href = '#';
+          l.addEventListener('click', function (e) { e.preventDefault(); state.path = state.path.slice(0, i + 1); drawInterest(); });
+          crumbsEl.appendChild(l);
+        });
+      }
+      function nodesAt() {
+        var list = tree.by[state.path[0]] || [];
+        for (var i = 1; i < state.path.length; i++) {
+          var nm = state.path[i], f = null;
+          list.forEach(function (n) { if (n.name === nm) { f = n; } });
+          list = f ? f.kids : [];
+        }
+        return list;
+      }
+      function drawInterest() {
+        crumbs(); mid.innerHTML = ''; card = null;
+        if (state.other) {
+          card = draftCard('Something that interests me', 'Details (optional)');
+          mid.appendChild(card); return;
+        }
+        if (!tree) { mid.appendChild(el('span', 'cw-loading', 'Looking at the categories')); return; }
+        var row = el('div', 'ikr');
+        if (!state.path.length) {
+          mid.appendChild(el('p', 'cw-fq', 'What interest would you like to add?'));
+          tree.names.forEach(function (c) { var p = ikPill(c); p.addEventListener('click', function () { state.path = [c]; drawInterest(); }); row.appendChild(p); });
+        } else {
+          if (state.path.length > 1) {
+            var here = state.path[state.path.length - 1], hp = ikPill(here, state.sel === here);
+            hp.addEventListener('click', function () { state.sel = here; drawInterest(); }); row.appendChild(hp);
+          }
+          nodesAt().forEach(function (n) {
+            var p = ikPill(n.name, state.sel === n.name);
+            p.addEventListener('click', function () {
+              if (n.kids.length) { state.path.push(n.name); drawInterest(); } else { state.sel = n.name; drawInterest(); }
+            });
+            row.appendChild(p);
+          });
+          var ot = ikPill('+ Other', false, true); ot.addEventListener('click', function () { state.other = true; drawInterest(); }); row.appendChild(ot);
+        }
+        mid.appendChild(row);
+      }
       tiles.classList.add('focus'); dash.classList.add('focus'); panel.classList.add('open');
-      shut(); inp.focus();
+      shut();
+      if (k === 'interest') {
+        drawInterest();
+        loadWords().then(function (t) { tree = t; drawInterest(); }).catch(function () { mid.innerHTML = ''; mid.appendChild(el('p', 'empty', 'This did not load. Reload the page to try again.')); });
+      } else {
+        crumbs(); card = draftCard(d.card, d.detailPh); mid.appendChild(card);
+      }
     }
     Array.prototype.forEach.call(list.querySelectorAll('.mni'), function (it) {
       it.addEventListener('click', function () { showKind(it.getAttribute('data-k')); });
