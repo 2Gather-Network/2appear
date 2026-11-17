@@ -575,6 +575,13 @@
       it.addEventListener('click', function () { showKind(it.getAttribute('data-k')); });
     });
   }
+  function cwCodeFor(id) {
+    var v = String(id || '').split('.').join('').toLowerCase();
+    if (!v) { return ''; }
+    var h = 5381;
+    for (var i = 0; i < v.length; i++) { h = ((h * 33) ^ v.charCodeAt(i)) >>> 0; }
+    return ('000000' + h.toString(36)).slice(-6);
+  }
   function failed(t) { empty(t, 'This did not load. Reload the page to try again.'); }
   function initial(s) { s = String(s || '').trim(); return s ? s.charAt(0).toUpperCase() : '?'; }
   function face(name, photo, square) {
@@ -709,9 +716,9 @@
             shut();
             menu.innerHTML = '';
             menu.appendChild(el('div', 'pmn', full));
-            var id = String(x.appearId || '').trim(), v = String(x.vanity || '').trim();
-            var send = el('a', 'pmi', 'Send message'); send.href = '/messages/?to=' + encodeURIComponent(id);
-            var see = el('a', 'pmi', 'See profile'); see.href = v ? '/hi/' + encodeURIComponent(v) : '/hi/?v=' + encodeURIComponent(id);
+            var code = cwCodeFor(String(x.appearId || '').trim()), v = String(x.vanity || '').trim();
+            var send = el('a', 'pmi', 'Send message'); send.href = '/messages/?to=' + encodeURIComponent('c:' + code);
+            var see = el('a', 'pmi', 'See profile'); see.href = v ? '/hi/' + encodeURIComponent(v) : 'https://2gather.network/hi/?v=' + encodeURIComponent(code);
             menu.appendChild(send); menu.appendChild(see);
             menu.hidden = false; openBtn = btn; btn.classList.add('sel'); btn.setAttribute('aria-expanded', 'true');
           });
