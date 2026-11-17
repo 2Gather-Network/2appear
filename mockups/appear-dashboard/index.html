@@ -310,7 +310,7 @@
       if (node.more && !node.search) { opts = node.opts; }
       var longest = opts.some(function (o) { return words(o.t) > 3; });
       var asRadio = longest;
-      var holder = el('div', asRadio ? 'cw-rad' : (node === START ? 'cw-fchips right' : 'cw-fchips'));
+      var holder = el('div', asRadio ? 'cw-rad' : (opts.length === 1 && opts[0].primary ? 'cw-fchips right' : 'cw-fchips'));
       var sel = [], cont = null;
       function advance(chosen, label) {
         var o = chosen[0];
@@ -356,12 +356,17 @@
         cont = el('button', 'cw-btn solid sm', 'Continue'); cont.type = 'button';
         cont.addEventListener('click', function () { if (sel.length) { advance(sel, sel.label || sel[0].t); } });
       } else {
-        opts.forEach(function (o) { mkChoice(o, holder); });
-        if (node.more) {
+        var solo = opts.length === 1 && opts[0].primary && trail.length > 0;
+        if (solo) {
+          var o1 = opts[0];
+          cont = el('button', 'cw-btn solid sm', o1.t); cont.type = 'button';
+          cont.addEventListener('click', function () { advance([o1], o1.t); });
+        } else { opts.forEach(function (o) { mkChoice(o, holder); }); }
+        if (!solo && node.more) {
           var m = el('button', asRadio ? 'cw-btn ghost sm' : 'cw-fchip', 'Show more'); m.type = 'button';
           m.addEventListener('click', function () { var kept = trail.slice(); render({ q: node.q, opts: node.more, search: true, parentNode: node }, 0); trail = kept; });
           if (asRadio) { host.appendChild(holder); host.appendChild(m); } else { holder.appendChild(m); host.appendChild(holder); }
-        } else { host.appendChild(holder); }
+        } else if (!solo) { host.appendChild(holder); }
         if (asRadio || node.multi) {
           cont = el('button', 'cw-btn solid sm', 'Continue'); cont.type = 'button';
           cont.addEventListener('click', function () {
