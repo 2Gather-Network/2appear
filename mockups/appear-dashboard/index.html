@@ -92,7 +92,9 @@
   .bc b{font-weight:700;}
   .tiles.focus .tile:not(.open){display:none;}
   .tiles.focus{grid-template-columns:1fr;}
-  .ft{display:flex;justify-content:flex-end;margin-top:14px;}
+  .ft{display:flex;justify-content:space-between;align-items:center;margin-top:14px;}
+  .dash.focus .greet,.dash.focus .lede{display:none;}
+  .ft .cw-btn{min-width:96px;text-align:center;}
   .ask{margin-top:12px;display:flex;flex-direction:column;gap:10px;}
   @keyframes cw-breathe{0%,100%{opacity:1}50%{opacity:.62}}
   @media(max-width:700px){.tiles{grid-template-columns:1fr;}.greet{font-size:22px;}}
@@ -233,8 +235,8 @@
     function resolve(n) { return n === 'deep' ? { q: DEEP.q, opts: DEEP.opts.map(function (o) { return opt(o.t, SECOND[key]); }) } : n; }
 
     function focus(on) {
-      if (on) { tiles.classList.add('focus'); t.classList.add('open'); }
-      else { tiles.classList.remove('focus'); t.classList.remove('open'); }
+      if (on) { tiles.classList.add('focus'); tiles.parentNode.classList.add('focus'); t.classList.add('open'); }
+      else { tiles.classList.remove('focus'); tiles.parentNode.classList.remove('focus'); t.classList.remove('open'); }
     }
     function reset() { trail = []; render(START, 0); }
     function leave(o) {
@@ -267,7 +269,7 @@
       var longest = opts.some(function (o) { return words(o.t) > 3; });
       var asRadio = longest;
       var holder = el('div', asRadio ? 'cw-rad' : 'cw-fchips');
-      var sel = [];
+      var sel = [], cont = null;
       function advance(chosen, label) {
         var o = chosen[0];
         trail.push({ node: node, label: label });
@@ -309,9 +311,8 @@
           });
         };
         inp2.addEventListener('input', fill); fill();
-        var go2 = el('button', 'cw-btn solid sm', 'Continue'); go2.type = 'button';
-        go2.addEventListener('click', function () { if (sel.length) { advance(sel, sel.label || sel[0].t); } });
-        host.appendChild(go2);
+        cont = el('button', 'cw-btn ghost sm', 'Continue'); cont.type = 'button';
+        cont.addEventListener('click', function () { if (sel.length) { advance(sel, sel.label || sel[0].t); } });
       } else {
         opts.forEach(function (o) { mkChoice(o, holder); });
         if (node.more) {
@@ -320,19 +321,23 @@
           if (asRadio) { host.appendChild(holder); host.appendChild(m); } else { holder.appendChild(m); host.appendChild(holder); }
         } else { host.appendChild(holder); }
         if (asRadio || node.multi) {
-          var go = el('button', 'cw-btn solid sm', 'Continue'); go.type = 'button';
-          go.addEventListener('click', function () {
+          cont = el('button', 'cw-btn ghost sm', 'Continue'); cont.type = 'button';
+          cont.addEventListener('click', function () {
             if (!sel.length) { return; }
             var label = sel.map(function (x) { return x.t; }).join(', ');
             advance(sel, label);
           });
-          host.appendChild(go);
         }
       }
-      if (trail.length > 0) {
-        var ft = el('div', 'ft'), cl = el('button', 'cw-btn ghost sm', 'Close'); cl.type = 'button';
-        cl.addEventListener('click', function () { reset(); });
-        ft.appendChild(cl); host.appendChild(ft);
+      if (trail.length > 0 || cont) {
+        var ft = el('div', 'ft');
+        if (trail.length > 0) {
+          var cl = el('button', 'cw-btn ghost sm', 'Close'); cl.type = 'button';
+          cl.addEventListener('click', function () { reset(); });
+          ft.appendChild(cl);
+        } else { ft.appendChild(el('span')); }
+        if (cont) { ft.appendChild(cont); }
+        host.appendChild(ft);
       }
     }
     render(START, 0);
