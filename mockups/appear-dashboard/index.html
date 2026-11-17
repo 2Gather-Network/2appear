@@ -95,7 +95,7 @@
   .tiles.focus{grid-template-columns:1fr;}
   .ft{display:flex;justify-content:space-between;align-items:center;margin-top:14px;}
   .dash.focus .greet,.dash.focus .lede{display:none;}
-  .ft .cw-btn{min-width:72px;text-align:center;padding-left:12px;padding-right:12px;}
+  .ft .cw-btn{min-width:72px;text-align:center;}
   .cw-fchips.right{justify-content:flex-end;}
   .ftl{display:flex;gap:8px;}
   .tile .view{display:none;}
@@ -103,7 +103,8 @@
   .hdr{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;}
   .mn{position:relative;flex:none;}
   .mn[hidden]{display:none;}
-  .mnb{display:inline-flex;align-items:center;gap:8px;}
+  .mnb{display:inline-flex;align-items:center;border-color:#7FB0D6;color:var(--ink);}
+  .mnb[aria-expanded="true"],.mnb[aria-expanded="true"]:hover,.mnb[aria-expanded="true"]:focus-visible{background:#1F699E;border-color:#1F699E;color:#fff;}
   .mnl{position:absolute;right:0;top:44px;width:260px;background:#fff;border:1.5px solid #DDE4EE;border-radius:14px;padding:6px;z-index:5;}
   .mnl[hidden]{display:none;}
   .mni{display:block;width:100%;text-align:left;background:transparent;border:0;border-radius:10px;padding:10px 12px;font-family:inherit;font-size:14px;font-weight:600;color:var(--ink);cursor:pointer;}
@@ -152,7 +153,7 @@
         <div class="hdl"><p class="greet" id="greet">Welcome back.</p>
         <p class="lede wait" id="lede">Looking up your information...</p></div>
         <div class="mn" id="editmenu" hidden>
-          <button class="cw-btn ghost sm mnb" id="editbtn" type="button" aria-expanded="false" aria-haspopup="true">Edit profile <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg></button>
+          <button class="cw-btn ghost sm mnb" id="editbtn" type="button" aria-expanded="false" aria-haspopup="true">Edit profile</button>
           <div class="mnl" id="editlist" hidden>
             <button type="button" class="mni" data-k="interest">Add an interest</button>
             <button type="button" class="mni" data-k="offer">Add something I'm offering</button>
