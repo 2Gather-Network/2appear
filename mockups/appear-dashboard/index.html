@@ -80,8 +80,19 @@
   .cw-btn:focus-visible{outline:3px solid var(--ink);outline-offset:2px;}
   .cw-search{display:flex;align-items:center;background:#F7F9FC;border:1px solid #DDE4EE;border-radius:18px;padding:2px 6px 2px 14px;max-width:320px;}
   .cw-search input{flex:1;border:0;background:transparent;font-family:inherit;font-size:14px;padding:8px 4px;outline:none;}
+  .cw-fh{font-size:16px;font-weight:700;color:var(--ink);margin:0 0 10px;}
+  .cw-btn.solid{background:var(--brand);color:#fff;}
+  .cw-rad{display:flex;flex-direction:column;gap:8px;margin:0 0 12px;}
+  .cw-rc{display:flex;align-items:center;gap:8px;font-size:14px;color:var(--ink);cursor:pointer;}
+  .cw-rc input{width:18px;height:18px;accent-color:#1F699E;flex:none;}
+  .bc{font-size:14px;line-height:1.7;color:var(--ink);}
+  .bc a{color:var(--brand);text-decoration:underline;cursor:pointer;}
+  .bc i{font-style:normal;color:var(--soft);margin:0 6px;}
+  .bc b{font-weight:700;}
+  .tiles.focus .tile:not(.open){display:none;}
+  .tiles.focus{grid-template-columns:1fr;}
+  .ft{display:flex;justify-content:flex-end;margin-top:14px;}
   .ask{margin-top:12px;display:flex;flex-direction:column;gap:10px;}
-  .ask .back{align-self:flex-start;}
   @keyframes cw-breathe{0%,100%{opacity:1}50%{opacity:.62}}
   @media(max-width:700px){.tiles{grid-template-columns:1fr;}.greet{font-size:22px;}}
 </style>
@@ -179,113 +190,151 @@
   }
 
   function opt(t, next, extra) { var o = { t: t, next: next || null }; if (extra) { for (var k in extra) { o[k] = extra[k]; } } return o; }
-  function yesNo() { return [opt('Yes'), opt('Not yet')]; }
+  function yesNo() { return [opt('Yes', null, { go: true }), opt('Not yet', null, { close: true })]; }
   var N = {};
   N.connect = { q: 'Based on what you have shared, is it okay if we connect dots for you?', opts: yesNo() };
   N.seen = { q: 'How would you like to be seen at first?', opts: [opt('Anonymously, by what I share', N.connect), opt('By name and photo', N.connect), opt('Let me look around first', N.connect)] };
-  N.msg = { q: 'Would you like to be introduced to other people?', opts: [opt('Introduce me to other people', N.seen), opt('Introduce other people to me', N.seen), opt('Not yet')] };
+  N.msg = { q: 'Would you like to be introduced to other people?', opts: [opt('Introduce me to other people', N.seen), opt('Introduce other people to me', N.seen), opt('Not yet', null, { close: true })] };
   N.evPerm = { q: 'Based on what you have shared, is it okay if we show events that fit?', opts: yesNo() };
   N.evFirst = { q: 'What would you like to see first?', opts: [opt('Show me what is coming up', N.evPerm), opt('Something specific', N.evPerm), opt('Surprise me', N.evPerm)] };
-  N.ev = { q: 'Where would you like to look?', opts: [opt('Live and near me', N.evFirst), opt('Online', N.evFirst), opt('Both', N.evFirst)] };
-  N.matchOn = { q: 'What would you like to be matched on?', opts: [opt('What I offer', N.seen), opt('What I seek', N.seen), opt('Both', N.seen)] };
+  N.ev = { q: 'Where would you like to look?', multi: true, opts: [opt('Live and near me', N.evFirst), opt('Online', N.evFirst)] };
+  N.matchOn = { q: 'What would you like to be matched on?', multi: true, opts: [opt('What I offer', N.seen), opt('What I seek', N.seen)] };
   N.grpPerm = { q: 'Based on what you have shared, is it okay if we suggest groups?', opts: yesNo() };
-  N.grpOpen = { q: 'Are you open to meeting new people?', opts: [opt('Yes', N.grpPerm), opt('Through people I trust', N.grpPerm), opt('Not yet', N.grpPerm)] };
-  N.grp = { q: 'Who would you like to spend time with?', opts: [opt('My own people', N.grpOpen), opt('The wider community', N.grpOpen), opt('Both', N.grpOpen)] };
-  N.bm = { q: 'Would you like to keep track of people?', opts: [opt('Bookmark people as I look around'), opt('Add someone I already know'), opt('Not yet')] };
+  N.grpOpen = { q: 'Are you open to meeting new people?', opts: [opt('Yes', N.grpPerm), opt('Through people I trust', N.grpPerm), opt('Not yet', null, { close: true })] };
+  N.grp = { q: 'Who would you like to spend time with?', multi: true, opts: [opt('My own people', N.grpOpen), opt('The wider community', N.grpOpen)] };
+  N.bm = { q: 'Would you like to keep track of people?', opts: [opt('Bookmark people as I look around', null, { go: true }), opt('Add someone I already know', null, { go: true }), opt('Not yet', null, { close: true })] };
   N.invPerm = { q: 'Is it okay if the people you chose can send you an invitation?', opts: yesNo() };
   N.invWho = { q: 'Who may invite you?', opts: [opt('People I know', N.invPerm), opt('People in my groups', N.invPerm), opt('People I attend events with', N.invPerm)], more: [opt('Anyone', N.invPerm)] };
-  N.invWork = { q: 'Which?', opts: [opt('Jobs', N.invWho), opt('Projects', N.invWho)] };
+  var PICK = 'Select your interest:';
+  N.invWork = { q: PICK, opts: [opt('Jobs', N.invWho), opt('Projects', N.invWho)] };
   N.invFund = { q: 'What would you like to fund?', opts: [opt('Projects', N.invWho), opt('People', N.invWho), opt('Companies', N.invWho)], more: [opt('Non-profits', N.invWho)] };
-  N.invPlaces = { q: 'Which?', opts: [opt('To live', N.invWho), opt('To work', N.invWho), opt('To play', N.invWho)] };
-  N.invRes = { q: 'Which?', opts: [opt('Things', N.invWho), opt('Living things', N.invWho)] };
+  N.invPlaces = { q: PICK, opts: [opt('To live', N.invWho), opt('To work', N.invWho), opt('To play', N.invWho)] };
+  N.invRes = { q: PICK, opts: [opt('Things', N.invWho), opt('Living things', N.invWho)] };
   N.inv = {
     q: 'What would you like to be invited to?',
     opts: [opt('Groups', N.invWho), opt('Events', N.invWho), opt('Open to work', N.invWork)],
     more: [opt('Experiences', N.invWho), opt('Projects to fund experiences', N.invFund, { alias: ['funding'], kinds: ['Donation'] }), opt('Places', N.invPlaces), opt('Resources', N.invRes)]
   };
   var SECOND = { msg: N.msg, inv: N.inv, ev: N.ev, match: N.matchOn, grp: N.grp, bm: N.bm };
+  var NAMES = { msg: 'Messages', inv: 'Invites', ev: 'Events', match: 'Matches', grp: 'Groups', bm: 'Bookmarks' };
+  var DEEP = { q: 'How would you like to begin?', hideQ: true, opts: [opt('Show me what is here'), opt('I have something specific in mind'), opt('I am not sure where to start. What do you suggest?')] };
 
-  function emptyAsk(t, words, key) {
+  function words(s) { return String(s).trim().split(/\s+/).length; }
+
+  function emptyAsk(t, line, key) {
     var b = body(t);
-    b.appendChild(el('p', 'empty', words));
     var host = el('div', 'ask');
     b.appendChild(host);
+    var tiles = t.parentNode;
     var viewHref = t.querySelector('.view').getAttribute('href');
-    var first = { q: 'How would you like to begin?', opts: [
-      { t: 'Show me what is here', href: viewHref },
-      opt('I have something specific in mind', SECOND[key]),
-      opt('I am not sure where to start. What do you suggest?', SECOND[key])
-    ] };
-    var stack = [];
-    function chip(o, chips, node) {
-      var c;
-      if (o.href) { c = el('a', 'cw-fchip', o.t); c.href = o.href; chips.appendChild(c); return; }
-      c = el('button', 'cw-fchip', o.t);
-      c.type = 'button';
-      c.addEventListener('click', function () {
-        if (o.next) { stack.push(node); show(o.next); return; }
-        var all = chips.querySelectorAll('.cw-fchip');
-        for (var i = 0; i < all.length; i++) { all[i].classList.remove('on'); }
-        c.classList.add('on');
+    var trail = [];
+    var START = { q: 'Would you like to be asked a few questions?', opts: [opt('Yes, ask me', 'deep'), opt('Not yet', null, { close: true })] };
+    function resolve(n) { return n === 'deep' ? { q: DEEP.q, hideQ: true, opts: DEEP.opts.map(function (o) { return opt(o.t, SECOND[key]); }) } : n; }
+
+    function focus(on) {
+      if (on) { tiles.classList.add('focus'); t.classList.add('open'); }
+      else { tiles.classList.remove('focus'); t.classList.remove('open'); }
+    }
+    function reset() { trail = []; render(START, 0); }
+    function leave(o) {
+      if (o.close) { reset(); return; }
+      window.location.href = viewHref;
+    }
+    function crumbs(upto) {
+      var c = el('div', 'bc');
+      var root = el('a', '', NAMES[key]); root.href = '#';
+      root.addEventListener('click', function (e) { e.preventDefault(); trail = []; render(START, 0); });
+      c.appendChild(root);
+      trail.forEach(function (st, i) {
+        c.appendChild(el('i', '', '›'));
+        if (i === trail.length - 1 && upto === trail.length) { c.appendChild(el('b', '', st.label)); return; }
+        var a = el('a', '', st.label); a.href = '#';
+        a.addEventListener('click', function (e) { e.preventDefault(); var back = trail.slice(0, i); var node = trail[i].node; trail = back; render(node, 0); });
+        c.appendChild(a);
       });
-      chips.appendChild(c);
+      return c;
     }
-    function backBtn() {
-      var bk = el('button', 'cw-btn ghost sm back', 'Back');
-      bk.type = 'button';
-      bk.addEventListener('click', function () { show(stack.pop()); });
-      return bk;
-    }
-    function show(node) {
+    function render(node, expanded) {
       host.innerHTML = '';
-      host.appendChild(el('p', 'cw-fq', node.q));
-      var chips = el('div', 'cw-fchips');
-      if (node.more && !node.expanded) {
-        node.opts.forEach(function (o) { chip(o, chips, node); });
-        var m = el('button', 'cw-fchip', 'Show more');
-        m.type = 'button';
-        m.addEventListener('click', function () { stack.push(node); show({ q: node.q, opts: node.more, search: true, expanded: true }); });
-        chips.appendChild(m);
-        host.appendChild(chips);
-      } else if (node.search) {
-        var box = el('div', 'cw-search'), inp = el('input');
-        inp.type = 'text'; inp.placeholder = 'Search, such as donation';
-        inp.setAttribute('aria-label', 'Search the choices');
-        box.appendChild(inp);
-        host.appendChild(box);
-        var list = el('div', 'cw-fchips');
-        function fill() {
-          var q = inp.value.trim().toLowerCase();
-          list.innerHTML = '';
+      focus(trail.length > 0);
+      if (trail.length === 0) { host.appendChild(el('p', 'cw-fh', 'None yet. How would you like to begin?')); }
+      else { host.appendChild(crumbs(trail.length)); }
+      node = resolve(node);
+      if (!node.hideQ) { host.appendChild(el('p', 'cw-fq', node.q)); }
+      var opts = node.opts, searchMode = !!node.search;
+      if (node.more && !node.search) { opts = node.opts; }
+      var longest = opts.some(function (o) { return words(o.t) > 3; });
+      var asRadio = longest || node.hideQ;
+      var holder = el('div', asRadio ? 'cw-rad' : 'cw-fchips');
+      var sel = [];
+      function advance(chosen, label) {
+        var o = chosen[0];
+        trail.push({ node: node, label: label });
+        if (o.close || o.go || (!o.next && !node.hideQ)) { leave(o); return; }
+        if (!o.next) { leave(o); return; }
+        render(o.next, 0);
+      }
+      function mkChoice(o, parent) {
+        if (asRadio || node.multi) {
+          var lab = el('label', 'cw-rc');
+          var inp = el('input'); inp.type = node.multi ? 'checkbox' : 'radio'; inp.name = 'pick-' + key;
+          inp.addEventListener('change', function () { sel = Array.prototype.slice.call(parent.querySelectorAll('input')).map(function (x, i) { return x.checked ? opts[i] : null; }).filter(Boolean); });
+          lab.appendChild(inp); lab.appendChild(document.createTextNode(' ' + o.t));
+          parent.appendChild(lab);
+        } else {
+          var c = el('button', 'cw-fchip', o.t); c.type = 'button';
+          c.addEventListener('click', function () { advance([o], o.t); });
+          parent.appendChild(c);
+        }
+      }
+      if (searchMode) {
+        var box = el('div', 'cw-search'), inp2 = el('input');
+        inp2.type = 'text'; inp2.placeholder = 'Search, such as donation';
+        inp2.setAttribute('aria-label', 'Search the choices');
+        box.appendChild(inp2); host.appendChild(box);
+        var list = el('div', 'cw-rad'); host.appendChild(list);
+        var fill = function () {
+          var q = inp2.value.trim().toLowerCase(); list.innerHTML = '';
           node.opts.forEach(function (o) {
-            var hit = !q || o.t.toLowerCase().indexOf(q) > -1;
-            var via = '';
+            var hit = !q || o.t.toLowerCase().indexOf(q) > -1, via = '';
             if (!hit) {
               (o.alias || []).forEach(function (a) { if (a.toLowerCase().indexOf(q) > -1) { hit = true; } });
               (o.kinds || []).forEach(function (kd) { if (kd.toLowerCase().indexOf(q) > -1) { hit = true; via = kd + ' is a kind of ' + o.t; } });
             }
             if (!hit) { return; }
-            var c = el('button', 'cw-fchip', via || o.t);
-            c.type = 'button';
-            c.addEventListener('click', function () {
-              if (o.next) { stack.push(node); show(o.next); return; }
-              var all = list.querySelectorAll('.cw-fchip');
-              for (var i = 0; i < all.length; i++) { all[i].classList.remove('on'); }
-              c.classList.add('on');
-            });
-            list.appendChild(c);
+            var lab = el('label', 'cw-rc'), inp = el('input'); inp.type = 'radio'; inp.name = 'pick-' + key;
+            inp.addEventListener('change', function () { sel = [o]; sel.label = via || o.t; });
+            lab.appendChild(inp); lab.appendChild(document.createTextNode(' ' + (via || o.t))); list.appendChild(lab);
           });
-        }
-        inp.addEventListener('input', fill);
-        fill();
-        host.appendChild(list);
+        };
+        inp2.addEventListener('input', fill); fill();
+        var go2 = el('button', 'cw-btn solid sm', 'Continue'); go2.type = 'button';
+        go2.addEventListener('click', function () { if (sel.length) { advance(sel, sel.label || sel[0].t); } });
+        host.appendChild(go2);
       } else {
-        node.opts.forEach(function (o) { chip(o, chips, node); });
-        host.appendChild(chips);
+        opts.forEach(function (o) { mkChoice(o, holder); });
+        if (node.more) {
+          var m = el('button', asRadio ? 'cw-btn ghost sm' : 'cw-fchip', 'Show more'); m.type = 'button';
+          m.addEventListener('click', function () { var kept = trail.slice(); render({ q: node.q, opts: node.more, search: true, parentNode: node }, 0); trail = kept; });
+          if (asRadio) { host.appendChild(holder); host.appendChild(m); } else { holder.appendChild(m); host.appendChild(holder); }
+        } else { host.appendChild(holder); }
+        if (asRadio || node.multi) {
+          var go = el('button', 'cw-btn solid sm', 'Continue'); go.type = 'button';
+          go.addEventListener('click', function () {
+            if (!sel.length) { return; }
+            var label = sel.map(function (x) { return x.t; }).join(', ');
+            advance(sel, label);
+          });
+          host.appendChild(go);
+        }
       }
-      if (stack.length) { host.appendChild(backBtn()); }
+      if (trail.length > 0) {
+        var ft = el('div', 'ft'), cl = el('button', 'cw-btn ghost sm', 'Close'); cl.type = 'button';
+        cl.addEventListener('click', function () { reset(); });
+        ft.appendChild(cl); host.appendChild(ft);
+      }
     }
-    show(first);
+    render(START, 0);
   }
   function failed(t) { empty(t, 'This did not load. Reload the page to try again.'); }
   function initial(s) { s = String(s || '').trim(); return s ? s.charAt(0).toUpperCase() : '?'; }
