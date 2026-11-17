@@ -72,7 +72,6 @@
   .cw-fq{font-size:16px;font-weight:700;color:var(--ink);margin:0 0 4px;}
   .cw-fchips{display:flex;gap:8px;flex-wrap:wrap;}
   .cw-fchip{background:#fff;border:1.5px solid #DDE4EE;border-radius:22px;padding:8px 16px;font-size:14px;font-weight:600;color:var(--ink);cursor:pointer;user-select:none;font-family:inherit;text-decoration:none;display:inline-block;}
-  .cw-fchips.pair{justify-content:space-between;}
   .cw-fchip.quiet{background:transparent;}
   .cw-fchip.on{background:var(--brand);color:#fff;border-color:var(--brand);}
   .cw-fchip:focus-visible{outline:3px solid var(--ink);outline-offset:2px;}
@@ -271,7 +270,7 @@
       if (node.more && !node.search) { opts = node.opts; }
       var longest = opts.some(function (o) { return words(o.t) > 3; });
       var asRadio = longest;
-      var holder = el('div', asRadio ? 'cw-rad' : (node === START ? 'cw-fchips pair' : 'cw-fchips'));
+      var holder = el('div', asRadio ? 'cw-rad' : 'cw-fchips');
       var sel = [], cont = null;
       function advance(chosen, label) {
         var o = chosen[0];
