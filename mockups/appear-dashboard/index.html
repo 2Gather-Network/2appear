@@ -1,0 +1,264 @@
+<!doctype html>
+<!--
+  Copyright 2026 DayBalancer LLC. All rights reserved.
+
+  The code and the content here power Creating.Works, DayBalancer, Appear Network,
+  and 2Gather. They are published so they can be read, audited, and dated.
+
+  Running either as a separate offering requires a license, whether you brand it as
+  ours or as your own, and whether or not money changes hands.
+
+  hello@creating.works
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex, nofollow">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta property="og:site_name" content="Appear">
+<meta property="og:title" content="Appear in your network. Make your network appear.">
+<title>2Appear</title>
+<link rel="icon" type="image/png" href="/logo.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:opsz,wght@6..12,400;6..12,600;6..12,700;6..12,800&family=DM+Sans:wght@400;500;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{--brand:#1F699E;--ink:#1A2E42;--soft:#2F3D4F;--line:#DDE3EA;--panel:#F7FBFF;--panel-line:#C9DFF3;}
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--brand);color:var(--ink);
+       font-family:'Nunito Sans','DM Sans',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;}
+  .wrap{max-width:900px;margin:0 auto;padding:24px 18px 60px;}
+  .card{background:#fff;border-radius:16px;padding:30px;}
+  h1{font-size:30px;font-weight:800;line-height:1.2;margin:0 0 12px;text-wrap:balance;}
+  .lede{font-size:17px;line-height:1.6;color:var(--soft);margin:0;max-width:60ch;}
+  .halves{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:26px;}
+  .half{background:var(--panel);border:1px solid var(--panel-line);border-radius:14px;padding:20px 22px;min-width:0;}
+  .half h2{font-size:18px;font-weight:800;margin:0 0 8px;}
+  .half p{font-size:15px;line-height:1.65;color:var(--soft);margin:0;}
+  .build{margin:22px 0 0;background:var(--panel);border:1px solid var(--panel-line);border-radius:14px;padding:20px 22px;display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;}
+  .build[hidden]{display:none;}
+  .build p{font-size:16px;line-height:1.5;color:var(--soft);margin:0;max-width:46ch;}
+  .build a{display:inline-block;background:var(--brand);color:#fff;font-size:15px;font-weight:700;text-decoration:none;border-radius:24px;padding:10px 18px;font-family:inherit;}
+  .build a:focus-visible{outline:3px solid var(--ink);outline-offset:2px;}
+  .build.editonly{background:none;border:0;padding:0;}
+  .build.editonly a{font-size:13px;padding:7px 14px;}
+  @media(max-width:700px){.card{padding:22px 20px;}h1{font-size:25px;}.halves{grid-template-columns:1fr;}}
+  .dash[hidden]{display:none;}
+  .greet{font-size:24px;font-weight:800;line-height:1.25;margin:0;}
+  .dash .lede{font-size:15px;margin-top:4px;}
+  .tiles{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:22px;}
+  .tile{position:relative;background:var(--panel);border:1.5px solid var(--panel-line);border-radius:14px 16.5px 14px 14px;padding:14px 16px 16px;min-width:0;}
+  .tile h2{font-size:16px;font-weight:800;margin:0;display:flex;align-items:center;gap:8px;min-height:30px;padding-right:76px;}
+  .cnt{display:inline-flex;align-items:center;justify-content:center;min-width:22px;height:22px;padding:0 7px;border-radius:11px;background:var(--brand);color:#fff;font-size:12px;font-weight:800;}
+  .cnt[hidden]{display:none;}
+  .view{position:absolute;top:-1.5px;right:-1.5px;height:33px;display:flex;align-items:center;font-size:13.5px;font-weight:700;color:var(--brand);background:#fff;border:1.5px solid var(--panel-line);border-radius:16.5px;padding:0 14px;text-decoration:none;white-space:nowrap;}
+  .view:hover{background:#EEF2F7;}
+  .view:focus-visible{outline:3px solid var(--ink);outline-offset:2px;}
+  .pv{margin-top:10px;display:flex;flex-direction:column;gap:9px;}
+  .row{display:flex;align-items:center;gap:10px;min-width:0;color:inherit;text-decoration:none;}
+  .ph{width:32px;height:32px;border-radius:50%;background:#EBF3FA;color:var(--brand);display:inline-flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;flex:none;overflow:hidden;}
+  .ph img{width:100%;height:100%;object-fit:cover;}
+  .ph.sq{border-radius:8px;}
+  .dt{width:32px;height:32px;border-radius:8px;background:#fff;border:1.5px solid var(--panel-line);color:var(--brand);display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:8.5px;font-weight:800;line-height:1.05;flex:none;}
+  .dt b{font-size:12.5px;}
+  .row .r{min-width:0;flex:1;}
+  .row .a{font-size:14px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .row .b{font-size:13px;color:var(--soft);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .faces{display:flex;gap:6px;margin-top:10px;}
+  .empty{font-size:14px;color:var(--soft);margin-top:8px;line-height:1.5;}
+  .empty a{color:var(--brand);font-weight:700;text-decoration:none;}
+  .cw-loading{display:inline-flex;align-items:center;background:var(--brand);color:#fff;font-size:12.5px;font-weight:700;padding:6px 14px;border-radius:20px;margin-top:10px;animation:cw-breathe 1.6s ease-in-out infinite;}
+  @keyframes cw-breathe{0%,100%{opacity:1}50%{opacity:.62}}
+  @media(max-width:700px){.tiles{grid-template-columns:1fr;}.greet{font-size:22px;}}
+</style>
+<script>window.CW_SIGNIN="/signin/?next="+encodeURIComponent(location.pathname+location.search);window.CW_SIGNUP="/signup/?next="+encodeURIComponent(location.pathname+location.search);</script>
+<script src="https://2gather.network/nav/identity.js?v=69"></script>
+<script src="https://2gather.network/nav/firststop.js?v=11"></script>
+<script src="https://2gather.network/nav/topbar.js" defer></script>
+</head>
+<body>
+<div class="wrap">
+  <div class="card">
+    <div class="dash" id="dash" hidden>
+      <p class="greet" id="greet">Welcome back.</p>
+      <p class="lede">Here is what is waiting for you.</p>
+      <div class="tiles">
+        <section class="tile" id="t-msg"><h2>See direct messages <span class="cnt" hidden></span></h2><a class="view" href="/messages/">View</a><div class="body"><span class="cw-loading">Looking for your messages</span></div></section>
+        <section class="tile" id="t-inv"><h2>See invitations <span class="cnt" hidden></span></h2><a class="view" href="/mygroups/?tab=invites">View</a><div class="body"><span class="cw-loading">Looking for your invitations</span></div></section>
+        <section class="tile" id="t-ev"><h2>See events for me <span class="cnt" hidden></span></h2><a class="view" href="/events/">View</a><div class="body"></div></section>
+        <section class="tile" id="t-match"><h2>See people I matched <span class="cnt" hidden></span></h2><a class="view" href="/network/">View</a><div class="body"></div></section>
+        <section class="tile" id="t-grp"><h2>See my groups <span class="cnt" hidden></span></h2><a class="view" href="/mygroups/">View</a><div class="body"><span class="cw-loading">Looking in your groups</span></div></section>
+        <section class="tile" id="t-bm"><h2>See bookmarks and contacts <span class="cnt" hidden></span></h2><a class="view" href="/network/bookmarks/">View</a><div class="body"><span class="cw-loading">Looking for your bookmarks</span></div></section>
+      </div>
+    </div>
+
+    <div id="intro">
+    <h1>Appear in your network. Make your network appear.</h1>
+
+    <div class="build" id="build" hidden>
+      <p>Add your photo, location, and language(s) so people can find you.</p>
+      <a href="/intro/start">Build my page</a>
+    </div>
+
+    <div class="build editonly" id="editme" hidden>
+      <a href="/me/?mine=1">Edit my profile</a>
+    </div>
+
+    <div class="halves">
+      <div class="half">
+        <h2>Be seen the way you want to be seen</h2>
+        <p>Describe what drives you and what you bring. You choose what shows and who sees it.</p>
+      </div>
+      <div class="half">
+        <h2>Co-create in a way that works</h2>
+        <p>Meet people who share your values and interests, who need what you offer, and offer what you seek.</p>
+      </div>
+    </div>
+    </div>
+
+  </div>
+</div>
+<script>
+(function () {
+  var GS = 'https://cw-api-gate.jessieupp.workers.dev';
+  var MSG = 'https://cw-messages.jessieupp.workers.dev';
+  var me = (window.CW && CW.me) ? CW.me() : { known: false, id: '' };
+  if (!me.known || !me.id || !CW.pageReady) { return; }
+  CW.pageReady(me.id, function (ready) {
+    if (ready === false) { document.getElementById('build').hidden = false; }
+    else if (ready === true) { dashboard(); }
+  });
+
+  function el(tag, cls, text) {
+    var n = document.createElement(tag);
+    if (cls) { n.className = cls; }
+    if (text != null) { n.textContent = text; }
+    return n;
+  }
+  function tile(id) { return document.getElementById(id); }
+  function count(t, n) {
+    var c = t.querySelector('.cnt');
+    c.textContent = n > 99 ? '99+' : String(n);
+    c.hidden = !(n > 0);
+  }
+  function body(t) { var b = t.querySelector('.body'); b.innerHTML = ''; return b; }
+  function empty(t, words, linkWords, href) {
+    var p = el('p', 'empty', words);
+    if (linkWords) { p.appendChild(document.createTextNode(' ')); var a = el('a', '', linkWords); a.href = href; p.appendChild(a); }
+    body(t).appendChild(p);
+  }
+  function failed(t) { empty(t, 'This did not load. Reload the page to try again.'); }
+  function initial(s) { s = String(s || '').trim(); return s ? s.charAt(0).toUpperCase() : '?'; }
+  function face(name, photo, square) {
+    var f = el('span', 'ph' + (square ? ' sq' : ''));
+    if (photo) { var i = el('img'); i.alt = ''; i.src = photo; f.appendChild(i); } else { f.textContent = initial(name); }
+    return f;
+  }
+  function row(lead, a, b, href) {
+    var r = el(href ? 'a' : 'div', 'row');
+    if (href) { r.href = href; }
+    r.appendChild(lead);
+    var w = el('div', 'r');
+    w.appendChild(el('div', 'a', a));
+    if (b) { w.appendChild(el('div', 'b', b)); }
+    r.appendChild(w);
+    return r;
+  }
+  function pass() { return (CW.passParam && CW.passParam()) || ''; }
+  function getJson(url, opts) { return fetch(url, opts).then(function (r) { return r.json(); }); }
+
+  function dashboard() {
+    document.getElementById('intro').hidden = true;
+    document.getElementById('dash').hidden = false;
+    var first = '';
+    if (!me.viewing) { try { first = String(localStorage.getItem('cw-first') || '').trim(); } catch (e) {} }
+    if (first) { document.getElementById('greet').textContent = 'Welcome back, ' + first + '.'; }
+    if (!pass()) { ['t-msg', 't-inv', 't-grp', 't-bm'].forEach(function (k) { failed(tile(k)); }); }
+    else { loadMessages(); loadInvites(); loadGroups(); loadBookmarks(); }
+    empty(tile('t-ev'), 'No events for you yet.', 'Find an event', '/events/');
+    empty(tile('t-match'), 'No matches yet.');
+  }
+
+  function loadMessages() {
+    var t = tile('t-msg');
+    if (me.viewing) { empty(t, 'Messages stay private while viewing as someone.'); return; }
+    var tok = '';
+    try { tok = localStorage.getItem('cw-token') || ''; } catch (e) {}
+    var key = 'cw-msg-session-' + me.id, sess = '';
+    try { var s = sessionStorage.getItem(key) || ''; if (s && parseInt(s.split('.')[1] || '0', 10) > Date.now() + 60000) { sess = s; } } catch (e) {}
+    var start = sess ? Promise.resolve(sess) : getJson(MSG + '/session', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: me.id, token: tok }) })
+      .then(function (d) {
+        if (!d || d.status !== 'ok' || !d.session) { throw new Error('no session'); }
+        try { sessionStorage.setItem(key, d.session); } catch (e) {}
+        return d.session;
+      });
+    start.then(function (s) { return getJson(MSG + '/threads', { headers: { 'x-msg-session': s } }); })
+      .then(function (d) {
+        if (!d || d.status !== 'ok') { throw new Error('not loaded'); }
+        var ts = (d.threads || []).filter(function (x) { return x && x.other; });
+        count(t, ts.reduce(function (n, x) { return n + (x.unread || 0); }, 0));
+        if (!ts.length) { empty(t, 'No messages yet.'); return; }
+        ts.sort(function (a, b) { return (b.unread ? 1 : 0) - (a.unread ? 1 : 0); });
+        var b = body(t), pv = el('div', 'pv');
+        ts.slice(0, 1).forEach(function (x) {
+          var line = x.last ? (x.last.mine ? 'You: ' : '') + x.last.body : '';
+          pv.appendChild(row(face(x.other.name, x.other.photo), x.other.name || 'Someone', line, '/messages/'));
+        });
+        b.appendChild(pv);
+      })
+      .catch(function () { failed(t); });
+  }
+
+  function loadInvites() {
+    var t = tile('t-inv'), hid = {};
+    try { hid = JSON.parse(localStorage.getItem('cw-inv-hidden-v2') || '{}') || {}; } catch (e) {}
+    getJson(GS + '?action=getMyInvites&appearId=' + encodeURIComponent(me.id) + pass())
+      .then(function (d) {
+        if (!d || !d.ok || !Array.isArray(d.invites)) { throw new Error('not loaded'); }
+        var list = d.invites.filter(function (iv) { return String(iv.state || 'new') === 'new' && !hid[iv.groupId]; });
+        count(t, list.length);
+        if (!list.length) { empty(t, 'No invitations right now.'); return; }
+        var b = body(t), pv = el('div', 'pv');
+        list.slice(0, 2).forEach(function (iv) {
+          pv.appendChild(row(face(iv.name, iv.image, true), iv.name || 'A group', 'invited you to join', '/mygroups/?tab=invites'));
+        });
+        b.appendChild(pv);
+      })
+      .catch(function () { failed(t); });
+  }
+
+  function loadGroups() {
+    var t = tile('t-grp');
+    getJson(GS + '?action=getMyGroups&appearId=' + encodeURIComponent(me.id) + pass())
+      .then(function (d) {
+        if (!d || !Array.isArray(d.groups)) { throw new Error('not loaded'); }
+        if (!d.groups.length) { empty(t, 'Nothing new in your groups.', 'Join a group', '/mygroups/'); return; }
+        var b = body(t), pv = el('div', 'pv');
+        d.groups.slice(0, 2).forEach(function (g) {
+          var sl = String(g.slug || '').split(',')[0].trim();
+          pv.appendChild(row(face(g.name, g.image, true), g.name || 'A group', '', sl ? '/group/' + encodeURIComponent(sl) : '/mygroups/'));
+        });
+        b.appendChild(pv);
+      })
+      .catch(function () { failed(t); });
+  }
+
+  function loadBookmarks() {
+    var t = tile('t-bm');
+    getJson(GS + '?action=getBookmarks&appearId=' + encodeURIComponent(me.id) + pass())
+      .then(function (d) {
+        if (!d || !Array.isArray(d.bookmarks)) { throw new Error('not loaded'); }
+        var list = d.bookmarks;
+        count(t, list.length);
+        if (!list.length) { empty(t, 'No bookmarks yet.'); return; }
+        var b = body(t), fs = el('div', 'faces');
+        list.slice(0, 5).forEach(function (x) { fs.appendChild(face(x.name, '')); });
+        b.appendChild(fs);
+      })
+      .catch(function () { failed(t); });
+  }
+})();
+</script>
+</body>
+</html>
