@@ -69,6 +69,7 @@
   .empty{font-size:14px;color:var(--soft);margin-top:8px;line-height:1.5;}
   .empty a{color:var(--brand);font-weight:700;text-decoration:none;}
   .cw-loading{display:inline-flex;align-items:center;background:var(--brand);color:#fff;font-size:12.5px;font-weight:700;padding:6px 14px;border-radius:20px;margin-top:10px;animation:cw-breathe 1.6s ease-in-out infinite;}
+  .lede.wait{animation:cw-breathe 1.6s ease-in-out infinite;}
   .cw-fq{font-size:16px;font-weight:700;color:var(--ink);margin:0 0 4px;}
   .cw-fchips{display:flex;gap:8px;flex-wrap:wrap;}
   .cw-fchip{background:#fff;border:1.5px solid #DDE4EE;border-radius:22px;padding:8px 16px;font-size:14px;font-weight:600;color:var(--ink);cursor:pointer;user-select:none;font-family:inherit;text-decoration:none;display:inline-block;}
@@ -139,7 +140,7 @@
     <div class="dash" id="dash" hidden>
       <div class="hdr">
         <div class="hdl"><p class="greet" id="greet">Welcome back.</p>
-        <p class="lede">Here is what is waiting for you.</p></div>
+        <p class="lede wait" id="lede">Looking up your information...</p></div>
         <div class="mn" id="editmenu" hidden>
           <button class="cw-btn ghost sm mnb" id="editbtn" type="button" aria-expanded="false" aria-haspopup="true">Edit profile <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg></button>
           <div class="mnl" id="editlist" hidden>
@@ -150,12 +151,12 @@
         </div>
       </div>
       <div class="tiles">
-        <section class="tile" id="t-msg"><h2>See direct messages <span class="cnt" hidden></span></h2><a class="view" href="/messages/">View</a><div class="body"><span class="cw-loading">Looking for your messages</span></div></section>
-        <section class="tile" id="t-inv"><h2>See invitations <span class="cnt" hidden></span></h2><a class="view" href="/mygroups/?tab=invites">View</a><div class="body"><span class="cw-loading">Looking for your invitations</span></div></section>
+        <section class="tile" id="t-msg"><h2>See direct messages <span class="cnt" hidden></span></h2><a class="view" href="/messages/">View</a><div class="body"></div></section>
+        <section class="tile" id="t-inv"><h2>See invitations <span class="cnt" hidden></span></h2><a class="view" href="/mygroups/?tab=invites">View</a><div class="body"></div></section>
         <section class="tile" id="t-ev"><h2>See events for me <span class="cnt" hidden></span></h2><a class="view" href="/events/">View</a><div class="body"></div></section>
         <section class="tile" id="t-match"><h2>See people I matched <span class="cnt" hidden></span></h2><a class="view" href="/network/">View</a><div class="body"></div></section>
-        <section class="tile" id="t-grp"><h2>See my groups <span class="cnt" hidden></span></h2><a class="view" href="/mygroups/">View</a><div class="body"><span class="cw-loading">Looking in your groups</span></div></section>
-        <section class="tile" id="t-bm"><h2>See bookmarks and contacts <span class="cnt" hidden></span></h2><a class="view" href="/network/bookmarks/">View</a><div class="body"><span class="cw-loading">Looking for your bookmarks</span></div></section>
+        <section class="tile" id="t-grp"><h2>See my groups <span class="cnt" hidden></span></h2><a class="view" href="/mygroups/">View</a><div class="body"></div></section>
+        <section class="tile" id="t-bm"><h2>See bookmarks and contacts <span class="cnt" hidden></span></h2><a class="view" href="/network/bookmarks/">View</a><div class="body"></div></section>
         <section class="tile" id="t-add"><div class="body"></div></section>
       </div>
     </div>
@@ -577,6 +578,14 @@
     document.getElementById('intro').hidden = true;
     document.getElementById('dash').hidden = false;
     quickAdd();
+    var lede = document.getElementById('lede'), bodies = ['t-msg', 't-inv', 't-grp', 't-bm'].map(function (k) { return tile(k).querySelector('.body'); });
+    function settled() {
+      if (!bodies.every(function (x) { return x.childNodes.length > 0; })) { return; }
+      lede.textContent = 'Here is what is waiting for you.'; lede.classList.remove('wait'); mo.disconnect();
+    }
+    var mo = new MutationObserver(settled);
+    bodies.forEach(function (x) { mo.observe(x, { childList: true }); });
+    settled();
     var first = '';
     if (!me.viewing) { try { first = String(localStorage.getItem('cw-first') || '').trim(); } catch (e) {} }
     if (first) { document.getElementById('greet').textContent = 'Welcome back, ' + first + '.'; }
