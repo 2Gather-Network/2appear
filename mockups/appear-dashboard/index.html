@@ -90,6 +90,7 @@
   .bc a{color:var(--brand);text-decoration:underline;cursor:pointer;}
   .bc i{font-style:normal;color:var(--soft);margin:0 6px;}
   .bc b{font-weight:700;}
+  .tile.open{background:#fff;}
   .tiles.focus .tile:not(.open){display:none;}
   .tiles.focus{grid-template-columns:1fr;}
   .ft{display:flex;justify-content:space-between;align-items:center;margin-top:14px;}
@@ -234,7 +235,9 @@
     var START = { q: '', hideQ: true, opts: [opt('Yes, ask me', 'deep', { crumb: 'Begin' }), opt('Not yet', null, { close: true })] };
     function resolve(n) { return n === 'deep' ? { q: DEEP.q, opts: DEEP.opts.map(function (o) { return opt(o.t, SECOND[key]); }) } : n; }
 
+    var h2 = t.querySelector('h2'), titleNode = h2.firstChild, fullTitle = titleNode.nodeValue;
     function focus(on) {
+      titleNode.nodeValue = on ? fullTitle.replace(/^See /, '').replace(/^./, function (c) { return c.toUpperCase(); }) : fullTitle;
       if (on) { tiles.classList.add('focus'); tiles.parentNode.classList.add('focus'); t.classList.add('open'); }
       else { tiles.classList.remove('focus'); tiles.parentNode.classList.remove('focus'); t.classList.remove('open'); }
     }
