@@ -99,6 +99,20 @@
   .ftl{display:flex;gap:8px;}
   .tile .view{display:none;}
   .tile h2{padding-right:0;}
+  .hdr{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;}
+  .mn{position:relative;flex:none;}
+  .mn[hidden]{display:none;}
+  .mnb{display:inline-flex;align-items:center;gap:8px;}
+  .mnl{position:absolute;right:0;top:44px;width:260px;background:#fff;border:1.5px solid #DDE4EE;border-radius:14px;padding:6px;z-index:5;}
+  .mnl[hidden]{display:none;}
+  .mni{display:block;width:100%;text-align:left;background:transparent;border:0;border-radius:10px;padding:10px 12px;font-family:inherit;font-size:14px;font-weight:600;color:var(--ink);cursor:pointer;}
+  .mni:hover,.mni:focus-visible{background:#EEF2F7;outline:none;}
+  #t-add{display:none;}
+  .tiles.focus #t-add.open{display:block;}
+  .dash.focus .hdr{display:none;}
+  .dash.focus .mn{display:none;}
+  .addlink{font-size:13.5px;margin:14px 0 0;}
+  .addlink a{color:var(--brand);text-decoration:underline;font-weight:600;}
   .ask{margin-top:12px;display:flex;flex-direction:column;gap:10px;}
   @keyframes cw-breathe{0%,100%{opacity:1}50%{opacity:.62}}
   @media(max-width:700px){.tiles{grid-template-columns:1fr;}.greet{font-size:22px;}}
@@ -112,8 +126,18 @@
 <div class="wrap">
   <div class="card">
     <div class="dash" id="dash" hidden>
-      <p class="greet" id="greet">Welcome back.</p>
-      <p class="lede">Here is what is waiting for you.</p>
+      <div class="hdr">
+        <div class="hdl"><p class="greet" id="greet">Welcome back.</p>
+        <p class="lede">Here is what is waiting for you.</p></div>
+        <div class="mn" id="editmenu" hidden>
+          <button class="cw-btn ghost sm mnb" id="editbtn" type="button" aria-expanded="false" aria-haspopup="true">Edit profile <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg></button>
+          <div class="mnl" id="editlist" hidden>
+            <button type="button" class="mni" data-k="interest">Add an interest</button>
+            <button type="button" class="mni" data-k="offer">Add something I'm offering</button>
+            <button type="button" class="mni" data-k="need">Add something I need</button>
+          </div>
+        </div>
+      </div>
       <div class="tiles">
         <section class="tile" id="t-msg"><h2>See direct messages <span class="cnt" hidden></span></h2><a class="view" href="/messages/">View</a><div class="body"><span class="cw-loading">Looking for your messages</span></div></section>
         <section class="tile" id="t-inv"><h2>See invitations <span class="cnt" hidden></span></h2><a class="view" href="/mygroups/?tab=invites">View</a><div class="body"><span class="cw-loading">Looking for your invitations</span></div></section>
@@ -121,6 +145,7 @@
         <section class="tile" id="t-match"><h2>See people I matched <span class="cnt" hidden></span></h2><a class="view" href="/network/">View</a><div class="body"></div></section>
         <section class="tile" id="t-grp"><h2>See my groups <span class="cnt" hidden></span></h2><a class="view" href="/mygroups/">View</a><div class="body"><span class="cw-loading">Looking in your groups</span></div></section>
         <section class="tile" id="t-bm"><h2>See bookmarks and contacts <span class="cnt" hidden></span></h2><a class="view" href="/network/bookmarks/">View</a><div class="body"><span class="cw-loading">Looking for your bookmarks</span></div></section>
+        <section class="tile" id="t-add"><div class="body"></div></section>
       </div>
     </div>
 
@@ -352,6 +377,55 @@
     }
     render(START, 0);
   }
+
+  function quickAdd() {
+    var box = document.getElementById('editmenu');
+    if (me.viewing) { return; }
+    box.hidden = false;
+    var btn = document.getElementById('editbtn'), list = document.getElementById('editlist');
+    var panel = tile('t-add'), tiles = panel.parentNode, dash = document.getElementById('dash');
+    var KIND = {
+      interest: { crumb: 'Add an interest', q: 'What interest would you like to add?', ph: 'Search my interests', hash: '#interests' },
+      offer: { crumb: 'Add something I’m offering', q: 'What would you like to offer?', ph: 'Search what I offer', hash: '#offering' },
+      need: { crumb: 'Add something I need', q: 'What do you need?', ph: 'Search what I need', hash: '#needs' }
+    };
+    function shut() { list.hidden = true; btn.setAttribute('aria-expanded', 'false'); }
+    function closeAll() {
+      panel.classList.remove('open'); tiles.classList.remove('focus'); dash.classList.remove('focus'); shut();
+    }
+    function openMenu() { list.hidden = false; btn.setAttribute('aria-expanded', 'true'); }
+    btn.addEventListener('click', function () { if (list.hidden) { openMenu(); } else { shut(); } });
+    document.addEventListener('keydown', function (e) { if (e.key === 'Escape') { shut(); } });
+    document.addEventListener('click', function (e) { if (!box.contains(e.target)) { shut(); } });
+    function showKind(k) {
+      var d = KIND[k], b = panel.querySelector('.body');
+      b.innerHTML = '';
+      var crumbs = el('div', 'bc');
+      var ep = el('a', '', 'Edit profile'); ep.href = '#';
+      ep.addEventListener('click', function (e) { e.preventDefault(); closeAll(); });
+      crumbs.appendChild(ep); crumbs.appendChild(el('i', '', '›')); crumbs.appendChild(el('b', '', d.crumb));
+      b.appendChild(crumbs);
+      b.appendChild(el('p', 'cw-fq', d.q));
+      var sb = el('div', 'cw-search'), inp = el('input');
+      inp.type = 'text'; inp.placeholder = d.ph; inp.setAttribute('aria-label', d.ph);
+      sb.appendChild(inp); b.appendChild(sb);
+      var lk = el('p', 'addlink'), a = el('a', '', 'Edit on my profile instead');
+      a.href = '/me/?mine=1' + d.hash; lk.appendChild(a); b.appendChild(lk);
+      var ft = el('div', 'ft'), grp = el('div', 'ftl');
+      var cl = el('button', 'cw-btn ghost sm', 'Close'); cl.type = 'button';
+      cl.addEventListener('click', function () { closeAll(); });
+      var bk = el('button', 'cw-btn ghost sm', 'Back'); bk.type = 'button';
+      bk.addEventListener('click', function () { closeAll(); openMenu(); });
+      grp.appendChild(cl); grp.appendChild(bk);
+      var add = el('button', 'cw-btn solid sm', 'Add'); add.type = 'button';
+      ft.appendChild(grp); ft.appendChild(add); b.appendChild(ft);
+      tiles.classList.add('focus'); dash.classList.add('focus'); panel.classList.add('open');
+      shut(); inp.focus();
+    }
+    Array.prototype.forEach.call(list.querySelectorAll('.mni'), function (it) {
+      it.addEventListener('click', function () { showKind(it.getAttribute('data-k')); });
+    });
+  }
   function failed(t) { empty(t, 'This did not load. Reload the page to try again.'); }
   function initial(s) { s = String(s || '').trim(); return s ? s.charAt(0).toUpperCase() : '?'; }
   function face(name, photo, square) {
@@ -375,6 +449,7 @@
   function dashboard() {
     document.getElementById('intro').hidden = true;
     document.getElementById('dash').hidden = false;
+    quickAdd();
     var first = '';
     if (!me.viewing) { try { first = String(localStorage.getItem('cw-first') || '').trim(); } catch (e) {} }
     if (first) { document.getElementById('greet').textContent = 'Welcome back, ' + first + '.'; }
