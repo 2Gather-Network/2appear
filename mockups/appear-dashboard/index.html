@@ -72,6 +72,7 @@
   .cw-fq{font-size:16px;font-weight:700;color:var(--ink);margin:0 0 4px;}
   .cw-fchips{display:flex;gap:8px;flex-wrap:wrap;}
   .cw-fchip{background:#fff;border:1.5px solid #DDE4EE;border-radius:22px;padding:8px 16px;font-size:14px;font-weight:600;color:var(--ink);cursor:pointer;user-select:none;font-family:inherit;text-decoration:none;display:inline-block;}
+  .cw-fchip.quiet{background:transparent;}
   .cw-fchip.on{background:var(--brand);color:#fff;border-color:var(--brand);}
   .cw-fchip:focus-visible{outline:3px solid var(--ink);outline-offset:2px;}
   .cw-btn{background:#fff;color:var(--brand);border:0;padding:10px 18px;border-radius:24px;font-family:inherit;font-size:15px;font-weight:700;cursor:pointer;text-decoration:none;display:inline-block;}
@@ -282,7 +283,7 @@
           lab.appendChild(inp); lab.appendChild(document.createTextNode(' ' + o.t));
           parent.appendChild(lab);
         } else {
-          var c = el('button', 'cw-fchip', o.t); c.type = 'button';
+          var c = el('button', o.close ? 'cw-fchip quiet' : 'cw-fchip', o.t); c.type = 'button';
           c.addEventListener('click', function () { advance([o], o.t); });
           parent.appendChild(c);
         }
