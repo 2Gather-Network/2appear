@@ -95,6 +95,9 @@
   .ft{display:flex;justify-content:space-between;align-items:center;margin-top:14px;}
   .dash.focus .greet,.dash.focus .lede{display:none;}
   .ft .cw-btn{min-width:96px;text-align:center;}
+  .ftl{display:flex;gap:8px;}
+  .tile .view{display:none;}
+  .tile h2{padding-right:0;}
   .ask{margin-top:12px;display:flex;flex-direction:column;gap:10px;}
   @keyframes cw-breathe{0%,100%{opacity:1}50%{opacity:.62}}
   @media(max-width:700px){.tiles{grid-template-columns:1fr;}.greet{font-size:22px;}}
@@ -220,7 +223,7 @@
   };
   var SECOND = { msg: N.msg, inv: N.inv, ev: N.ev, match: N.matchOn, grp: N.grp, bm: N.bm };
   var NAMES = { msg: 'Messages', inv: 'Invites', ev: 'Events', match: 'Matches', grp: 'Groups', bm: 'Bookmarks' };
-  var DEEP = { q: 'How would you like to begin?', opts: [opt('Show me what is here'), opt('I have something specific in mind'), opt('I am not sure where to start. What do you suggest?')] };
+  var DEEP = { q: 'How would you like to begin?', opts: [opt('Show me what is here', null, { crumb: 'Show me' }), opt('I have something specific in mind', null, { crumb: 'Specific' }), opt('I am not sure where to start. What do you suggest?', null, { crumb: 'Suggest' })] };
 
   function words(s) { return String(s).trim().split(/\s+/).length; }
 
@@ -232,7 +235,7 @@
     var viewHref = t.querySelector('.view').getAttribute('href');
     var trail = [];
     var START = { q: '', hideQ: true, opts: [opt('Yes, ask me', 'deep', { crumb: 'Begin', primary: true })] };
-    function resolve(n) { return n === 'deep' ? { q: DEEP.q, opts: DEEP.opts.map(function (o) { return opt(o.t, SECOND[key]); }) } : n; }
+    function resolve(n) { return n === 'deep' ? { q: DEEP.q, opts: DEEP.opts.map(function (o) { return opt(o.t, SECOND[key], { crumb: o.crumb }); }) } : n; }
 
     var h2 = t.querySelector('h2'), titleNode = h2.firstChild, fullTitle = titleNode.nodeValue;
     function focus(on) {
@@ -334,9 +337,13 @@
       if (trail.length > 0 || cont) {
         var ft = el('div', 'ft');
         if (trail.length > 0) {
+          var grp = el('div', 'ftl');
           var cl = el('button', 'cw-btn ghost sm', 'Close'); cl.type = 'button';
           cl.addEventListener('click', function () { reset(); });
-          ft.appendChild(cl);
+          var bk = el('button', 'cw-btn ghost sm', 'Back'); bk.type = 'button';
+          bk.addEventListener('click', function () { var prev = trail[trail.length - 1].node; trail = trail.slice(0, -1); render(prev, 0); });
+          grp.appendChild(cl); grp.appendChild(bk);
+          ft.appendChild(grp);
         } else { ft.appendChild(el('span')); }
         if (cont) { ft.appendChild(cont); }
         host.appendChild(ft);
