@@ -172,6 +172,7 @@
     </div>
 
     <p class="empty" id="loadfail" hidden>This did not load. Reload the page to try again.</p>
+    <p class="lede wait" id="pre" hidden>Looking up your information...</p>
     <div id="intro">
     <h1>Appear in your network. Make your network appear.</h1>
 
@@ -204,8 +205,11 @@
   var MSG = 'https://cw-messages.jessieupp.workers.dev';
   var me = (window.CW && CW.me) ? CW.me() : { known: false, id: '' };
   if (!me.known || !me.id) { return; }
+  document.getElementById('intro').hidden = true;
+  document.getElementById('pre').hidden = false;
   readyCheck(function (ready) {
-    if (ready === false) { document.getElementById('build').hidden = false; }
+    document.getElementById('pre').hidden = true;
+    if (ready === false) { document.getElementById('intro').hidden = false; document.getElementById('build').hidden = false; }
     else if (ready === true) { dashboard(); }
     else { document.getElementById('loadfail').hidden = false; }
   });
@@ -275,6 +279,12 @@
 
   function words(s) { return String(s).trim().split(/\s+/).length; }
 
+  var held = [], released = false, settleFn = function () {};
+  function askLater(t, fn) {
+    t.setAttribute('data-done', '1');
+    if (released) { fn(); return; }
+    held.push(fn); settleFn();
+  }
   function emptyAsk(t, line, key) {
     var b = body(t);
     var host = el('div', 'ask');
@@ -590,13 +600,17 @@
     quickAdd();
     var lede = document.getElementById('lede'), bodies = ['t-msg', 't-inv', 't-grp', 't-bm'].map(function (k) { return tile(k).querySelector('.body'); });
     function settled() {
-      if (!bodies.every(function (x) { return x.childNodes.length > 0; })) { return; }
+      if (!['t-msg', 't-inv', 't-grp', 't-bm'].every(function (k) { var tt = tile(k); return tt.getAttribute('data-done') === '1' || tt.querySelector('.body').childNodes.length > 0; })) { return; }
+      if (released) { return; }
+      released = true;
       lede.textContent = 'Here is what is waiting for you.'; lede.classList.remove('wait'); mo.disconnect();
+      held.forEach(function (fn) { fn(); });
       emptyAsk(tile('t-ev'), 'No events for you yet.', 'ev');
       emptyAsk(tile('t-match'), 'No matches yet.', 'match');
     }
     var mo = new MutationObserver(settled);
     bodies.forEach(function (x) { mo.observe(x, { childList: true }); });
+    settleFn = settled;
     settled();
     var first = '';
     if (!me.viewing) { try { first = String(localStorage.getItem('cw-first') || '').trim(); } catch (e) {} }
@@ -623,7 +637,7 @@
         if (!d || d.status !== 'ok') { throw new Error('not loaded'); }
         var ts = (d.threads || []).filter(function (x) { return x && x.other; });
         count(t, ts.reduce(function (n, x) { return n + (x.unread || 0); }, 0));
-        if (!ts.length) { emptyAsk(t, 'No messages yet.', 'msg'); return; }
+        if (!ts.length) { askLater(t, function () { emptyAsk(t, 'No messages yet.', 'msg'); }); return; }
         ts.sort(function (a, b) { return (b.unread ? 1 : 0) - (a.unread ? 1 : 0); });
         var b = body(t), pv = el('div', 'pv');
         ts.slice(0, 1).forEach(function (x) {
@@ -643,7 +657,7 @@
         if (!d || !d.ok || !Array.isArray(d.invites)) { throw new Error('not loaded'); }
         var list = d.invites.filter(function (iv) { return String(iv.state || 'new') === 'new' && !hid[iv.groupId]; });
         count(t, list.length);
-        if (!list.length) { emptyAsk(t, 'No invitations right now.', 'inv'); return; }
+        if (!list.length) { askLater(t, function () { emptyAsk(t, 'No invitations right now.', 'inv'); }); return; }
         var b = body(t), pv = el('div', 'pv');
         list.slice(0, 2).forEach(function (iv) {
           pv.appendChild(row(face(iv.name, iv.image, true), iv.name || 'A group', 'invited you to join', '/mygroups/?tab=invites'));
@@ -658,7 +672,7 @@
     getJson(GS + '?action=getMyGroups&appearId=' + encodeURIComponent(me.id) + pass())
       .then(function (d) {
         if (!d || !Array.isArray(d.groups)) { throw new Error('not loaded'); }
-        if (!d.groups.length) { emptyAsk(t, 'Nothing new in your groups.', 'grp'); return; }
+        if (!d.groups.length) { askLater(t, function () { emptyAsk(t, 'Nothing new in your groups.', 'grp'); }); return; }
         var b = body(t), pv = el('div', 'pv');
         d.groups.slice(0, 2).forEach(function (g) {
           var sl = String(g.slug || '').split(',')[0].trim();
@@ -676,7 +690,7 @@
         if (!d || !Array.isArray(d.bookmarks)) { throw new Error('not loaded'); }
         var list = d.bookmarks;
         count(t, list.length);
-        if (!list.length) { emptyAsk(t, 'No bookmarks yet.', 'bm'); return; }
+        if (!list.length) { askLater(t, function () { emptyAsk(t, 'No bookmarks yet.', 'bm'); }); return; }
         var b = body(t), fs = el('div', 'faces');
         var menu = el('div', 'pm'); menu.hidden = true;
         var openBtn = null;
