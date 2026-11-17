@@ -69,6 +69,19 @@
   .empty{font-size:14px;color:var(--soft);margin-top:8px;line-height:1.5;}
   .empty a{color:var(--brand);font-weight:700;text-decoration:none;}
   .cw-loading{display:inline-flex;align-items:center;background:var(--brand);color:#fff;font-size:12.5px;font-weight:700;padding:6px 14px;border-radius:20px;margin-top:10px;animation:cw-breathe 1.6s ease-in-out infinite;}
+  .cw-fq{font-size:16px;font-weight:700;color:var(--ink);margin:0 0 4px;}
+  .cw-fchips{display:flex;gap:8px;flex-wrap:wrap;}
+  .cw-fchip{background:#fff;border:1.5px solid #DDE4EE;border-radius:22px;padding:8px 16px;font-size:14px;font-weight:600;color:var(--ink);cursor:pointer;user-select:none;font-family:inherit;text-decoration:none;display:inline-block;}
+  .cw-fchip.on{background:var(--brand);color:#fff;border-color:var(--brand);}
+  .cw-fchip:focus-visible{outline:3px solid var(--ink);outline-offset:2px;}
+  .cw-btn{background:#fff;color:var(--brand);border:0;padding:10px 18px;border-radius:24px;font-family:inherit;font-size:15px;font-weight:700;cursor:pointer;text-decoration:none;display:inline-block;}
+  .cw-btn.ghost{background:transparent;color:var(--brand);border:1.5px solid var(--brand);}
+  .cw-btn.sm{padding:7px 14px;font-size:13px;}
+  .cw-btn:focus-visible{outline:3px solid var(--ink);outline-offset:2px;}
+  .cw-search{display:flex;align-items:center;background:#F7F9FC;border:1px solid #DDE4EE;border-radius:18px;padding:2px 6px 2px 14px;max-width:320px;}
+  .cw-search input{flex:1;border:0;background:transparent;font-family:inherit;font-size:14px;padding:8px 4px;outline:none;}
+  .ask{margin-top:12px;display:flex;flex-direction:column;gap:10px;}
+  .ask .back{align-self:flex-start;}
   @keyframes cw-breathe{0%,100%{opacity:1}50%{opacity:.62}}
   @media(max-width:700px){.tiles{grid-template-columns:1fr;}.greet{font-size:22px;}}
 </style>
@@ -164,6 +177,116 @@
     if (linkWords) { p.appendChild(document.createTextNode(' ')); var a = el('a', '', linkWords); a.href = href; p.appendChild(a); }
     body(t).appendChild(p);
   }
+
+  function opt(t, next, extra) { var o = { t: t, next: next || null }; if (extra) { for (var k in extra) { o[k] = extra[k]; } } return o; }
+  function yesNo() { return [opt('Yes'), opt('Not yet')]; }
+  var N = {};
+  N.connect = { q: 'Based on what you have shared, is it okay if we connect dots for you?', opts: yesNo() };
+  N.seen = { q: 'How would you like to be seen at first?', opts: [opt('Anonymously, by what I share', N.connect), opt('By name and photo', N.connect), opt('Let me look around first', N.connect)] };
+  N.msg = { q: 'Would you like to be introduced to other people?', opts: [opt('Introduce me to other people', N.seen), opt('Introduce other people to me', N.seen), opt('Not yet')] };
+  N.evPerm = { q: 'Based on what you have shared, is it okay if we show events that fit?', opts: yesNo() };
+  N.evFirst = { q: 'What would you like to see first?', opts: [opt('Show me what is coming up', N.evPerm), opt('Something specific', N.evPerm), opt('Surprise me', N.evPerm)] };
+  N.ev = { q: 'Where would you like to look?', opts: [opt('Live and near me', N.evFirst), opt('Online', N.evFirst), opt('Both', N.evFirst)] };
+  N.matchOn = { q: 'What would you like to be matched on?', opts: [opt('What I offer', N.seen), opt('What I seek', N.seen), opt('Both', N.seen)] };
+  N.grpPerm = { q: 'Based on what you have shared, is it okay if we suggest groups?', opts: yesNo() };
+  N.grpOpen = { q: 'Are you open to meeting new people?', opts: [opt('Yes', N.grpPerm), opt('Through people I trust', N.grpPerm), opt('Not yet', N.grpPerm)] };
+  N.grp = { q: 'Who would you like to spend time with?', opts: [opt('My own people', N.grpOpen), opt('The wider community', N.grpOpen), opt('Both', N.grpOpen)] };
+  N.bm = { q: 'Would you like to keep track of people?', opts: [opt('Bookmark people as I look around'), opt('Add someone I already know'), opt('Not yet')] };
+  N.invPerm = { q: 'Is it okay if the people you chose can send you an invitation?', opts: yesNo() };
+  N.invWho = { q: 'Who may invite you?', opts: [opt('People I know', N.invPerm), opt('People in my groups', N.invPerm), opt('People I attend events with', N.invPerm)], more: [opt('Anyone', N.invPerm)] };
+  N.invWork = { q: 'Which?', opts: [opt('Jobs', N.invWho), opt('Projects', N.invWho)] };
+  N.invFund = { q: 'What would you like to fund?', opts: [opt('Projects', N.invWho), opt('People', N.invWho), opt('Companies', N.invWho)], more: [opt('Non-profits', N.invWho)] };
+  N.invPlaces = { q: 'Which?', opts: [opt('To live', N.invWho), opt('To work', N.invWho), opt('To play', N.invWho)] };
+  N.invRes = { q: 'Which?', opts: [opt('Things', N.invWho), opt('Living things', N.invWho)] };
+  N.inv = {
+    q: 'What would you like to be invited to?',
+    opts: [opt('Groups', N.invWho), opt('Events', N.invWho), opt('Open to work', N.invWork)],
+    more: [opt('Experiences', N.invWho), opt('Projects to fund experiences', N.invFund, { alias: ['funding'], kinds: ['Donation'] }), opt('Places', N.invPlaces), opt('Resources', N.invRes)]
+  };
+  var SECOND = { msg: N.msg, inv: N.inv, ev: N.ev, match: N.matchOn, grp: N.grp, bm: N.bm };
+
+  function emptyAsk(t, words, key) {
+    var b = body(t);
+    b.appendChild(el('p', 'empty', words));
+    var host = el('div', 'ask');
+    b.appendChild(host);
+    var viewHref = t.querySelector('.view').getAttribute('href');
+    var first = { q: 'How would you like to begin?', opts: [
+      { t: 'Show me what is here', href: viewHref },
+      opt('I have something specific in mind', SECOND[key]),
+      opt('I am not sure where to start. What do you suggest?', SECOND[key])
+    ] };
+    var stack = [];
+    function chip(o, chips, node) {
+      var c;
+      if (o.href) { c = el('a', 'cw-fchip', o.t); c.href = o.href; chips.appendChild(c); return; }
+      c = el('button', 'cw-fchip', o.t);
+      c.type = 'button';
+      c.addEventListener('click', function () {
+        if (o.next) { stack.push(node); show(o.next); return; }
+        var all = chips.querySelectorAll('.cw-fchip');
+        for (var i = 0; i < all.length; i++) { all[i].classList.remove('on'); }
+        c.classList.add('on');
+      });
+      chips.appendChild(c);
+    }
+    function backBtn() {
+      var bk = el('button', 'cw-btn ghost sm back', 'Back');
+      bk.type = 'button';
+      bk.addEventListener('click', function () { show(stack.pop()); });
+      return bk;
+    }
+    function show(node) {
+      host.innerHTML = '';
+      host.appendChild(el('p', 'cw-fq', node.q));
+      var chips = el('div', 'cw-fchips');
+      if (node.more && !node.expanded) {
+        node.opts.forEach(function (o) { chip(o, chips, node); });
+        var m = el('button', 'cw-fchip', 'Show more');
+        m.type = 'button';
+        m.addEventListener('click', function () { stack.push(node); show({ q: node.q, opts: node.more, search: true, expanded: true }); });
+        chips.appendChild(m);
+        host.appendChild(chips);
+      } else if (node.search) {
+        var box = el('div', 'cw-search'), inp = el('input');
+        inp.type = 'text'; inp.placeholder = 'Search, such as donation';
+        inp.setAttribute('aria-label', 'Search the choices');
+        box.appendChild(inp);
+        host.appendChild(box);
+        var list = el('div', 'cw-fchips');
+        function fill() {
+          var q = inp.value.trim().toLowerCase();
+          list.innerHTML = '';
+          node.opts.forEach(function (o) {
+            var hit = !q || o.t.toLowerCase().indexOf(q) > -1;
+            var via = '';
+            if (!hit) {
+              (o.alias || []).forEach(function (a) { if (a.toLowerCase().indexOf(q) > -1) { hit = true; } });
+              (o.kinds || []).forEach(function (kd) { if (kd.toLowerCase().indexOf(q) > -1) { hit = true; via = kd + ' is a kind of ' + o.t; } });
+            }
+            if (!hit) { return; }
+            var c = el('button', 'cw-fchip', via || o.t);
+            c.type = 'button';
+            c.addEventListener('click', function () {
+              if (o.next) { stack.push(node); show(o.next); return; }
+              var all = list.querySelectorAll('.cw-fchip');
+              for (var i = 0; i < all.length; i++) { all[i].classList.remove('on'); }
+              c.classList.add('on');
+            });
+            list.appendChild(c);
+          });
+        }
+        inp.addEventListener('input', fill);
+        fill();
+        host.appendChild(list);
+      } else {
+        node.opts.forEach(function (o) { chip(o, chips, node); });
+        host.appendChild(chips);
+      }
+      if (stack.length) { host.appendChild(backBtn()); }
+    }
+    show(first);
+  }
   function failed(t) { empty(t, 'This did not load. Reload the page to try again.'); }
   function initial(s) { s = String(s || '').trim(); return s ? s.charAt(0).toUpperCase() : '?'; }
   function face(name, photo, square) {
@@ -192,8 +315,8 @@
     if (first) { document.getElementById('greet').textContent = 'Welcome back, ' + first + '.'; }
     if (!pass()) { ['t-msg', 't-inv', 't-grp', 't-bm'].forEach(function (k) { failed(tile(k)); }); }
     else { loadMessages(); loadInvites(); loadGroups(); loadBookmarks(); }
-    empty(tile('t-ev'), 'No events for you yet.', 'Find an event', '/events/');
-    empty(tile('t-match'), 'No matches yet.');
+    emptyAsk(tile('t-ev'), 'No events for you yet.', 'ev');
+    emptyAsk(tile('t-match'), 'No matches yet.', 'match');
   }
 
   function loadMessages() {
@@ -214,7 +337,7 @@
         if (!d || d.status !== 'ok') { throw new Error('not loaded'); }
         var ts = (d.threads || []).filter(function (x) { return x && x.other; });
         count(t, ts.reduce(function (n, x) { return n + (x.unread || 0); }, 0));
-        if (!ts.length) { empty(t, 'No messages yet.'); return; }
+        if (!ts.length) { emptyAsk(t, 'No messages yet.', 'msg'); return; }
         ts.sort(function (a, b) { return (b.unread ? 1 : 0) - (a.unread ? 1 : 0); });
         var b = body(t), pv = el('div', 'pv');
         ts.slice(0, 1).forEach(function (x) {
@@ -234,7 +357,7 @@
         if (!d || !d.ok || !Array.isArray(d.invites)) { throw new Error('not loaded'); }
         var list = d.invites.filter(function (iv) { return String(iv.state || 'new') === 'new' && !hid[iv.groupId]; });
         count(t, list.length);
-        if (!list.length) { empty(t, 'No invitations right now.'); return; }
+        if (!list.length) { emptyAsk(t, 'No invitations right now.', 'inv'); return; }
         var b = body(t), pv = el('div', 'pv');
         list.slice(0, 2).forEach(function (iv) {
           pv.appendChild(row(face(iv.name, iv.image, true), iv.name || 'A group', 'invited you to join', '/mygroups/?tab=invites'));
@@ -249,7 +372,7 @@
     getJson(GS + '?action=getMyGroups&appearId=' + encodeURIComponent(me.id) + pass())
       .then(function (d) {
         if (!d || !Array.isArray(d.groups)) { throw new Error('not loaded'); }
-        if (!d.groups.length) { empty(t, 'Nothing new in your groups.', 'Join a group', '/mygroups/'); return; }
+        if (!d.groups.length) { emptyAsk(t, 'Nothing new in your groups.', 'grp'); return; }
         var b = body(t), pv = el('div', 'pv');
         d.groups.slice(0, 2).forEach(function (g) {
           var sl = String(g.slug || '').split(',')[0].trim();
@@ -267,7 +390,7 @@
         if (!d || !Array.isArray(d.bookmarks)) { throw new Error('not loaded'); }
         var list = d.bookmarks;
         count(t, list.length);
-        if (!list.length) { empty(t, 'No bookmarks yet.'); return; }
+        if (!list.length) { emptyAsk(t, 'No bookmarks yet.', 'bm'); return; }
         var b = body(t), fs = el('div', 'faces');
         list.slice(0, 5).forEach(function (x) { fs.appendChild(face(x.name, '')); });
         b.appendChild(fs);
