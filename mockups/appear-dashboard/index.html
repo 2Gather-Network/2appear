@@ -245,7 +245,7 @@
   N.grpPerm = { q: 'Based on what you have shared, is it okay if we suggest groups?', opts: yesNo() };
   N.grpOpen = { q: 'Are you open to meeting new people?', opts: [opt('Yes', N.grpPerm), opt('Through people I trust', N.grpPerm), opt('Not yet', null, { close: true })] };
   N.grp = { q: 'Who would you like to spend time with?', multi: true, opts: [opt('My own people', N.grpOpen), opt('The wider community', N.grpOpen)] };
-  N.bm = { q: 'Would you like to keep track of people?', opts: [opt('Bookmark people as I look around', null, { go: true }), opt('Add someone I already know', null, { go: true }), opt('Not yet', null, { close: true })] };
+  N.bm = { q: 'Would you like to keep track of people?', opts: [opt('Bookmark people as I look around', null, { go: true, dest: '/network/' }), opt('Add someone I already know', null, { go: true }), opt('Not yet', null, { close: true })] };
   N.invPerm = { q: 'Is it okay if the people you chose can send you an invitation?', opts: yesNo() };
   N.invWho = { q: 'Who may invite you?', opts: [opt('People I know', N.invPerm), opt('People in my groups', N.invPerm), opt('People I attend events with', N.invPerm)], more: [opt('Anyone', N.invPerm)] };
   var PICK = 'Select your interest:';
@@ -269,7 +269,7 @@
     var host = el('div', 'ask');
     b.appendChild(host);
     var tiles = t.parentNode;
-    var viewHref = t.querySelector('.view').getAttribute('href');
+    var DEST = { msg: '/network/', inv: '/mygroups/?tab=invites', ev: '/events/', match: '/network/', grp: '/mygroups/', bm: '/network/bookmarks/' };
     var trail = [];
     var START = { q: '', hideQ: true, opts: [opt('Yes, ask me', 'deep', { crumb: 'Begin', primary: true })] };
     function resolve(n) { return n === 'deep' ? { q: DEEP.q, opts: DEEP.opts.map(function (o) { return opt(o.t, SECOND[key], { crumb: o.crumb }); }) } : n; }
@@ -283,7 +283,7 @@
     function reset() { trail = []; render(START, 0); }
     function leave(o) {
       if (o.close) { reset(); return; }
-      window.location.href = viewHref;
+      window.location.href = o.dest || DEST[key];
     }
     function crumbs(upto) {
       var c = el('div', 'bc');
