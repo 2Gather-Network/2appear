@@ -231,7 +231,7 @@
     var tiles = t.parentNode;
     var viewHref = t.querySelector('.view').getAttribute('href');
     var trail = [];
-    var START = { q: '', hideQ: true, opts: [opt('Yes, ask me', 'deep'), opt('Not yet', null, { close: true })] };
+    var START = { q: '', hideQ: true, opts: [opt('Yes, ask me', 'deep', { crumb: 'Begin' }), opt('Not yet', null, { close: true })] };
     function resolve(n) { return n === 'deep' ? { q: DEEP.q, opts: DEEP.opts.map(function (o) { return opt(o.t, SECOND[key]); }) } : n; }
 
     function focus(on) {
@@ -272,7 +272,7 @@
       var sel = [], cont = null;
       function advance(chosen, label) {
         var o = chosen[0];
-        trail.push({ node: node, label: label });
+        trail.push({ node: node, label: o.crumb || label });
         if (o.close || o.go || (!o.next && !node.hideQ)) { leave(o); return; }
         if (!o.next) { leave(o); return; }
         render(o.next, 0);
@@ -311,7 +311,7 @@
           });
         };
         inp2.addEventListener('input', fill); fill();
-        cont = el('button', 'cw-btn ghost sm', 'Continue'); cont.type = 'button';
+        cont = el('button', 'cw-btn solid sm', 'Continue'); cont.type = 'button';
         cont.addEventListener('click', function () { if (sel.length) { advance(sel, sel.label || sel[0].t); } });
       } else {
         opts.forEach(function (o) { mkChoice(o, holder); });
@@ -321,7 +321,7 @@
           if (asRadio) { host.appendChild(holder); host.appendChild(m); } else { holder.appendChild(m); host.appendChild(holder); }
         } else { host.appendChild(holder); }
         if (asRadio || node.multi) {
-          cont = el('button', 'cw-btn ghost sm', 'Continue'); cont.type = 'button';
+          cont = el('button', 'cw-btn solid sm', 'Continue'); cont.type = 'button';
           cont.addEventListener('click', function () {
             if (!sel.length) { return; }
             var label = sel.map(function (x) { return x.t; }).join(', ');
