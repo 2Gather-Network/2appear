@@ -231,7 +231,7 @@
     var tiles = t.parentNode;
     var viewHref = t.querySelector('.view').getAttribute('href');
     var trail = [];
-    var START = { q: '', hideQ: true, opts: [opt('Not yet', null, { close: true }), opt('Yes, ask me', 'deep', { crumb: 'Begin', primary: true })] };
+    var START = { q: '', hideQ: true, opts: [opt('Yes, ask me', 'deep', { crumb: 'Begin', primary: true })] };
     function resolve(n) { return n === 'deep' ? { q: DEEP.q, opts: DEEP.opts.map(function (o) { return opt(o.t, SECOND[key]); }) } : n; }
 
     var h2 = t.querySelector('h2'), titleNode = h2.firstChild, fullTitle = titleNode.nodeValue;
