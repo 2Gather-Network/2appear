@@ -149,7 +149,7 @@
   .lay.focus{display:block;}
   .lay.focus .bx:not(.open){display:none;}
   .lay.focus .two,.lay.focus .rail{display:block;margin:0;}
-  .pgbar{margin:0 0 12px;}
+  .pgbar{margin:12px 0 0;display:flex;justify-content:flex-end;}
   .pgbar[hidden]{display:none;}
   .lay{display:grid;grid-template-columns:minmax(0,1fr) 280px;gap:14px;align-items:start;}
   .two{display:grid;grid-template-columns:minmax(0,1fr);gap:12px;}
@@ -238,7 +238,6 @@
 </head>
 <body>
 <div class="wrap">
-  <div class="pgbar" id="pgbar" hidden><button class="cw-btn sm" id="pgclose" type="button">Close</button></div>
   <div class="card">
     <div class="dash" id="dash" hidden>
       <div class="hdr">
@@ -302,6 +301,7 @@
     </div>
 
   </div>
+  <div class="pgbar" id="pgbar" hidden><button class="cw-btn sm" id="pgclose" type="button">Close</button></div>
 </div>
 <script>
 (function () {
