@@ -382,11 +382,11 @@
   N.evRadius = { q: 'How far would you like to look?', opts: [opt('My neighborhood', N.evMode), opt('My city', N.evMode), opt('My county', N.evMode), opt('My state', N.evMode)] };
   N.ev = { q: 'Where would you like to look?', multi: true, opts: [opt('In person', N.evRadius), opt('Virtually', N.evMode)] };
   N.matchOn = { q: 'What would you like to be matched on?', multi: true, opts: [opt('What I offer', N.seen), opt('What I seek', N.seen)] };
-  N.grpPerm = { q: 'Based on what you have shared, is it okay if we suggest groups?', opts: yesNo() };
+  N.grpPerm = { q: 'What would you like to do next?', multi: true, opts: [opt('Add my interests for groups', null, { go: true, dest: '/ikigai/interests' }), opt('Build my own group and invite people I trust', null, { go: true, dest: '/groups/create' }), opt('Wait for an invitation from someone I meet', null, { go: true, dest: '/mygroups/?tab=invites' })] };
   N.grpOpen = { q: 'Are you open to meeting new people in your groups?', opts: [opt('Yes, show me anyone', N.grpPerm), opt('Show me just matches to people in my groups', N.grpPerm), opt('Don\'t show me matches', N.grpPerm)] };
   N.grp = { q: 'Who would you like to spend time with?', multi: true, opts: [opt('My own people', N.grpOpen), opt('The wider community', N.grpOpen)] };
   N.grpNews = { q: 'Who would you like to spend time with?', multi: true, opts: [opt('My own people', seenThen(N.grpOpen)), opt('The wider community', seenThen(N.grpOpen))] };
-  N.bm = { q: 'Would you like to keep track of people?', opts: [opt('Bookmark people as I look around', null, { go: true, dest: '/network/' }), opt('Add someone I already know', null, { go: true })] };
+  N.bm = { q: 'Would you like to keep track of people?', dyn: function () { var o = []; if (store.bmCount) { o.push(opt('See my bookmarks', null, { go: true, dest: '/network/' })); } o.push(opt('Bookmark people as I look around', N.matchOn)); o.push(opt('Add someone I already know', null, { go: true })); return o; } };
   N.invPerm = { q: 'Is it okay if the people you chose can send you an invitation?', opts: yesNo() };
   N.invWho = { q: 'Who may invite you?', multi: true, opts: [opt('People I know', seenThen(N.invPerm)), opt('People in my groups', seenThen(N.invPerm)), opt('People I attend events with', seenThen(N.invPerm)), opt('Anyone', seenThen(N.invPerm))] };
   N.inv = {
@@ -449,6 +449,7 @@
       if (trail.length === 0) { host.appendChild(el('p', 'empty', 'Would you like to populate this section?')); }
       else { host.appendChild(crumbs(trail.length)); }
       node = resolve(node);
+      if (node && node.dyn) { node = { q: node.q, opts: node.dyn() }; }
       while (node && node.seen && seenDone) { node = node.skipTo; }
       if (!node.hideQ) { host.appendChild(el('p', 'cw-fq', node.q)); }
       var opts = node.opts, searchMode = !!node.search;
@@ -1402,7 +1403,7 @@
       if (cd && cd.status === 'ok' && Array.isArray(cd.contacts)) {
         cd.contacts.forEach(function (c) { var pid = String(c.personId || '').trim(), code = pid ? cwCodeFor(pid) : ''; if (code && seen[code]) { return; } if (code) { seen[code] = 1; } list.push({ name: c.name, photo: '', code: code }); });
       }
-      store.people = list;
+      store.people = list; store.bmCount = ((d && d.bookmarks) || []).length;
       var b = bbody('b-ppl');
       if (!list.length) { nothing(b, '', 'Add someone you know', RMS); return; }
       var srch = el('input', 'sr'); srch.type = 'search'; srch.placeholder = '\u{1F50D} Search my people'; srch.setAttribute('aria-label', 'Search my people'); b.appendChild(srch);
