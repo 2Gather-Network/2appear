@@ -117,7 +117,7 @@
   .ikr{display:flex;flex-wrap:wrap;gap:7px;}
   .ikd{border:1.5px dashed #1F699E;border-radius:12px;padding:12px 14px 13px;background:#F7FBFF;margin:4px 0 8px;}
   .ikt{font-size:12.5px;color:#4B5A6D;margin:0 0 8px;}
-  .ikd input,.ikd textarea{width:100%;box-sizing:border-box;border:1.5px solid #DDE3EA;background:#fff;border-radius:10px;padding:8px 10px;font:inherit;font-size:13.5px;color:#1A2E42;outline:none;margin-bottom:8px;resize:none;}
+  .ikd input,.ikd textarea{width:100%;box-sizing:border-box;border:1.5px solid #C9DFF3;background:#F7FBFF;border-radius:12px;padding:0 12px;font:inherit;font-size:14px;color:#1A2E42;outline:none;margin-bottom:8px;resize:none;}.ikd input{height:38px;}.ikd textarea{min-height:80px;padding:9px 12px;line-height:1.45;overflow:hidden;}@media(max-width:599px){.ikd input,.ikd textarea{font-size:16px;}}
   .ikd .bad{border-color:#C4501A;}
   .ike{font-size:13px;color:#7A2410;margin:-4px 0 8px;}
   .ike[hidden]{display:none;}
@@ -487,6 +487,7 @@
     function ikPill(label, on, other) {
       var p = el('button', 'ikp' + (on ? ' on' : '') + (other ? ' ot' : ''), label); p.type = 'button'; return p;
     }
+    document.addEventListener('input', function (ev) { var x = ev.target; if (x && x.tagName === 'TEXTAREA') { x.style.height = 'auto'; x.style.height = Math.max(80, x.scrollHeight + 3) + 'px'; } });
     function draftCard(typeLabel, detailPh) {
       var card = el('div', 'ikd');
       if (typeLabel) { card.appendChild(el('div', 'ikt', typeLabel)); }
