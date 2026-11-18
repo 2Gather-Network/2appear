@@ -108,6 +108,7 @@
   .mnl{position:absolute;right:0;top:44px;width:260px;background:#fff;border:1.5px solid #DDE4EE;border-radius:14px;padding:6px;z-index:5;}
   .mnl[hidden]{display:none;}
   .mni{display:block;width:100%;text-align:left;background:transparent;border:0;border-radius:10px;padding:10px 12px;font-family:inherit;font-size:14px;font-weight:600;color:var(--ink);cursor:pointer;}
+  .mnd{border:0;border-top:1.5px solid #DDE4EE;margin:6px 8px;}
   .mni:hover,.mni:focus-visible{background:#EEF2F7;outline:none;}
   .ikp{font-family:inherit;font-size:13.5px;padding:7px 14px;border-radius:20px;cursor:pointer;background:#fff;border:1px solid #C9DFF3;color:#1F699E;font-weight:600;}
   .ikp.on{background:#1F699E;border-color:#1F699E;color:#fff;font-weight:700;}
@@ -158,6 +159,9 @@
             <button type="button" class="mni" data-k="interest">Add an interest</button>
             <button type="button" class="mni" data-k="offer">Add something I'm offering</button>
             <button type="button" class="mni" data-k="need">Add something I need</button>
+            <hr class="mnd">
+            <button type="button" class="mni" data-k="theyneed">I know someone who is looking for...</button>
+            <button type="button" class="mni" data-k="theyoffer">I know someone who has...</button>
           </div>
         </div>
       </div>
@@ -424,8 +428,10 @@
     var panel = tile('t-add'), tiles = panel.parentNode, dash = document.getElementById('dash');
     var KIND = {
       interest: { crumb: 'Add an interest', hash: '#interests' },
-      offer: { crumb: 'Add something I\u2019m offering', q: 'What would you like to offer?', card: 'Something I\u2019m offering', detailPh: 'Details: what exactly are you offering? (required)', hash: '#offering' },
-      need: { crumb: 'Add something I need', q: 'What do you need?', card: 'Something I need', detailPh: 'Details: what exactly are you seeking? (required)', hash: '#needs' }
+      offer: { crumb: 'I offer', q: 'What would you like to offer?', card: 'Something I\u2019m offering', detailPh: 'Details: what exactly are you offering? (required)', hash: '#offering' },
+      need: { crumb: 'I need', q: 'What do you need?', card: 'Something I need', detailPh: 'Details: what exactly are you seeking? (required)', hash: '#needs' },
+      theyneed: { crumb: 'They need', q: 'What are they seeking?', card: 'Something they need', detailPh: 'Details: what exactly are they seeking? (required)', other: true },
+      theyoffer: { crumb: 'They offer', q: 'What are they offering?', card: 'Something they offer', detailPh: 'Details: what exactly are they offering? (required)', other: true }
     };
     function shut() { list.hidden = true; btn.setAttribute('aria-expanded', 'false'); }
     function closeAll() {
@@ -487,8 +493,7 @@
       b.appendChild(crumbsEl);
       if (k !== 'interest') { b.appendChild(el('p', 'cw-fq', d.q)); }
       b.appendChild(mid);
-      var lk = el('p', 'addlink'), a = el('a', '', 'Edit on my profile instead');
-      a.href = '/me/?mine=1' + d.hash; lk.appendChild(a); b.appendChild(lk);
+      if (!d.other) { var lk = el('p', 'addlink'), a = el('a', '', 'Edit on my profile instead'); a.href = '/me/?mine=1' + d.hash; lk.appendChild(a); b.appendChild(lk); }
       var ft = el('div', 'ft'), grp = el('div', 'ftl');
       var cl = el('button', 'cw-btn ghost sm', 'Close'); cl.type = 'button';
       cl.addEventListener('click', function () { closeAll(); });
@@ -569,6 +574,25 @@
         loadWords().then(function (t) { tree = t; drawInterest(); }).catch(function () { mid.innerHTML = ''; mid.appendChild(el('p', 'empty', 'This did not load. Reload the page to try again.')); });
       } else {
         crumbs(); card = draftCard(d.card, d.detailPh); mid.appendChild(card);
+        if (d.other) {
+          var who = el('div', 'ikd');
+          who.appendChild(el('div', 'ikt', 'Who are they?'));
+          var nm = el('input'); nm.type = 'text'; nm.placeholder = 'Their name (required)'; nm.setAttribute('aria-label', 'Their name');
+          var e1 = el('div', 'ike', 'Add their name first.'); e1.hidden = true;
+          var em = el('input'); em.type = 'email'; em.placeholder = 'Their email (required)'; em.setAttribute('aria-label', 'Their email');
+          var e2 = el('div', 'ike', 'Add their email first.'); e2.hidden = true;
+          var nt = el('textarea'); nt.rows = 2; nt.placeholder = 'A note to them (optional)'; nt.setAttribute('aria-label', 'A note to them');
+          [nm, em].forEach(function (x) { x.addEventListener('input', function () { if (x.value.trim()) { x.classList.remove('bad'); (x === nm ? e1 : e2).hidden = true; } }); });
+          who.appendChild(nm); who.appendChild(e1); who.appendChild(em); who.appendChild(e2); who.appendChild(nt);
+          mid.appendChild(who);
+          var base = card.check;
+          card.check = function () {
+            var ok = base();
+            if (!nm.value.trim()) { e1.hidden = false; nm.classList.add('bad'); ok = false; }
+            if (!em.value.trim()) { e2.hidden = false; em.classList.add('bad'); ok = false; }
+            return ok;
+          };
+        }
       }
     }
     Array.prototype.forEach.call(list.querySelectorAll('.mni'), function (it) {
