@@ -132,6 +132,9 @@
   .faces .bk.sel{box-shadow:0 0 0 2px #fff,0 0 0 3.5px #1F699E;}
   .faces .bk:hover::after,.faces .bk:focus-visible::after{content:attr(data-name);position:absolute;bottom:38px;left:50%;transform:translateX(-50%);background:#1A2E42;color:#fff;font-size:12.5px;font-weight:600;padding:5px 10px;border-radius:8px;white-space:nowrap;z-index:6;}
   .faces .bk:focus-visible{outline:3px solid var(--ink);outline-offset:2px;}
+  .faces .bk.nm{cursor:default;}
+  .faces .bk.nm:hover::after,.faces .bk.nm:focus-visible::after{content:attr(data-name);position:absolute;bottom:38px;left:50%;transform:translateX(-50%);background:#1A2E42;color:#fff;font-size:12.5px;font-weight:600;padding:5px 10px;border-radius:8px;white-space:nowrap;z-index:6;}
+  .faces .bk.nm{display:inline-flex;align-items:center;justify-content:center;position:relative;}
   .pm{margin-top:10px;background:#fff;border:1.5px solid #DDE4EE;border-radius:14px;padding:6px;max-width:240px;}
   .pm[hidden]{display:none;}
   .pmn{font-size:13px;font-weight:700;color:var(--soft);padding:6px 12px 4px;}
@@ -894,10 +897,21 @@
 
   function loadBookmarks() {
     var t = tile('t-bm');
-    getJson(GS + '?action=getBookmarks&appearId=' + encodeURIComponent(me.id) + pass())
-      .then(function (d) {
+    var cReq = getJson(GS + '?action=getContacts&appearId=' + encodeURIComponent(me.id) + pass() + '&t=' + Date.now(), { cache: 'no-store', referrerPolicy: 'no-referrer' }).catch(function () { return null; });
+    Promise.all([getJson(GS + '?action=getBookmarks&appearId=' + encodeURIComponent(me.id) + pass()), cReq])
+      .then(function (res) {
+        var d = res[0], cd = res[1];
         if (!d || !Array.isArray(d.bookmarks)) { throw new Error('not loaded'); }
-        var list = d.bookmarks;
+        var seen = {};
+        var list = d.bookmarks.map(function (x) { var c = cwCodeFor(String(x.appearId || '').trim()); if (c) { seen[c] = 1; } return { name: x.name, photo: x.photo, appearId: x.appearId, vanity: x.vanity, member: true }; });
+        if (cd && cd.status === 'ok' && Array.isArray(cd.contacts)) {
+          cd.contacts.forEach(function (c) {
+            var pid = String(c.personId || '').trim(), code = pid ? cwCodeFor(pid) : '';
+            if (code && seen[code]) { return; }
+            if (code) { seen[code] = 1; }
+            list.push({ name: c.name, photo: '', appearId: pid, vanity: '', member: !!pid });
+          });
+        }
         count(t, list.length);
         if (!list.length) { askLater(t, function () { emptyAsk(t, 'No bookmarks yet.', 'bm'); }); return; }
         var b = body(t), fs = el('div', 'faces');
@@ -907,6 +921,11 @@
         list.slice(0, 5).forEach(function (x) {
           var full = String(x.name || '').trim() || 'Someone';
           var f = face(full, String(x.photo || '').trim());
+          if (!x.member) {
+            var sp = el('span', f.className + ' bk nm', null); sp.innerHTML = f.innerHTML;
+            sp.setAttribute('data-name', full); sp.setAttribute('aria-label', full); sp.setAttribute('tabindex', '0');
+            fs.appendChild(sp); return;
+          }
           var btn = el('button', f.className + ' bk', null);
           btn.type = 'button'; btn.innerHTML = f.innerHTML;
           btn.setAttribute('data-name', full);
