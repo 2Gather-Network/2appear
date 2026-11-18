@@ -152,7 +152,7 @@
   .pgbar{margin:0 0 12px;}
   .pgbar[hidden]{display:none;}
   .lay{display:grid;grid-template-columns:minmax(0,1fr) 280px;gap:14px;align-items:start;}
-  .two{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px;margin-top:12px;}
+  .two{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px;}
   .rail{display:flex;flex-direction:column;gap:12px;}
   @media(max-width:820px){.lay{grid-template-columns:1fr;}.two{grid-template-columns:1fr;}}
   .bx{position:relative;background:#fff;border:1.5px solid var(--panel-line);border-radius:14px 16.5px 14px 14px;padding:14px 16px 16px;min-width:0;}
@@ -254,7 +254,6 @@
         <section class="tile" id="t-add"><div class="body"></div></section>
         <div class="lay">
           <div class="main">
-            <section class="bx" id="b-news"><h2>New for me today</h2><p class="showing" hidden></p><div class="fl"></div><div class="body"></div></section>
             <div class="two">
               <section class="bx" id="b-ev"><h2>Events for me <span class="cnt" hidden></span></h2><p class="showing" hidden></p><div class="fl"></div><div class="body"></div></section>
               <section class="bx" id="b-grp"><h2>My groups <span class="cnt" hidden></span></h2><div class="corner"><a class="view" href="/mygroups/">View</a></div><div class="body"></div></section>
@@ -1135,6 +1134,7 @@
     if (on) { window.scrollTo(0, 0); }
   }
   function drawNews() {
+    if (!bx('b-news')) { return; }
     var b = bbody('b-news'), d = store.news;
     if (!d) { return; }
     if (newsFull && newsFull.venue) {
@@ -1226,7 +1226,7 @@
     if (first) { document.getElementById('greet').textContent = 'Welcome back, ' + first + '.'; }
     (function () { var root = bx('b-ppl').querySelector('.fl'), btn = root.querySelector('.view'), list = root.querySelector('.flist'); btn.addEventListener('click', function (e) { e.stopPropagation(); if (openF && openF.btn === btn) { closeFilters(); return; } closeFilters(); list.hidden = false; btn.setAttribute('aria-expanded', 'true'); openF = { btn: btn, list: list, root: root }; }); })();
     fState.news = fLoad('news'); fState.match = fLoad('match'); fState.ev = fLoad('ev');
-    filterUI('news', drawNews); matchPaint = matchUI(); evPaint = filterUI('ev', drawEvents);
+    if (bx('b-news')) { filterUI('news', drawNews); } matchPaint = matchUI(); evPaint = filterUI('ev', drawEvents);
     var lede = document.getElementById('lede');
     var jobs = [loadNews(), loadEvents(), loadGroups3(), loadPeople(), loadMessages3(), loadInvites3(), loadMatch()];
     var left = jobs.length;
