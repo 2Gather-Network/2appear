@@ -222,6 +222,11 @@
   .mp{display:inline-flex;align-items:center;height:24px;padding:0 10px;border-radius:12px;background:#fff;border:1.5px solid #DDE4EE;color:var(--ink);font-size:12.5px;font-weight:400;white-space:nowrap;}
   .morer{display:flex;justify-content:flex-end;margin-top:10px;}
   .ul2{color:var(--brand);text-decoration:underline;}
+  .ivl .rs{margin-left:4px;}
+  .ivf{margin:6px 0 10px;}
+  .ivf .sres .fi{display:block;width:100%;text-align:left;background:transparent;border:0;border-radius:10px;padding:8px 10px;font:inherit;font-size:14px;cursor:pointer;}
+  .ivf .sres .fi:hover{background:#EEF2F7;}
+  .ivf input[hidden]{display:none;}
   .vh{margin:10px 0 0;font-weight:700;color:var(--ink);}
   button.pmi{display:block;width:100%;text-align:left;background:transparent;border:0;font-family:inherit;cursor:pointer;}
 </style>
@@ -1336,7 +1341,6 @@
     bcount('b-ev', evs.length);
     if (!evs.length) { nothing(b, 'to go to.', 'Find an event', '/events/'); return; }
     evs.slice(0, 3).forEach(function (x) { b.appendChild(newsItem(x)); });
-    if (evs.length > 3) { var mr = el('div', 'morer'); var a = el('a', 'rs', 'More'); a.href = hosting ? '/myevents/' : '/events/'; mr.appendChild(a); b.appendChild(mr); }
   }
   function loadGroups3() {
     var news = gate('getGroupNews').then(function (d) { return (d && d.status === 'ok' && Array.isArray(d.groups)) ? d.groups : []; }, function () { return []; });
@@ -1366,6 +1370,7 @@
       if (cd && cd.status === 'ok' && Array.isArray(cd.contacts)) {
         cd.contacts.forEach(function (c) { var pid = String(c.personId || '').trim(), code = pid ? cwCodeFor(pid) : ''; if (code && seen[code]) { return; } if (code) { seen[code] = 1; } list.push({ name: c.name, photo: '', code: code }); });
       }
+      store.people = list;
       var b = bbody('b-ppl');
       if (!list.length) { nothing(b, '', 'Add someone you know', RMS); return; }
       var srch = el('input', 'sr'); srch.type = 'search'; srch.placeholder = '\u{1F50D} Search my people'; srch.setAttribute('aria-label', 'Search my people'); b.appendChild(srch);
@@ -1399,8 +1404,76 @@
         var last = x.last && x.last.body ? String(x.last.body) : 'New message';
         b.appendChild(line({ people: [p], text: [{ p: 0 }, ' ', { a: last, href: p.code ? '/messages/?to=' + encodeURIComponent('c:' + p.code) : '/messages/' }] }));
       });
-      if (ts.length > 3) { var mr = el('div', 'morer'); var a = el('a', 'rs', 'More'); a.href = '/messages/'; mr.appendChild(a); b.appendChild(mr); }
     }).catch(function () { bfail('b-msg'); });
+  }
+  function extendInvite(box, past, groups, hosted) {
+    var b = box.querySelector('.body'), lay = box.closest('.lay'), dashEl = document.getElementById('dash');
+    var picks = {};
+    function focus(on) { lay.classList.toggle('focus', on); dashEl.classList.toggle('focus', on); box.classList.toggle('open', on); pageClose(on ? function () { step0(); } : null); if (on) { window.scrollTo(0, 0); } }
+    function crumbs(last) { var c = el('div', 'bc'); var r = el('a', '', 'Invites'); r.href = '#'; r.addEventListener('click', function (e) { e.preventDefault(); step0(); }); c.appendChild(r); c.appendChild(el('i', '', '›')); c.appendChild(el('b', '', last)); return c; }
+    function foot(backFn, right) { var ft = el('div', 'ft'), l = el('div', 'ftl'); if (backFn) { var bk = el('button', 'cw-btn ghost sm', 'Back'); bk.type = 'button'; bk.addEventListener('click', backFn); l.appendChild(bk); } ft.appendChild(l); if (right) { ft.appendChild(right); } return ft; }
+    function step0() {
+      focus(false); b.innerHTML = '';
+      if (past.length) {
+        var names = past.slice(0, 3).map(function (iv) { return String(iv.name || 'a group'); });
+        var said = names.length > 1 ? names.slice(0, -1).join(', ') + ' and ' + names[names.length - 1] : names[0];
+        b.appendChild(el('p', 'none', 'Past invites you received included ' + said + '.'));
+      }
+      b.appendChild(el('p', 'none', 'Would you like to extend an invite to someone now?'));
+      var y = el('button', 'cw-btn solid sm', 'Yes'); y.type = 'button'; y.addEventListener('click', step1);
+      var row = el('div', 'ft'); row.appendChild(el('span')); row.appendChild(y); b.appendChild(row);
+    }
+    function step1() {
+      focus(true); b.innerHTML = '';
+      b.appendChild(crumbs('Invite')); b.appendChild(el('p', 'cw-fq', 'Where would you like to invite them?'));
+      var opts = [];
+      if (groups.length) { opts.push(['groups', groups.length > 1 ? 'My groups' : 'My group']); }
+      if (hosted.length) { opts.push(['events', hosted.length > 1 ? 'My events' : 'My event']); }
+      opts.push(['appear', '2Appear']);
+      var rad = el('div', 'cw-rad');
+      opts.forEach(function (o) { var lab = el('label', 'cw-rc'), inp = el('input'); inp.type = 'checkbox'; inp.checked = !!picks[o[0]]; inp.addEventListener('change', function () { picks[o[0]] = inp.checked; }); lab.appendChild(inp); lab.appendChild(document.createTextNode(' ' + o[1])); rad.appendChild(lab); });
+      b.appendChild(rad);
+      var c = el('button', 'cw-btn solid sm', 'Continue'); c.type = 'button';
+      c.addEventListener('click', function () { if (!opts.some(function (o) { return picks[o[0]]; })) { if (!b.querySelector('.pick1')) { b.insertBefore(el('p', 'ike pick1', 'Pick one first.'), b.querySelector('.ft')); } return; } step2(); });
+      b.appendChild(foot(null, c));
+    }
+    function inviteForm(after, what) {
+      var open = after.nextSibling && after.nextSibling.classList && after.nextSibling.classList.contains('ivf');
+      b.querySelectorAll('.ivf').forEach(function (x) { x.remove(); });
+      if (open) { return; }
+      var f = el('div', 'ivf ikd');
+      var nm = el('input'); nm.type = 'text'; nm.placeholder = 'Search my contacts'; nm.setAttribute('aria-label', 'Their name');
+      var hits = el('div', 'sres'), em = el('input'); em.type = 'email'; em.placeholder = 'Their email'; em.setAttribute('aria-label', 'Their email'); em.hidden = true;
+      var chosen = null, msg = el('p', 'ike'); msg.hidden = true;
+      nm.addEventListener('input', function () {
+        chosen = null; hits.innerHTML = ''; var q = nm.value.trim().toLowerCase(); em.hidden = true;
+        if (!q) { return; }
+        var found = (store.people || []).filter(function (p) { return String(p.name || '').toLowerCase().indexOf(q) > -1; }).slice(0, 5);
+        found.forEach(function (p) { var o = el('button', 'fi', String(p.name || '')); o.type = 'button'; o.addEventListener('click', function () { chosen = p; nm.value = String(p.name || ''); hits.innerHTML = ''; em.hidden = true; }); hits.appendChild(o); });
+        if (!found.length) { em.hidden = false; }
+      });
+      var send = el('button', 'cw-btn solid sm', 'Send invite'); send.type = 'button';
+      send.addEventListener('click', function () { msg.hidden = false; msg.textContent = (!nm.value.trim() ? 'Add their name first.' : (!chosen && !em.value.trim() ? 'Add their email first.' : 'Sending is not built yet.')); });
+      f.appendChild(el('div', 'ikt', 'Invite someone to ' + what));
+      f.appendChild(nm); f.appendChild(hits); f.appendChild(em); f.appendChild(msg);
+      var r = el('div', 'ft'); r.appendChild(el('span')); r.appendChild(send); f.appendChild(r);
+      after.insertAdjacentElement('afterend', f); nm.focus();
+    }
+    function inviteLine(words, linkWords, href, what) {
+      var p = el('p', 'none ivl'); p.appendChild(document.createTextNode(words));
+      if (linkWords) { var a = el('a', 'ul2', linkWords); a.href = href; p.appendChild(a); }
+      var go = el('button', 'rs', 'Invite'); go.type = 'button'; go.addEventListener('click', function () { inviteForm(p, what); });
+      p.appendChild(document.createTextNode(' ')); p.appendChild(go);
+      return p;
+    }
+    function step2() {
+      b.innerHTML = ''; b.appendChild(crumbs('Invite'));
+      if (picks.groups) { b.appendChild(el('p', 'vh', 'Your groups')); groups.forEach(function (g) { b.appendChild(inviteLine('Invite someone to your ', String(g.name || 'group'), groupHref(g), String(g.name || 'your group'))); }); }
+      if (picks.events) { b.appendChild(el('p', 'vh', 'Your events')); hosted.slice(0, 3).forEach(function (h) { b.appendChild(inviteLine('Invite someone to your ', shortTitle(h.e), evHref(h.e), shortTitle(h.e))); }); }
+      if (picks.appear) { b.appendChild(el('p', 'vh', '2Appear')); b.appendChild(inviteLine('Invite someone to 2Appear', '', '', '2Appear')); }
+      b.appendChild(foot(step1, null));
+    }
+    step0();
   }
   function loadInvites3() {
     var hid = {};
@@ -1415,28 +1488,13 @@
         var groups = (r[0] && Array.isArray(r[0].groups)) ? r[0].groups : [], hosted = r[1] || [];
         var mine = groups.filter(function (g) { var ro = String(g.role || '').toLowerCase(); return ro === 'host' || ro === 'cohost'; });
         var toInvite = (mine.length ? mine : groups).slice(0, 3);
-        if (!list.length && !past.length && !hosted.length && !toInvite.length) { nothing(b); return; }
         list.slice(0, 3).forEach(function (iv) {
           var who = String(iv.invitedByName || '').trim();
           var p = { name: who, code: String(iv.invitedByCode || '') };
           var words = (who ? who + ' invited you to ' : 'You are invited to ') + (iv.name || 'a group');
           b.appendChild(line({ people: who ? [p] : [], text: [{ a: words, href: '/mygroups/?tab=invites' }] }));
         });
-        if (list.length > 3) { var mr = el('div', 'morer'); var ma = el('a', 'rs', 'More'); ma.href = '/mygroups/?tab=invites'; mr.appendChild(ma); b.appendChild(mr); }
-        if (!list.length && past.length) {
-          var names = past.slice(0, 3).map(function (iv) { return String(iv.name || 'a group'); });
-          var said = names.length > 1 ? names.slice(0, -1).join(', ') + ' and ' + names[names.length - 1] : names[0];
-          b.appendChild(el('p', 'none', 'Past invites included ' + said + '.'));
-        }
-        if (hosted.length) {
-          var h = hosted[0], hp = el('p', 'none', 'Invite someone to your ');
-          var ha = el('a', 'ul2', shortTitle(h.e)); ha.href = evHref(h.e); hp.appendChild(ha); b.appendChild(hp);
-        }
-        toInvite.forEach(function (g) {
-          var sl = String(g.slug || '').split(',')[0].trim();
-          var gp = el('p', 'none', 'Invite someone to your ');
-          var ga = el('a', 'ul2', String(g.name || 'group')); ga.href = sl ? '/group/' + encodeURIComponent(sl) : '/mygroups/'; gp.appendChild(ga); b.appendChild(gp);
-        });
+        if (!list.length) { extendInvite(bx('b-inv'), past, toInvite, hosted); }
       });
     }).catch(function () { bfail('b-inv'); });
   }
