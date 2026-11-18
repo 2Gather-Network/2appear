@@ -215,6 +215,7 @@
   if (!me.known || !me.id) { return; }
   document.getElementById('intro').hidden = true;
   document.getElementById('pre').hidden = false;
+  if (pass()) { prefetch(); }
   readyCheck(function (ready) {
     document.getElementById('pre').hidden = true;
     if (ready === false) { document.getElementById('intro').hidden = false; document.getElementById('build').hidden = false; }
@@ -643,7 +644,7 @@
           mid.appendChild(checkbox('In my groups', S.gOpen, function (on) {
             S.gOpen = on;
             if (on && S.groups === null) {
-              getJson(GS + '?action=getMyGroups&appearId=' + encodeURIComponent(me.id) + pass()).then(function (r) { S.groups = (r && Array.isArray(r.groups)) ? r.groups.map(function (g) { return g.name || 'A group'; }) : []; drawGroups(); }).catch(function () { S.groups = []; drawGroups(); });
+              gate('getMyGroups').then(function (r) { S.groups = (r && Array.isArray(r.groups)) ? r.groups.map(function (g) { return g.name || 'A group'; }) : []; drawGroups(); }).catch(function () { S.groups = []; drawGroups(); });
             }
             drawGroups();
           }));
@@ -808,6 +809,38 @@
   }
   function pass() { return (CW.passParam && CW.passParam()) || ''; }
   function getJson(url, opts) { return fetch(url, opts).then(function (r) { return r.json(); }); }
+  function getOnce(key, make) {
+    var c = getOnce.c || (getOnce.c = {});
+    if (!c[key]) {
+      c[key] = Promise.race([make(), new Promise(function (ok, no) { setTimeout(function () { no(new Error('slow')); }, 45000); })]);
+    }
+    return c[key];
+  }
+  function gate(action, extra) {
+    var url = GS + '?action=' + action + '&appearId=' + encodeURIComponent(me.id) + pass();
+    return getOnce(action, function () { return getJson(url, extra); });
+  }
+  function msgThreads() {
+    return getOnce('threads', function () {
+      var tok = '';
+      try { tok = localStorage.getItem('cw-token') || ''; } catch (e) {}
+      var key = 'cw-msg-session-' + me.id, sess = '';
+      try { var s = sessionStorage.getItem(key) || ''; if (s && parseInt(s.split('.')[1] || '0', 10) > Date.now() + 60000) { sess = s; } } catch (e) {}
+      var start = sess ? Promise.resolve(sess) : getJson(MSG + '/session', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: me.id, token: tok }) })
+        .then(function (d) {
+          if (!d || d.status !== 'ok' || !d.session) { throw new Error('no session'); }
+          try { sessionStorage.setItem(key, d.session); } catch (e) {}
+          return d.session;
+        });
+      return start.then(function (s) { return getJson(MSG + '/threads', { headers: { 'x-msg-session': s } }); });
+    });
+  }
+  function prefetch() {
+    if (!me.known || !me.id) { return; }
+    if (!me.viewing) { msgThreads().catch(function () {}); }
+    ['getMyInvites', 'getMyGroups', 'getBookmarks'].forEach(function (a) { gate(a).catch(function () {}); });
+    gate('getContacts', { cache: 'no-store', referrerPolicy: 'no-referrer' }).catch(function () {});
+  }
 
   function dashboard() {
     document.getElementById('intro').hidden = true;
@@ -837,17 +870,7 @@
   function loadMessages() {
     var t = tile('t-msg');
     if (me.viewing) { empty(t, 'Messages stay private while viewing as someone.'); return; }
-    var tok = '';
-    try { tok = localStorage.getItem('cw-token') || ''; } catch (e) {}
-    var key = 'cw-msg-session-' + me.id, sess = '';
-    try { var s = sessionStorage.getItem(key) || ''; if (s && parseInt(s.split('.')[1] || '0', 10) > Date.now() + 60000) { sess = s; } } catch (e) {}
-    var start = sess ? Promise.resolve(sess) : getJson(MSG + '/session', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: me.id, token: tok }) })
-      .then(function (d) {
-        if (!d || d.status !== 'ok' || !d.session) { throw new Error('no session'); }
-        try { sessionStorage.setItem(key, d.session); } catch (e) {}
-        return d.session;
-      });
-    start.then(function (s) { return getJson(MSG + '/threads', { headers: { 'x-msg-session': s } }); })
+    msgThreads()
       .then(function (d) {
         if (!d || d.status !== 'ok') { throw new Error('not loaded'); }
         var ts = (d.threads || []).filter(function (x) { return x && x.other; });
@@ -867,7 +890,7 @@
   function loadInvites() {
     var t = tile('t-inv'), hid = {};
     try { hid = JSON.parse(localStorage.getItem('cw-inv-hidden-v2') || '{}') || {}; } catch (e) {}
-    getJson(GS + '?action=getMyInvites&appearId=' + encodeURIComponent(me.id) + pass())
+    gate('getMyInvites')
       .then(function (d) {
         if (!d || !d.ok || !Array.isArray(d.invites)) { throw new Error('not loaded'); }
         var list = d.invites.filter(function (iv) { return String(iv.state || 'new') === 'new' && !hid[iv.groupId]; });
@@ -884,7 +907,7 @@
 
   function loadGroups() {
     var t = tile('t-grp');
-    getJson(GS + '?action=getMyGroups&appearId=' + encodeURIComponent(me.id) + pass())
+    gate('getMyGroups')
       .then(function (d) {
         if (!d || !Array.isArray(d.groups)) { throw new Error('not loaded'); }
         if (!d.groups.length) { askLater(t, function () { emptyAsk(t, 'Nothing new in your groups.', 'grp'); }); return; }
@@ -900,11 +923,20 @@
 
   function loadBookmarks() {
     var t = tile('t-bm');
-    var cReq = getJson(GS + '?action=getContacts&appearId=' + encodeURIComponent(me.id) + pass() + '&t=' + Date.now(), { cache: 'no-store', referrerPolicy: 'no-referrer' }).catch(function () { return null; });
-    Promise.all([getJson(GS + '?action=getBookmarks&appearId=' + encodeURIComponent(me.id) + pass()), cReq])
-      .then(function (res) {
+    var cReq = gate('getContacts', { cache: 'no-store', referrerPolicy: 'no-referrer' }).catch(function () { return null; });
+    var cDone = false, cData = null;
+    cReq.then(function (cd) { cDone = true; cData = cd; });
+    gate('getBookmarks').then(function (d) {
+      if (!d || !Array.isArray(d.bookmarks)) { throw new Error('not loaded'); }
+      if (d.bookmarks.length && !cDone) {
+        draw([d, null]);
+        cReq.then(function (cd) { if (cd && cd.status === 'ok' && Array.isArray(cd.contacts) && cd.contacts.length && !t.querySelector('.ask')) { draw([d, cd]); } });
+        return;
+      }
+      return cReq.then(function () { draw([d, cData]); });
+    }).catch(function () { failed(t); });
+    function draw(res) {
         var d = res[0], cd = res[1];
-        if (!d || !Array.isArray(d.bookmarks)) { throw new Error('not loaded'); }
         var seen = {};
         var list = d.bookmarks.map(function (x) { var c = cwCodeFor(String(x.appearId || '').trim()); if (c) { seen[c] = 1; } return { name: x.name, photo: x.photo, appearId: x.appearId, vanity: x.vanity, member: true }; });
         if (cd && cd.status === 'ok' && Array.isArray(cd.contacts)) {
@@ -949,8 +981,7 @@
         });
         document.addEventListener('keydown', function (e) { if (e.key === 'Escape') { shut(); } });
         b.appendChild(fs); b.appendChild(menu);
-      })
-      .catch(function () { failed(t); });
+    }
   }
 })();
 </script>
