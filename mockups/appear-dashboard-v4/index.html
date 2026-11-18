@@ -210,13 +210,16 @@
   .fi.tg[aria-checked="true"] .sw::after{left:16px;}
   .rs.more{display:inline-block;margin-top:10px;}
   .ni .im{width:56px;height:44px;}
-  .ni .ul{font-size:14px;}
+  .ni{align-items:center;}
+  .ni .tx a.ul{display:block;font-size:14px;font-weight:400;color:var(--brand);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .ni .sub{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
   .ni .sub{margin-top:2px;}
   .vn{background:none;border:0;padding:0;font:inherit;color:var(--brand);text-decoration:underline;cursor:pointer;font-weight:600;}
   .vn:focus-visible{outline:3px solid var(--ink);outline-offset:2px;}
-  .pills{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px;}
-  .mp{display:inline-flex;align-items:center;height:24px;padding:0 10px;border-radius:12px;background:#EAF2FA;color:#1F699E;font-size:12.5px;font-weight:700;}
+  .pills{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:6px;flex:none;max-width:40%;}
+  .mp{display:inline-flex;align-items:center;height:24px;padding:0 10px;border-radius:12px;background:#fff;border:1.5px solid #DDE4EE;color:var(--ink);font-size:12.5px;font-weight:400;white-space:nowrap;}
   .morer{display:flex;justify-content:flex-end;margin-top:10px;}
+  .ul2{color:var(--brand);text-decoration:underline;}
   .vh{margin:10px 0 0;font-weight:700;color:var(--ink);}
   button.pmi{display:block;width:100%;text-align:left;background:transparent;border:0;font-family:inherit;cursor:pointer;}
 </style>
@@ -1099,8 +1102,8 @@
       when.appendChild(vb);
     }
     tx.appendChild(when);
-    if ((x.whys || []).length) { var ps = el('div', 'pills'); x.whys.forEach(function (w) { ps.appendChild(el('span', 'mp', w)); }); tx.appendChild(ps); }
     wrap.appendChild(tx);
+    if ((x.whys || []).length) { var ps = el('div', 'pills'); x.whys.forEach(function (w) { ps.appendChild(el('span', 'mp', w)); }); wrap.appendChild(ps); }
     return wrap;
   }
   function openNewsFull(mode) {
@@ -1130,7 +1133,7 @@
       else { nothing(b); }
       return;
     }
-    (newsFull ? items : items.slice(0, 3)).forEach(function (it) { b.appendChild(newsItem(it.ev)); });
+    (newsFull ? items : items.slice(0, 3)).forEach(function (it) { b.appendChild(it.grp ? groupItem(it.grp.g, it.grp.whys, 'A group you are in') : newsItem(it.ev)); });
     if (!newsFull && items.length > 3) { var mr = el('div', 'morer'); var mb = el('button', 'rs', 'More'); mb.type = 'button'; mb.addEventListener('click', function () { openNewsFull({}); }); mr.appendChild(mb); b.appendChild(mr); }
   }
   var MSRC = [['groups', 'My groups'], ['past', 'My past events'], ['contacts', 'My contacts'], ['connections', 'My connections']];
@@ -1249,15 +1252,37 @@
   }
   function dayWords(day) { var d = new Date(day + 'T12:00:00'); return d.toLocaleDateString('en-US', { weekday: 'short', day: 'numeric', month: 'short' }); }
   function evHref(e) { return '/event/?id=' + encodeURIComponent(String(e.id)); }
-  var hasInts = null;
+  var hasInts = null, myInts = [];
+  function groupHref(g) { var sl = String(g.slug || '').split(',')[0].trim(); return sl ? '/group/' + encodeURIComponent(sl) : '/mygroups/'; }
+  function groupWhys(g) {
+    var hay = [g.name, g.intro, g.description, g.categories, g.tags].map(function (v) { return String(v || ''); }).join(' ').toLowerCase(), out = [];
+    myInts.forEach(function (w) { var l = w.toLowerCase(); if (l.length > 3 && hay.indexOf(l) > -1) { out.push(w); } });
+    return out;
+  }
+  function groupItem(g, whys, subText) {
+    var wrap = el('div', 'ln ni gi');
+    var im = el('span', 'im'); var src = String(g.image || g.cover || ''); if (src.indexOf('https://') === 0) { var ii = el('img'); ii.alt = ''; ii.src = src; im.appendChild(ii); } wrap.appendChild(im);
+    var tx = el('div', 'tx'); var a = el('a', 'ul', String(g.name || 'A group')); a.href = groupHref(g); tx.appendChild(a);
+    if (subText) { tx.appendChild(el('div', 'sub', subText)); }
+    wrap.appendChild(tx);
+    if ((whys || []).length) { var ps = el('div', 'pills'); whys.forEach(function (w) { ps.appendChild(el('span', 'mp', w)); }); wrap.appendChild(ps); }
+    return wrap;
+  }
   function loadNews() {
     return matchedEvents().then(function (m) {
       hasInts = m.ints.length > 0;
       var soon = new Date(Date.now() + 7 * 864e5).toISOString().slice(0, 10);
       store.upcoming = m.upcoming || [];
       var allM = m.list.map(function (x) { return x; });
-      var items = m.list.filter(function (x) { return x.day <= soon; }).map(function (x) { return { sources: ['upcoming'], ev: x }; });
-      store.news = { items: items, allMatched: allM }; drawNews();
+      myInts = m.ints;
+      var evItems = m.list.filter(function (x) { return x.day <= soon; }).map(function (x) { return { sources: ['upcoming'], ev: x }; });
+      return gate('getMyGroups').catch(function () { return null; }).then(function (gd) {
+        var gItems = ((gd && gd.groups) || []).map(function (g) { return { g: g, whys: groupWhys(g) }; }).filter(function (x) { return x.whys.length; }).map(function (x) { return { sources: ['groups'], grp: x }; });
+        var items = [];
+        if (evItems.length && gItems.length) { items = evItems.slice(0, 2).concat(gItems.slice(0, 1), evItems.slice(2), gItems.slice(1)); }
+        else { items = evItems.length ? evItems : gItems; }
+        store.news = { items: items, allMatched: allM }; drawNews();
+      });
     }, function () { store.news = { items: [] }; drawNews(); });
   }
   function loadMatch() {
@@ -1265,9 +1290,20 @@
       .catch(function () { store.match = { people: [] }; matchPaint(); drawMatch(); });
   }
   var evPaint = function () {};
+  function hostedUpcoming() {
+    return getOnce('hosted', function () {
+      return Promise.all([gate('getMyEvents').then(function (d) { return (d && d.status === 'ok' && Array.isArray(d.events)) ? d.events : []; }, function () { return []; }), allEvents()]).then(function (r) {
+        var ids = {}, today = new Date().toISOString().slice(0, 10), out = [];
+        r[0].forEach(function (x) { var id = String((x && (x.id || x.eventId)) || '').trim(); if (id) { ids[id] = 1; } });
+        r[1].forEach(function (e) { if (!e || !ids[String(e.id)]) { return; } if (/\[cancel+ed\]/i.test(String(e.title || ''))) { return; } var day = evDay(e.date); if (day && day >= today) { out.push({ e: e, day: day, whys: [] }); } });
+        out.sort(function (a, b) { return a.day < b.day ? -1 : a.day > b.day ? 1 : 0; });
+        return out;
+      });
+    });
+  }
   function loadEvents() {
-    var host = gate('getMyHostedEvents').then(function (d) { return (d && d.status === 'ok' && Array.isArray(d.events)) ? d.events : []; }, function () { return []; });
-    var mat = matchedEvents().then(function (m) { hasInts = m.ints.length > 0; return m.list.map(function (x) { var where = String(x.e.venue || x.e.location || '').trim(); return { title: x.e.title, href: evHref(x.e), when: dayWords(x.day), where: where, image: String(x.e.imageUrl || '').indexOf('https://') === 0 ? x.e.imageUrl : '', why: x.why }; }); }, function () { return []; });
+    var host = hostedUpcoming();
+    var mat = matchedEvents().then(function (m) { hasInts = m.ints.length > 0; return m.list; }, function () { return []; });
     return Promise.all([mat, host]).then(function (r) {
       store.ev = r[0]; store.host = r[1];
       if (fState.ev === 'hosting' && !store.host.length) { fState.ev = 'all'; fSave('ev', 'all'); }
@@ -1280,18 +1316,13 @@
     var b = bbody('b-ev');
     bcount('b-ev', evs.length);
     if (!evs.length) { nothing(b, 'to go to.', 'Find an event', '/events/'); return; }
-    evs.slice(0, 2).forEach(function (ev, i) {
-      if (i) { b.appendChild(el('hr', 'sep')); }
-      b.appendChild(line({ text: [{ a: ev.title || 'An event', href: ev.href || '/events/' }] }, { image: ev.image || '' }));
-      var when = [ev.when, ev.where].filter(Boolean).join(' · ');
-      if (when) { b.lastChild.querySelector('.tx').appendChild(el('div', 'sub', when)); }
-      if (ev.why) { b.lastChild.querySelector('.tx').appendChild(el('div', 'sub', 'Matches your interest in ' + ev.why + '.')); }
-      if ((ev.people || []).length) { b.appendChild(line({ people: ev.people, text: ev.going || [] })); }
-    });
+    evs.slice(0, 3).forEach(function (x) { b.appendChild(newsItem(x)); });
+    if (evs.length > 3) { var mr = el('div', 'morer'); var a = el('a', 'rs', 'More'); a.href = hosting ? '/myevents/' : '/events/'; mr.appendChild(a); b.appendChild(mr); }
   }
   function loadGroups3() {
     var news = gate('getGroupNews').then(function (d) { return (d && d.status === 'ok' && Array.isArray(d.groups)) ? d.groups : []; }, function () { return []; });
-    return gate('getMyGroups').then(function (d) {
+    return Promise.all([gate('getMyGroups'), myInterests().then(function (w) { myInts = w; })]).then(function (r0) {
+      var d = r0[0];
       if (!d || !Array.isArray(d.groups)) { throw new Error('not loaded'); }
       return news.then(function (gn) {
         var b = bbody('b-grp'), by = {};
@@ -1301,9 +1332,8 @@
         d.groups.slice(0, 2).forEach(function (g, i) {
           if (i) { b.appendChild(el('hr', 'sep')); }
           var sl = String(g.slug || '').split(',')[0].trim();
-          var h = el('a', 'gname', g.name || 'A group'); h.href = sl ? '/group/' + encodeURIComponent(sl) : '/mygroups/'; b.appendChild(h);
           var ls = by[sl] || [];
-          if (!ls.length) { b.appendChild(el('div', 'sub', 'Nothing new.')); }
+          b.appendChild(groupItem(g, groupWhys(g), ls.length ? '' : 'Nothing new.'));
           ls.slice(0, 2).forEach(function (it) { b.appendChild(line(it)); });
         });
       });
@@ -1344,13 +1374,13 @@
       var unread = ts.reduce(function (n, x) { return n + (x.unread || 0); }, 0);
       bcount('b-msg', unread);
       var b = bbody('b-msg');
-      var fresh = ts.filter(function (x) { return x.unread; });
-      if (!fresh.length) { nothing(b, '', 'Send someone a message', '/messages/'); return; }
-      fresh.slice(0, 2).forEach(function (x) {
+      if (!ts.length) { nothing(b, '', 'Send someone a message', '/messages/'); return; }
+      ts.slice(0, 3).forEach(function (x) {
         var p = { name: x.other.name, photo: x.other.photo, code: x.other.code || (x.other.id ? cwCodeFor(x.other.id) : ''), vanity: x.other.vanity };
         var last = x.last && x.last.body ? String(x.last.body) : 'New message';
         b.appendChild(line({ people: [p], text: [{ p: 0 }, ' ', { a: last, href: p.code ? '/messages/?to=' + encodeURIComponent('c:' + p.code) : '/messages/' }] }));
       });
+      if (ts.length > 3) { var mr = el('div', 'morer'); var a = el('a', 'rs', 'More'); a.href = '/messages/'; mr.appendChild(a); b.appendChild(mr); }
     }).catch(function () { bfail('b-msg'); });
   }
   function loadInvites3() {
@@ -1359,14 +1389,35 @@
     return gate('getMyInvites').then(function (d) { if (!d || !d.ok) { throw new Error('bad'); } return d; }).catch(function () { delete getOnce.c.getMyInvites; return gate('getMyInvites'); }).then(function (d) {
       if (!d || !d.ok || !Array.isArray(d.invites)) { throw new Error('not loaded'); }
       var list = d.invites.filter(function (iv) { return String(iv.state || 'new') === 'new' && !hid[iv.groupId]; });
+      var past = d.invites.filter(function (iv) { return String(iv.state || 'new') !== 'new'; });
       bcount('b-inv', list.length);
-      var b = bbody('b-inv');
-      if (!list.length) { nothing(b, 'so people can invite you to its events.', 'Join a group', '/groups/'); return; }
-      list.slice(0, 2).forEach(function (iv) {
-        var who = String(iv.invitedByName || '').trim();
-        var p = { name: who, code: String(iv.invitedByCode || '') };
-        var words = (who ? who + ' invited you to ' : 'You are invited to ') + (iv.name || 'a group');
-        b.appendChild(line({ people: who ? [p] : [], text: [{ a: words, href: '/mygroups/?tab=invites' }] }));
+      return Promise.all([gate('getMyGroups').catch(function () { return null; }), hostedUpcoming().catch(function () { return []; })]).then(function (r) {
+        var b = bbody('b-inv');
+        var groups = (r[0] && Array.isArray(r[0].groups)) ? r[0].groups : [], hosted = r[1] || [];
+        var mine = groups.filter(function (g) { var ro = String(g.role || '').toLowerCase(); return ro === 'host' || ro === 'cohost'; });
+        var toInvite = (mine.length ? mine : groups).slice(0, 3);
+        if (!list.length && !past.length && !hosted.length && !toInvite.length) { nothing(b); return; }
+        list.slice(0, 3).forEach(function (iv) {
+          var who = String(iv.invitedByName || '').trim();
+          var p = { name: who, code: String(iv.invitedByCode || '') };
+          var words = (who ? who + ' invited you to ' : 'You are invited to ') + (iv.name || 'a group');
+          b.appendChild(line({ people: who ? [p] : [], text: [{ a: words, href: '/mygroups/?tab=invites' }] }));
+        });
+        if (list.length > 3) { var mr = el('div', 'morer'); var ma = el('a', 'rs', 'More'); ma.href = '/mygroups/?tab=invites'; mr.appendChild(ma); b.appendChild(mr); }
+        if (!list.length && past.length) {
+          var names = past.slice(0, 3).map(function (iv) { return String(iv.name || 'a group'); });
+          var said = names.length > 1 ? names.slice(0, -1).join(', ') + ' and ' + names[names.length - 1] : names[0];
+          b.appendChild(el('p', 'none', 'Past invites included ' + said + '.'));
+        }
+        if (hosted.length) {
+          var h = hosted[0], hp = el('p', 'none', 'Invite someone to your ');
+          var ha = el('a', 'ul2', shortTitle(h.e)); ha.href = evHref(h.e); hp.appendChild(ha); b.appendChild(hp);
+        }
+        toInvite.forEach(function (g) {
+          var sl = String(g.slug || '').split(',')[0].trim();
+          var gp = el('p', 'none', 'Invite someone to your ');
+          var ga = el('a', 'ul2', String(g.name || 'group')); ga.href = sl ? '/group/' + encodeURIComponent(sl) : '/mygroups/'; gp.appendChild(ga); b.appendChild(gp);
+        });
       });
     }).catch(function () { bfail('b-inv'); });
   }
