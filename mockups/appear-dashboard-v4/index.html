@@ -957,6 +957,7 @@
   }
 
   var RMS = '/network/contacts/';
+  var READS_READY = /[?&]demo=1(&|$)/.test(location.search) && /^(127\.0\.0\.1|localhost)$/.test(location.hostname);
   var POST_EVENT = '/myevents/#new';
   var FILTERS = {
     news: [['all', 'All'], ['groups', 'My groups'], ['upcoming', 'My upcoming events'], ['past', 'My past events'], ['contacts', 'My contacts'], ['connections', 'My connections']],
@@ -1341,7 +1342,7 @@
     }, function () { store.news = { items: [] }; drawNews(); });
   }
   function loadMatch() {
-    return gate('getPeopleMatched').then(function (d) { store.match = (d && d.status === 'ok' && Array.isArray(d.people)) ? d : { people: [] }; matchPaint(); drawMatch(); })
+    return (READS_READY ? gate('getPeopleMatched') : Promise.resolve(null)).then(function (d) { store.match = (d && d.status === 'ok' && Array.isArray(d.people)) ? d : { people: [] }; matchPaint(); drawMatch(); })
       .catch(function () { store.match = { people: [] }; matchPaint(); drawMatch(); });
   }
   var evPaint = function () {};
@@ -1375,7 +1376,7 @@
     evs.slice(0, 3).forEach(function (x) { var blk = el('div', 'rb'); blk.appendChild(newsItem(x)); L.appendChild(blk); });
   }
   function loadGroups3() {
-    var news = gate('getGroupNews').then(function (d) { return (d && d.status === 'ok' && Array.isArray(d.groups)) ? d.groups : []; }, function () { return []; });
+    var news = (READS_READY ? gate('getGroupNews') : Promise.resolve(null)).then(function (d) { return (d && d.status === 'ok' && Array.isArray(d.groups)) ? d.groups : []; }, function () { return []; });
     return Promise.all([gate('getMyGroups'), myInterests().then(function (w) { myInts = w; })]).then(function (r0) {
       var d = r0[0];
       if (!d || !Array.isArray(d.groups)) { throw new Error('not loaded'); }
