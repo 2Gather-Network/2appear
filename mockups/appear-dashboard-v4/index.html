@@ -220,6 +220,10 @@
   .vn:focus-visible{outline:3px solid var(--ink);outline-offset:2px;}
   .pills{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:6px;flex:none;max-width:40%;}
   .mp{display:inline-flex;align-items:center;height:24px;padding:0 10px;border-radius:12px;background:#fff;border:1.5px solid #DDE4EE;color:var(--ink);font-size:12.5px;font-weight:400;white-space:nowrap;}
+  .ul.plain{font-weight:400;}
+  .mp.mpx{cursor:pointer;font-family:inherit;color:var(--brand);}
+  .mp.mpx:focus-visible{outline:3px solid var(--ink);outline-offset:2px;}
+  .pills.all{max-width:60%;}
   .morer{display:flex;justify-content:flex-end;margin-top:10px;}
   .ul2{color:var(--brand);text-decoration:underline;}
   .rlist{border:1.5px solid #DDE4EE;border-radius:12px;margin-top:10px;overflow:hidden;}
@@ -1030,7 +1034,7 @@
       if (x && typeof x.p === 'number' && people[x.p]) { host.appendChild(nameBtn(people[x.p], after)); return; }
       if (x && x.a) {
         var h = String(x.href || '');
-        var a = el('a', 'ul', x.a); a.href = /^\/[^\/]/.test(h) || /^https:\/\/2(appear|gather)\.network\//.test(h) ? h : '#'; host.appendChild(a);
+        var a = el('a', x.plain ? 'ul plain' : 'ul', x.a); a.href = /^\/[^\/]/.test(h) || /^https:\/\/2(appear|gather)\.network\//.test(h) ? h : '#'; host.appendChild(a);
       }
     });
   }
@@ -1108,6 +1112,17 @@
   function passes(k, it) { var f = fState[k]; return f === 'all' || (it.sources || []).indexOf(f) > -1; }
 
   var newsFull = null;
+  function pillsFor(whys) {
+    var ps = el('div', 'pills');
+    whys.slice(0, 2).forEach(function (w) { ps.appendChild(el('span', 'mp', w)); });
+    if (whys.length > 2) {
+      var more = el('button', 'mp mpx', '+' + (whys.length - 2)); more.type = 'button';
+      more.setAttribute('aria-label', 'Show ' + (whys.length - 2) + ' more matches');
+      more.addEventListener('click', function () { more.remove(); whys.slice(2).forEach(function (w) { ps.appendChild(el('span', 'mp', w)); }); ps.classList.add('all'); });
+      ps.appendChild(more);
+    }
+    return ps;
+  }
   function venueOf(e) { return String(e.venue || e.location || '').trim(); }
   function shortTitle(e) { var tt = String(e.title || 'An event'), v = venueOf(e); if (v) { var k = tt.toLowerCase().lastIndexOf(' @ ' + v.toLowerCase()); if (k > 0) { tt = tt.slice(0, k); } } return tt; }
   function newsItem(x) {
@@ -1132,7 +1147,7 @@
     }
     tx.appendChild(when);
     wrap.appendChild(tx);
-    if ((x.whys || []).length) { var ps = el('div', 'pills'); x.whys.forEach(function (w) { ps.appendChild(el('span', 'mp', w)); }); wrap.appendChild(ps); }
+    if ((x.whys || []).length) { wrap.appendChild(pillsFor(x.whys)); }
     return wrap;
   }
   function openNewsFull(mode) {
@@ -1304,7 +1319,7 @@
     var tx = el('div', 'tx'); var a = el('a', 'ul', String(g.name || 'A group')); a.href = groupHref(g); tx.appendChild(a);
     if (subText) { tx.appendChild(el('div', 'sub', subText)); }
     wrap.appendChild(tx);
-    if ((whys || []).length) { var ps = el('div', 'pills'); whys.forEach(function (w) { ps.appendChild(el('span', 'mp', w)); }); wrap.appendChild(ps); }
+    if ((whys || []).length) { wrap.appendChild(pillsFor(whys)); }
     return wrap;
   }
   function loadNews() {
@@ -1419,7 +1434,7 @@
       ts.slice(0, 3).forEach(function (x) {
         var p = { name: x.other.name, photo: x.other.photo, code: x.other.code || (x.other.id ? cwCodeFor(x.other.id) : ''), vanity: x.other.vanity };
         var last = x.last && x.last.body ? String(x.last.body) : 'New message';
-        b.appendChild(line({ people: [p], text: [{ p: 0 }, ' ', { a: last, href: p.code ? '/messages/?to=' + encodeURIComponent('c:' + p.code) : '/messages/' }] }));
+        b.appendChild(line({ people: [p], text: [{ p: 0 }, ' ', { a: last, plain: true, href: p.code ? '/messages/?to=' + encodeURIComponent('c:' + p.code) : '/messages/' }] }));
       });
     }).catch(function () { bfail('b-msg'); });
   }
