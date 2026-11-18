@@ -1212,7 +1212,7 @@
       if (i) { b.appendChild(el('hr', 'sep')); }
       b.appendChild(line({ people: [p], text: [{ p: 0 }, ' · ' + String(p.shared || '')] }));
     });
-    if (!mFull && ps.length > 5) { var m = el('button', 'rs more', 'more'); m.type = 'button'; m.addEventListener('click', function () { showAllMatches(true); }); b.appendChild(m); }
+    if (!mFull && ps.length > 5) { var mr = el('div', 'morer'); var m = el('button', 'rs', 'More'); m.type = 'button'; m.addEventListener('click', function () { showAllMatches(true); }); mr.appendChild(m); b.appendChild(mr); }
   }
 
 
