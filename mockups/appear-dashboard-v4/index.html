@@ -209,6 +209,16 @@
   .fi.tg[aria-checked="true"] .sw{background:#1F699E;}
   .fi.tg[aria-checked="true"] .sw::after{left:16px;}
   .rs.more{display:inline-block;margin-top:10px;}
+  .ni .im{width:56px;height:44px;}
+  .ni .ul{font-size:14px;}
+  .ni .sub{margin-top:2px;}
+  .vn{background:none;border:0;padding:0;font:inherit;color:var(--brand);text-decoration:underline;cursor:pointer;font-weight:600;}
+  .vn:focus-visible{outline:3px solid var(--ink);outline-offset:2px;}
+  .pills{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px;}
+  .mp{display:inline-flex;align-items:center;height:24px;padding:0 10px;border-radius:12px;background:#EAF2FA;color:#1F699E;font-size:12.5px;font-weight:700;}
+  .morer{display:flex;justify-content:flex-end;margin-top:10px;}
+  .vh{margin:10px 0 0;font-weight:700;color:var(--ink);}
+  button.pmi{display:block;width:100%;text-align:left;background:transparent;border:0;font-family:inherit;cursor:pointer;}
 </style>
 <script>window.CW_SIGNIN="/signin/?next="+encodeURIComponent(location.pathname+location.search);window.CW_SIGNUP="/signup/?next="+encodeURIComponent(location.pathname+location.search);</script>
 <script src="https://2gather.network/nav/identity.js?v=70"></script>
@@ -1065,16 +1075,63 @@
   }
   function passes(k, it) { var f = fState[k]; return f === 'all' || (it.sources || []).indexOf(f) > -1; }
 
+  var newsFull = null;
+  function venueOf(e) { return String(e.venue || e.location || '').trim(); }
+  function shortTitle(e) { var tt = String(e.title || 'An event'), v = venueOf(e); if (v) { var k = tt.toLowerCase().lastIndexOf(' @ ' + v.toLowerCase()); if (k > 0) { tt = tt.slice(0, k); } } return tt; }
+  function newsItem(x) {
+    var e = x.e, v = venueOf(e);
+    var wrap = el('div', 'ln nb ni');
+    var im = el('span', 'im'); var src = String(e.imageUrl || ''); if (src.indexOf('https://') === 0) { var ii = el('img'); ii.alt = ''; ii.src = src; im.appendChild(ii); } wrap.appendChild(im);
+    var tx = el('div', 'tx');
+    var a = el('a', 'ul', shortTitle(e)); a.href = evHref(e); tx.appendChild(a);
+    var when = el('div', 'sub'); when.appendChild(document.createTextNode(dayWords(x.day) + (v ? ' at ' : '')));
+    if (v) {
+      var vb = el('button', 'vn', v); vb.type = 'button'; vb.setAttribute('aria-expanded', 'false');
+      vb.addEventListener('click', function () {
+        if (pmenuFor === vb) { closeMenu(); return; }
+        closeMenu();
+        var m = el('div', 'pm');
+        var o1 = el('button', 'pmi', 'Show me all events at this venue'); o1.type = 'button'; o1.addEventListener('click', function () { closeMenu(); openNewsFull({ venue: v, all: true }); });
+        var o2 = el('button', 'pmi', 'Show me all my matches at this venue'); o2.type = 'button'; o2.addEventListener('click', function () { closeMenu(); openNewsFull({ venue: v, all: false }); });
+        m.appendChild(o1); m.appendChild(o2);
+        wrap.insertAdjacentElement('afterend', m); pmenu = m; pmenuFor = vb; vb.setAttribute('aria-expanded', 'true');
+      });
+      when.appendChild(vb);
+    }
+    tx.appendChild(when);
+    if ((x.whys || []).length) { var ps = el('div', 'pills'); x.whys.forEach(function (w) { ps.appendChild(el('span', 'mp', w)); }); tx.appendChild(ps); }
+    wrap.appendChild(tx);
+    return wrap;
+  }
+  function openNewsFull(mode) {
+    newsFull = mode;
+    var box = bx('b-news'), lay = box.closest('.lay'), dashEl = document.getElementById('dash');
+    var on = !!mode;
+    lay.classList.toggle('focus', on); dashEl.classList.toggle('focus', on); box.classList.toggle('open', on);
+    pageClose(on ? function () { openNewsFull(null); } : null);
+    drawNews();
+    if (on) { window.scrollTo(0, 0); }
+  }
   function drawNews() {
     var b = bbody('b-news'), d = store.news;
     if (!d) { return; }
+    if (newsFull && newsFull.venue) {
+      var pool = newsFull.all ? (store.upcoming || []) : ((store.ev && store.matchedAll) || []);
+      if (!newsFull.all) { pool = (d.allMatched || []); }
+      var at = pool.filter(function (x) { return venueOf(x.e) === newsFull.venue; });
+      b.appendChild(el('p', 'sub vh', (newsFull.all ? 'All events at ' : 'My matches at ') + newsFull.venue));
+      if (!at.length) { b.appendChild(el('p', 'none', 'Nothing coming up here.')); return; }
+      at.forEach(function (x) { b.appendChild(newsItem(x)); });
+      return;
+    }
     var items = (d.items || []).filter(function (it) { return passes('news', it); });
     if (!items.length) {
       if (fState.news !== 'all') { b.appendChild(el('p', 'none', 'Nothing new in ' + fLabel('news', fState.news) + '.')); }
-      else { nothing(b, 'and we will show you what matches it.', 'Add an interest', '/ikigai/interests'); }
+      else { nothing(b); }
       return;
     }
-    items.slice(0, 4).forEach(function (it) { b.appendChild(line(it, { boxed: true })); });
+    (newsFull ? items : items.slice(0, 3)).forEach(function (it) { b.appendChild(newsItem(it.ev)); });
+    if (!newsFull && items.length > 3) { var mr = el('div', 'morer'); var mb = el('button', 'rs', 'More'); mb.type = 'button'; mb.addEventListener('click', function () { openNewsFull({}); }); mr.appendChild(mb); b.appendChild(mr); }
   }
   var MSRC = [['groups', 'My groups'], ['past', 'My past events'], ['contacts', 'My contacts'], ['connections', 'My connections']];
   var mOn = (function () { var o = {}; try { o = JSON.parse(localStorage.getItem('cw-dash4-match-on') || '{}') || {}; } catch (e) {} return o; })();
@@ -1172,18 +1229,21 @@
   function matchedEvents() {
     return getOnce('matched', function () {
       return Promise.all([myInterests(), allEvents()]).then(function (r) {
-        var ints = r[0], evs = r[1], today = new Date().toISOString().slice(0, 10), out = [];
-        if (!ints.length) { return { ints: ints, list: [] }; }
+        var ints = r[0], evs = r[1], today = new Date().toISOString().slice(0, 10), out = [], upcoming = [];
+        if (!ints.length) { return { ints: ints, list: [], upcoming: [] }; }
         evs.forEach(function (e) {
           if (!e || !e.id || String(e.isPrivate).toLowerCase() === 'true' || String(e.archived).toLowerCase() === 'true') { return; }
           var day = evDay(e.date); if (!day || day < today) { return; }
           var cats = String(e.categories || '').split(',').map(function (c) { return c.trim().toLowerCase(); });
-          var hay = (String(e.title || '') + ' ' + String(e.keywords || '')).toLowerCase(), hit = '';
-          ints.forEach(function (w) { if (hit) { return; } var l = w.toLowerCase(); if (cats.indexOf(l) > -1 || (l.length > 3 && hay.indexOf(l) > -1)) { hit = w; } });
-          if (hit) { out.push({ e: e, day: day, why: hit }); }
+          if (/\[cancel+ed\]/i.test(String(e.title || ''))) { return; }
+          var hay = (String(e.title || '') + ' ' + String(e.keywords || '')).toLowerCase(), hits = [];
+          ints.forEach(function (w) { var l = w.toLowerCase(); if (cats.indexOf(l) > -1 || (l.length > 3 && hay.indexOf(l) > -1)) { hits.push(w); } });
+          upcoming.push({ e: e, day: day, whys: hits });
+          if (hits.length) { out.push({ e: e, day: day, why: hits[0], whys: hits }); }
         });
-        out.sort(function (a, b) { return a.day < b.day ? -1 : a.day > b.day ? 1 : 0; });
-        return { ints: ints, list: out };
+        var byDay = function (a, b) { return a.day < b.day ? -1 : a.day > b.day ? 1 : 0; };
+        out.sort(byDay); upcoming.sort(byDay);
+        return { ints: ints, list: out, upcoming: upcoming };
       });
     });
   }
@@ -1194,11 +1254,10 @@
     return matchedEvents().then(function (m) {
       hasInts = m.ints.length > 0;
       var soon = new Date(Date.now() + 7 * 864e5).toISOString().slice(0, 10);
-      var items = m.list.filter(function (x) { return x.day <= soon; }).slice(0, 4).map(function (x) {
-        var where = String(x.e.venue || x.e.location || '').trim();
-        return { sources: ['upcoming'], text: [{ a: String(x.e.title || 'An event'), href: evHref(x.e) }, ' is on ' + dayWords(x.day) + (where ? ' at ' + where : '') + '. It matches your interest in ' + x.why + '.'] };
-      });
-      store.news = { items: items }; drawNews();
+      store.upcoming = m.upcoming || [];
+      var allM = m.list.map(function (x) { return x; });
+      var items = m.list.filter(function (x) { return x.day <= soon; }).map(function (x) { return { sources: ['upcoming'], ev: x }; });
+      store.news = { items: items, allMatched: allM }; drawNews();
     }, function () { store.news = { items: [] }; drawNews(); });
   }
   function loadMatch() {
