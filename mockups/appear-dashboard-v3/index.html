@@ -160,6 +160,8 @@
   .plus{width:33px;height:33px;border-radius:50%;background:var(--brand);color:#fff;display:inline-flex;align-items:center;justify-content:center;flex:none;}
   .plus svg{width:16px;height:16px;}
   .plus:focus-visible{outline:3px solid var(--ink);outline-offset:2px;}
+  .flist .mnd{margin:6px 8px;}
+  a.fi{text-decoration:none;}
   .flist{position:absolute;right:0;top:40px;width:230px;background:#fff;border:1.5px solid #DDE4EE;border-radius:14px;padding:6px;z-index:5;}
   .flist[hidden]{display:none;}
   .fi{display:block;width:100%;text-align:left;background:transparent;border:0;border-radius:10px;padding:9px 12px;font-family:inherit;font-size:14px;font-weight:600;color:var(--ink);cursor:pointer;}
@@ -225,12 +227,12 @@
           <div class="main">
             <section class="bx" id="b-news"><h2>New for you today</h2><p class="showing" hidden></p><div class="fl"></div><div class="body"></div></section>
             <div class="two">
-              <section class="bx pl" id="b-ev"><h2>Events for me <span class="cnt" hidden></span></h2><div class="corner"><a class="plus" href="/myevents/#new" aria-label="Post an event"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></a><a class="view" href="/myevents/">View</a></div><div class="body"></div></section>
-              <section class="bx pl" id="b-grp"><h2>My groups <span class="cnt" hidden></span></h2><div class="corner"><a class="plus" href="/groups/create" aria-label="Create a group"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></a><a class="view" href="/mygroups/">View</a></div><div class="body"></div></section>
+              <section class="bx" id="b-ev"><h2>Events for me <span class="cnt" hidden></span></h2><p class="showing" hidden></p><div class="fl"></div><div class="body"></div></section>
+              <section class="bx" id="b-grp"><h2>My groups <span class="cnt" hidden></span></h2><div class="corner"><a class="view" href="/mygroups/">View</a></div><div class="body"></div></section>
             </div>
           </div>
           <aside class="rail">
-            <section class="bx pl" id="b-ppl"><h2>My people</h2><div class="corner"><a class="plus" href="/network/contacts/" aria-label="Add someone"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></a><a class="view" href="/network/contacts/">View</a></div><div class="body"></div></section>
+            <section class="bx" id="b-ppl"><h2>My people</h2><div class="corner"><a class="view" href="/network/contacts/">View</a></div><div class="body"></div></section>
             <section class="bx" id="b-msg"><h2>Direct messages <span class="cnt" hidden></span></h2><div class="corner"><a class="view" href="/messages/">View</a></div><div class="body"></div></section>
             <section class="bx" id="b-inv"><h2>Invitations <span class="cnt" hidden></span></h2><div class="corner"><a class="view" href="/mygroups/?tab=invites">View</a></div><div class="body"></div></section>
             <section class="bx" id="b-match"><h2>People I matched <span class="cnt" hidden></span></h2><p class="showing" hidden></p><div class="fl"></div><div class="body"></div></section>
@@ -898,7 +900,7 @@
   function prefetch() {
     if (!me.known || !me.id) { return; }
     if (!me.viewing) { msgThreads().catch(function () {}); }
-    ['getMyInvites', 'getMyGroups', 'getBookmarks', 'getDashNews', 'getPeopleMatched', 'getMatchedEvents', 'getGroupNews'].forEach(function (a) { gate(a).catch(function () {}); });
+    ['getMyInvites', 'getMyGroups', 'getBookmarks', 'getDashNews', 'getPeopleMatched', 'getMatchedEvents', 'getMyHostedEvents', 'getGroupNews'].forEach(function (a) { gate(a).catch(function () {}); });
     gate('getContacts', { cache: 'no-store', referrerPolicy: 'no-referrer' }).catch(function () {});
   }
 
@@ -906,10 +908,12 @@
   var POST_EVENT = '/myevents/#new';
   var FILTERS = {
     news: [['all', 'All'], ['groups', 'My groups'], ['upcoming', 'My upcoming events'], ['past', 'My past events'], ['contacts', 'My contacts'], ['connections', 'My connections']],
-    match: [['all', 'All'], ['groups', 'My groups'], ['past', 'My past events'], ['contacts', 'My contacts'], ['connections', 'My connections']]
+    match: [['all', 'All'], ['groups', 'My groups'], ['past', 'My past events'], ['contacts', 'My contacts'], ['connections', 'My connections']],
+    ev: [['all', 'My event matches'], ['hosting', 'Events I\'m hosting']]
   };
-  var fState = { news: 'all', match: 'all' };
-  var store = { news: null, match: null };
+  var LINKS = { ev: [['Post an event', '/myevents/#new'], ['Calendar - all events', '/events/']] };
+  var fState = { news: 'all', match: 'all', ev: 'all' };
+  var store = { news: null, match: null, ev: null, host: null };
 
   function fKey(k) { return 'cw-dash3-filter-' + k; }
   function fLoad(k) { var v = 'all'; try { v = localStorage.getItem(fKey(k)) || 'all'; } catch (e) {} return FILTERS[k].some(function (o) { return o[0] === v; }) ? v : 'all'; }
@@ -973,7 +977,7 @@
     var lead = el('div', 'fs');
     var after = function () { return wrap; };
     var shown = people.slice(0, 3);
-    if (item.ring && shown.length) {
+    if (item.ring && shown.length > 1) {
       var ring = el('button', 'ring'); ring.type = 'button'; ring.setAttribute('aria-expanded', 'false');
       ring.setAttribute('aria-label', 'Show what you share');
       shown.forEach(function (p) { var nm = String(p.name || '').trim(); var f = el('span', 'fc'); var ph = String(p.photo || '').trim(); if (ph) { var i = el('img'); i.alt = ''; i.src = ph; f.appendChild(i); } else { f.textContent = initial(nm); } ring.appendChild(f); });
@@ -1012,18 +1016,19 @@
   function closeFilters() { if (openF) { openF.list.hidden = true; openF.btn.setAttribute('aria-expanded', 'false'); openF = null; } }
   document.addEventListener('click', function (e) { if (openF && !openF.root.contains(e.target)) { closeFilters(); } });
   function filterUI(k, rerender) {
-    var root = bx(k === 'news' ? 'b-news' : 'b-match').querySelector('.fl');
+    var box = bx({ news: 'b-news', match: 'b-match', ev: 'b-ev' }[k]), root = box.querySelector('.fl');
     root.innerHTML = '';
     var btn = el('button', 'view vb', 'View'); btn.type = 'button'; btn.setAttribute('aria-haspopup', 'true'); btn.setAttribute('aria-expanded', 'false');
     var list = el('div', 'flist'); list.hidden = true; list.setAttribute('role', 'menu');
     function paint() {
       list.innerHTML = '';
-      FILTERS[k].forEach(function (o) {
+      FILTERS[k].filter(function (o) { return !(k === 'ev' && o[0] === 'hosting' && !(store.host && store.host.length)); }).forEach(function (o) {
         var it = el('button', 'fi' + (fState[k] === o[0] ? ' on' : ''), o[1]); it.type = 'button'; it.setAttribute('role', 'menuitemradio'); it.setAttribute('aria-checked', fState[k] === o[0] ? 'true' : 'false');
         it.addEventListener('click', function () { set(o[0]); });
         list.appendChild(it);
       });
-      var shw = bx(k === 'news' ? 'b-news' : 'b-match').querySelector('.showing');
+      if (LINKS[k]) { list.appendChild(el('hr', 'mnd')); LINKS[k].forEach(function (l) { var a = el('a', 'fi', l[0]); a.href = l[1]; a.setAttribute('role', 'menuitem'); list.appendChild(a); }); }
+      var shw = box.querySelector('.showing');
       shw.innerHTML = '';
       if (fState[k] !== 'all') {
         shw.appendChild(document.createTextNode('Showing ' + fLabel(k, fState[k]) + ' · '));
@@ -1035,6 +1040,7 @@
     btn.addEventListener('click', function (e) { e.stopPropagation(); if (openF && openF.btn === btn) { closeFilters(); return; } closeFilters(); list.hidden = false; btn.setAttribute('aria-expanded', 'true'); openF = { btn: btn, list: list, root: root }; });
     root.appendChild(btn); root.appendChild(list);
     paint();
+    return paint;
   }
   function passes(k, it) { var f = fState[k]; return f === 'all' || (it.sources || []).indexOf(f) > -1; }
 
@@ -1072,8 +1078,8 @@
     var first = '';
     if (!me.viewing) { try { first = String(localStorage.getItem('cw-first') || '').trim(); } catch (e) {} }
     if (first) { document.getElementById('greet').textContent = 'Welcome back, ' + first + '.'; }
-    fState.news = fLoad('news'); fState.match = fLoad('match');
-    filterUI('news', drawNews); filterUI('match', drawMatch);
+    fState.news = fLoad('news'); fState.match = fLoad('match'); fState.ev = fLoad('ev');
+    filterUI('news', drawNews); filterUI('match', drawMatch); evPaint = filterUI('ev', drawEvents);
     var lede = document.getElementById('lede');
     var jobs = [loadNews(), loadEvents(), loadGroups3(), loadPeople(), loadMessages3(), loadInvites3(), loadMatch()];
     var left = jobs.length;
@@ -1089,20 +1095,29 @@
     return gate('getPeopleMatched').then(function (d) { store.match = (d && d.status === 'ok' && Array.isArray(d.people)) ? d : { people: [] }; drawMatch(); })
       .catch(function () { store.match = { people: [] }; drawMatch(); });
   }
+  var evPaint = function () {};
   function loadEvents() {
-    return gate('getMatchedEvents').then(function (d) { return (d && d.status === 'ok' && Array.isArray(d.events)) ? d.events : []; }, function () { return []; })
-      .then(function (evs) {
-        var b = bbody('b-ev');
-        bcount('b-ev', evs.length);
-        if (!evs.length) { nothing(b, 'to go to.', 'Find an event', '/events/'); return; }
-        evs.slice(0, 2).forEach(function (ev, i) {
-          if (i) { b.appendChild(el('hr', 'sep')); }
-          b.appendChild(line({ text: [{ a: ev.title || 'An event', href: ev.href || '/events/' }] }, { image: ev.image || '' }));
-          var when = [ev.when, ev.where].filter(Boolean).join(' · ');
-          if (when) { b.lastChild.querySelector('.tx').appendChild(el('div', 'sub', when)); }
-          if ((ev.people || []).length) { b.appendChild(line({ people: ev.people, text: ev.going || [] })); }
-        });
-      });
+    var host = gate('getMyHostedEvents').then(function (d) { return (d && d.status === 'ok' && Array.isArray(d.events)) ? d.events : []; }, function () { return []; });
+    var mat = gate('getMatchedEvents').then(function (d) { return (d && d.status === 'ok' && Array.isArray(d.events)) ? d.events : []; }, function () { return []; });
+    return Promise.all([mat, host]).then(function (r) {
+      store.ev = r[0]; store.host = r[1];
+      if (fState.ev === 'hosting' && !store.host.length) { fState.ev = 'all'; fSave('ev', 'all'); }
+      evPaint(); drawEvents();
+    });
+  }
+  function drawEvents() {
+    if (!store.ev) { return; }
+    var hosting = fState.ev === 'hosting', evs = hosting ? store.host : store.ev;
+    var b = bbody('b-ev');
+    bcount('b-ev', evs.length);
+    if (!evs.length) { nothing(b, 'to go to.', 'Find an event', '/events/'); return; }
+    evs.slice(0, 2).forEach(function (ev, i) {
+      if (i) { b.appendChild(el('hr', 'sep')); }
+      b.appendChild(line({ text: [{ a: ev.title || 'An event', href: ev.href || '/events/' }] }, { image: ev.image || '' }));
+      var when = [ev.when, ev.where].filter(Boolean).join(' · ');
+      if (when) { b.lastChild.querySelector('.tx').appendChild(el('div', 'sub', when)); }
+      if ((ev.people || []).length) { b.appendChild(line({ people: ev.people, text: ev.going || [] })); }
+    });
   }
   function loadGroups3() {
     var news = gate('getGroupNews').then(function (d) { return (d && d.status === 'ok' && Array.isArray(d.groups)) ? d.groups : []; }, function () { return []; });
