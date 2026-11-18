@@ -222,7 +222,8 @@
   .mp{display:inline-flex;align-items:center;height:24px;padding:0 10px;border-radius:12px;background:#fff;border:1.5px solid #DDE4EE;color:var(--ink);font-size:12.5px;font-weight:400;white-space:nowrap;}
   .morer{display:flex;justify-content:flex-end;margin-top:10px;}
   .ul2{color:var(--brand);text-decoration:underline;}
-  .ivl .rs{margin-left:4px;}
+  .ivl{display:flex;align-items:center;justify-content:space-between;gap:10px;}
+  .ivl .ivb{flex:none;}
   .ivf{margin:6px 0 10px;}
   .ivf .sres .fi{display:block;width:100%;text-align:left;background:transparent;border:0;border-radius:10px;padding:8px 10px;font:inherit;font-size:14px;cursor:pointer;}
   .ivf .sres .fi:hover{background:#EEF2F7;}
@@ -1460,10 +1461,11 @@
       after.insertAdjacentElement('afterend', f); nm.focus();
     }
     function inviteLine(words, linkWords, href, what) {
-      var p = el('p', 'none ivl'); p.appendChild(document.createTextNode(words));
-      if (linkWords) { var a = el('a', 'ul2', linkWords); a.href = href; p.appendChild(a); }
-      var go = el('button', 'rs', 'Invite'); go.type = 'button'; go.addEventListener('click', function () { inviteForm(p, what); });
-      p.appendChild(document.createTextNode(' ')); p.appendChild(go);
+      var p = el('div', 'none ivl'), s = el('span', ''); s.appendChild(document.createTextNode(words));
+      if (linkWords) { var a = el('a', 'ul2', linkWords); a.href = href; s.appendChild(a); }
+      p.appendChild(s);
+      var go = el('button', 'cw-btn ghost sm ivb', 'Invite'); go.type = 'button'; go.addEventListener('click', function () { inviteForm(p, what); });
+      p.appendChild(go);
       return p;
     }
     function step2() {
