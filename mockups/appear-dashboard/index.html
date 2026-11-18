@@ -111,7 +111,7 @@
   .mnd{border:0;border-top:1.5px solid #DDE4EE;margin:6px 8px;}
   .mni:hover,.mni:focus-visible{background:#EEF2F7;outline:none;}
   .ikp{font-family:inherit;font-size:13px;padding:7px 14px;border-radius:24px;cursor:pointer;background:#fff;border:1px solid #C9DFF3;color:#1F699E;font-weight:700;}
-  .ikp.on{background:#1F699E;border-color:#1F699E;color:#fff;font-weight:700;}
+  .ikp.ic{display:inline-flex;align-items:center;gap:6px;}.ikp.ic svg{width:16px;height:16px;flex:none;}.ikp.on{background:#1F699E;border-color:#1F699E;color:#fff;font-weight:700;}
   .ikp.ot{border:1.5px solid #1F699E;font-weight:700;}
   .ikp:focus-visible{outline:3px solid var(--ink);outline-offset:2px;}
   .ikr{display:flex;flex-wrap:wrap;gap:7px;}
@@ -507,7 +507,8 @@
       return card;
     }
 
-    var SPACES = [['\u{1F3E0} Home', 'Home'], ['\u{1F6CF} Room', 'Room'], ['\u{1F5E3} Meeting room', 'Meeting room'], ['\u{1F3AA} Venue', 'Venue'], ['\u{1F3A8} Studio', 'Studio'], ['\u{1F527} Workshop', 'Workshop'], ['\u{1F4BB} Desk', 'Desk']];
+    var PICON = {"Work or project": "<rect x=\"3\" y=\"7\" width=\"18\" height=\"13\" rx=\"2\"/><path d=\"M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2\"/><path d=\"M3 13h18\"/>", "Skill or service": "<circle cx=\"12\" cy=\"8\" r=\"4\"/><path d=\"M4 21c1-4 4-6 8-6s7 2 8 6\"/>", "Resource": "<path d=\"M12 3l8 4.5v9L12 21l-8-4.5v-9z\"/><path d=\"M4 7.5l8 4.5 8-4.5\"/><path d=\"M12 12v9\"/>", "Space": "<path d=\"M3 11l9-8 9 8\"/><path d=\"M5 10v10h14V10\"/><path d=\"M10 20v-6h4v6\"/>", "Physical good": "<path d=\"M3 4h8l9 9-7 7-9-9z\"/><circle cx=\"7.5\" cy=\"8.5\" r=\"1.2\"/>", "Consumable": "<path d=\"M3 12h18a9 9 0 0 1-18 0z\"/><path d=\"M8 8c0-1.5 1.5-1.5 1.5-3\"/><path d=\"M13 8c0-1.5 1.5-1.5 1.5-3\"/>", "Living": "<path d=\"M12 21v-9\"/><path d=\"M12 12c0-4 3-6 7-6 0 4-3 6-7 6z\"/><path d=\"M12 16c0-3-2-5-6-5 0 3 2 5 6 5z\"/>", "Digital": "<rect x=\"3\" y=\"4\" width=\"18\" height=\"12\" rx=\"2\"/><path d=\"M8 20h8\"/><path d=\"M12 16v4\"/>", "Room": "<path d=\"M3 19V6\"/><path d=\"M3 15h18v4\"/><path d=\"M21 15v-2a3 3 0 0 0-3-3h-7v5\"/><circle cx=\"7\" cy=\"11.5\" r=\"1.8\"/>", "Meeting room": "<path d=\"M21 12a8 8 0 0 1-11.5 7.2L4 20l1-4.5A8 8 0 1 1 21 12z\"/>", "Venue": "<path d=\"M2 20L12 4l10 16z\"/><path d=\"M12 4v4\"/><path d=\"M9.5 20l2.5-5 2.5 5\"/>", "Studio": "<path d=\"M12 3a9 9 0 1 0 0 18c1.5 0 2-1 2-2s-1-1.5-1-2.5 1-1.5 2.5-1.5H17a4 4 0 0 0 4-4c0-4-4-8-9-8z\"/><circle cx=\"7.5\" cy=\"11\" r=\"1\"/><circle cx=\"11\" cy=\"7\" r=\"1\"/><circle cx=\"16\" cy=\"8\" r=\"1\"/>", "Workshop": "<path d=\"M14.7 6.3a4 4 0 0 0-5.4 5.1L3 17.7 6.3 21l6.3-6.3a4 4 0 0 0 5.1-5.4l-2.6 2.6-2.4-.6-.6-2.4z\"/>", "Desk": "<rect x=\"4\" y=\"5\" width=\"16\" height=\"11\" rx=\"2\"/><path d=\"M2 20h20\"/>", "Home": "<path d=\"M3 11l9-8 9 8\"/><path d=\"M5 10v10h14V10\"/><path d=\"M10 20v-6h4v6\"/>"};
+    var SPACES = ['Home', 'Room', 'Meeting room', 'Venue', 'Studio', 'Workshop', 'Desk'];
     function showGive(k) {
       var d = KIND[k], b = panel.querySelector('.body');
       var isNeed = (k === 'need' || k === 'theyneed');
@@ -531,6 +532,7 @@
         crumbsEl.appendChild(el('b', '', S.typeLabel));
       }
       function pill(label, fn, on) { var p = el('button', 'ikp' + (on ? ' on' : ''), label); p.type = 'button'; p.addEventListener('click', fn); return p; }
+      function ipill(word, fn) { var p = el('button', 'ikp ic'); p.type = 'button'; p.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + PICON[word] + '</svg>'; p.appendChild(document.createTextNode(word)); p.addEventListener('click', fn); return p; }
       function checkbox(label, checked, fn) {
         var lab = el('label', 'cw-rc'), inp = el('input'); inp.type = 'checkbox'; inp.checked = !!checked;
         inp.addEventListener('change', function () { fn(inp.checked, inp); });
@@ -562,8 +564,8 @@
         if (S.step === 'type') {
           mid.appendChild(el('p', 'cw-fq', d.q));
           var row = el('div', 'ikr');
-          [['work', 'Work or project', 'Work or project'], ['skill', '\u{1F464} Skill or service', 'Skill or service'], ['resource', '\u{1F4E6} Resource', 'Resource'], ['space', '\u{1F3E0} Space', 'Space']].forEach(function (t) {
-            row.appendChild(pill(t[1], function () { S.type = t[0]; S.typeLabel = t[2]; go(t[0]); }));
+          [['work', 'Work or project'], ['skill', 'Skill or service'], ['resource', 'Resource'], ['space', 'Space']].forEach(function (t) {
+            row.appendChild(ipill(t[1], function () { S.type = t[0]; S.typeLabel = t[1]; go(t[0]); }));
           });
           mid.appendChild(row);
         } else if (S.step === 'work') {
@@ -590,11 +592,11 @@
           right = 'Continue'; rightFn = function () { if (S.sel) { go('details'); } else { say('Pick one first.', true); } };
         } else if (S.step === 'resource') {
           var r2 = el('div', 'ikr');
-          ['\u{1F4E6} Physical good', '\u{1F372} Consumable', '\u{1FAB4} Living', 'Digital'].forEach(function (x) { r2.appendChild(pill(x, function () { S.pick = x; go('details'); })); });
+          ['Physical good', 'Consumable', 'Living', 'Digital'].forEach(function (x) { r2.appendChild(ipill(x, function () { S.pick = x; go('details'); })); });
           mid.appendChild(r2);
         } else if (S.step === 'space') {
           var r3 = el('div', 'ikr'), shown = S.more ? SPACES : SPACES.slice(0, 3);
-          shown.forEach(function (x) { r3.appendChild(pill(x[0], function () { S.pick = x[1]; go('details'); })); });
+          shown.forEach(function (x) { r3.appendChild(ipill(x, function () { S.pick = x; go('details'); })); });
           if (!S.more) { var m = el('button', 'ikp ot', 'Show more'); m.type = 'button'; m.addEventListener('click', function () { S.more = true; draw(); }); r3.appendChild(m); }
           mid.appendChild(r3);
         } else if (S.step === 'details') {
