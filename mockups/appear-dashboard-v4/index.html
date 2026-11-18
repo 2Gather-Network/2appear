@@ -386,7 +386,7 @@
   N.grpOpen = { q: 'Are you open to meeting new people in your groups?', opts: [opt('Yes, show me anyone', N.grpPerm), opt('Show me just matches to people in my groups', N.grpPerm), opt('Don\'t show me matches', N.grpPerm)] };
   N.grp = { q: 'Who would you like to spend time with?', multi: true, opts: [opt('My own people', N.grpOpen), opt('The wider community', N.grpOpen)] };
   N.grpNews = { q: 'Who would you like to spend time with?', multi: true, opts: [opt('My own people', seenThen(N.grpOpen)), opt('The wider community', seenThen(N.grpOpen))] };
-  N.bm = { q: 'Would you like to keep track of people?', dyn: function () { var o = []; if (store.bmCount) { o.push(opt('See my bookmarks', null, { go: true, dest: '/network/' })); } o.push(opt('Bookmark people as I look around', N.matchOn)); o.push(opt('Add someone I already know', null, { go: true })); return o; } };
+  N.bm = { q: 'Who would you like to have around you?', dyn: function () { var o = []; o.push(opt('People I already know', null, { go: true })); o.push(opt('New people I meet as I look around', N.matchOn)); if (store.bmCount) { o.push(opt('People I bookmarked', null, { go: true, dest: '/network/' })); } return o; } };
   N.invPerm = { q: 'Is it okay if the people you chose can send you an invitation?', opts: yesNo() };
   N.invWho = { q: 'Who may invite you?', multi: true, opts: [opt('People I know', seenThen(N.invPerm)), opt('People in my groups', seenThen(N.invPerm)), opt('People I attend events with', seenThen(N.invPerm)), opt('Anyone', seenThen(N.invPerm))] };
   N.inv = {
