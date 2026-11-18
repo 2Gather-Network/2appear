@@ -230,7 +230,7 @@
             </div>
           </div>
           <aside class="rail">
-            <section class="bx pl" id="b-ppl"><h2>My people</h2><div class="corner"><a class="plus" href="/network/" aria-label="Add someone"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></a><a class="view" href="/network/">View</a></div><div class="body"></div></section>
+            <section class="bx pl" id="b-ppl"><h2>My people</h2><div class="corner"><a class="plus" href="/network/contacts/" aria-label="Add someone"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></a><a class="view" href="/network/contacts/">View</a></div><div class="body"></div></section>
             <section class="bx" id="b-msg"><h2>Direct messages <span class="cnt" hidden></span></h2><div class="corner"><a class="view" href="/messages/">View</a></div><div class="body"></div></section>
             <section class="bx" id="b-inv"><h2>Invitations <span class="cnt" hidden></span></h2><div class="corner"><a class="view" href="/mygroups/?tab=invites">View</a></div><div class="body"></div></section>
             <section class="bx" id="b-match"><h2>People I matched <span class="cnt" hidden></span></h2><p class="showing" hidden></p><div class="fl"></div><div class="body"></div></section>
@@ -902,7 +902,7 @@
     gate('getContacts', { cache: 'no-store', referrerPolicy: 'no-referrer' }).catch(function () {});
   }
 
-  var RMS = '/network/';
+  var RMS = '/network/contacts/';
   var POST_EVENT = '/myevents/';
   var FILTERS = {
     news: [['all', 'All'], ['groups', 'My groups'], ['upcoming', 'My upcoming events'], ['past', 'My past events'], ['contacts', 'My contacts'], ['connections', 'My connections']],
