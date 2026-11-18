@@ -295,7 +295,7 @@
     var host = el('div', 'ask');
     b.appendChild(host);
     var tiles = t.parentNode;
-    var DEST = { msg: '/messages/', inv: '/mygroups/?tab=invites', ev: '/events/', match: '/network/', grp: '/mygroups/', bm: '/network/bookmarks/' };
+    var DEST = { msg: '/messages/', inv: '/mygroups/?tab=invites', ev: '/events/', match: '/network/', grp: '/mygroups/', bm: '/network/contacts/' };
     var trail = [];
     var START = { q: '', hideQ: true, opts: [opt('Yes, ask me', 'deep', { crumb: 'Begin', primary: true })] };
     function resolve(n) { return n === 'deep' ? { q: DEEP.q, opts: DEEP.opts.map(function (o) { return opt(o.t, SECOND[key], { crumb: o.crumb }); }) } : n; }
@@ -380,7 +380,7 @@
         };
         inp2.addEventListener('input', fill); fill();
         cont = el('button', 'cw-btn solid sm', 'Continue'); cont.type = 'button';
-        cont.addEventListener('click', function () { if (sel.length) { advance(sel, sel.label || sel[0].t); } });
+        cont.addEventListener('click', function () { if (sel.length) { advance(sel, sel.label || sel[0].t); } else { if (!host.querySelector('.pick1')) { host.insertBefore(el('p', 'ike pick1', 'Pick one first.'), host.querySelector('.ft')); } } });
       } else {
         var solo = opts.length === 1 && opts[0].primary && trail.length > 0;
         if (solo) {
@@ -396,7 +396,7 @@
         if (asRadio || node.multi) {
           cont = el('button', 'cw-btn solid sm', 'Continue'); cont.type = 'button';
           cont.addEventListener('click', function () {
-            if (!sel.length) { return; }
+            if (!sel.length) { if (!host.querySelector('.pick1')) { host.insertBefore(el('p', 'ike pick1', 'Pick one first.'), host.querySelector('.ft')); } return; }
             var label = sel.map(function (x) { return x.t; }).join(', ');
             advance(sel, label);
           });
@@ -464,6 +464,23 @@
       WP.catch(function () { WPS[asked] = null; });
       return WP;
     }
+    var TP = null;
+    function loadTopics() {
+      if (TP) { return TP; }
+      TP = fetch(GS + '?action=getReferenceData').then(function (r) { return r.json(); }).then(function (d) {
+        var cats = (d && d.topicCategories) || [];
+        if (!cats.length) { throw new Error('none'); }
+        var names = [], by = {};
+        cats.forEach(function (c) {
+          var nm = (c.emoji ? c.emoji + ' ' : '') + c.label;
+          names.push(nm);
+          by[nm] = (c.examples || []).map(function (x) { x = String(x).trim(); return { name: x.charAt(0).toUpperCase() + x.slice(1), kids: [] }; });
+        });
+        return { names: names, by: by };
+      });
+      TP.catch(function () { TP = null; });
+      return TP;
+    }
     function ikPill(label, on, other) {
       var p = el('button', 'ikp' + (on ? ' on' : '') + (other ? ' ot' : ''), label); p.type = 'button'; return p;
     }
@@ -494,7 +511,9 @@
       var tree = null, card = null, who = null;
       b.innerHTML = '';
       var crumbsEl = el('div', 'bc'), mid = el('div', 'ikm'), linkEl = el('p', 'addlink'), ft = el('div', 'ft');
-      b.appendChild(crumbsEl); b.appendChild(mid); b.appendChild(linkEl); b.appendChild(ft);
+      var msgEl = el('p', 'ike'); msgEl.hidden = true;
+      function say(t, err) { msgEl.textContent = t; msgEl.className = err ? 'ike' : 'empty'; msgEl.hidden = false; }
+      b.appendChild(crumbsEl); b.appendChild(mid); b.appendChild(linkEl); b.appendChild(msgEl); b.appendChild(ft);
       function go(step) { S.hist.push(S.step); S.step = step; draw(); }
       function crumbs() {
         crumbsEl.innerHTML = '';
@@ -534,7 +553,7 @@
       }
       function afterDetails() { if (d.other) { go('who'); } }
       function draw() {
-        crumbs(); link(); mid.innerHTML = ''; card = null; who = null;
+        crumbs(); link(); mid.innerHTML = ''; card = null; who = null; msgEl.hidden = true;
         var right = null, rightFn = null;
         if (S.step === 'type') {
           mid.appendChild(el('p', 'cw-fq', d.q));
@@ -549,7 +568,7 @@
           mid.appendChild(checkbox('Paid', S.work.paid, function (on) { S.work.paid = on; draw(); }));
           mid.appendChild(checkbox('Unpaid', S.work.unpaid, function (on) { S.work.unpaid = on; draw(); }));
           mid.className = 'ikm cw-rad';
-          right = 'Continue'; rightFn = function () { if (S.work.paid || S.work.unpaid) { mid.className = 'ikm'; go('details'); } };
+          right = 'Continue'; rightFn = function () { if (S.work.paid || S.work.unpaid) { mid.className = 'ikm'; go('details'); } else { say('Pick one first.', true); } };
         } else if (S.step === 'skill') {
           mid.className = 'ikm';
           if (!tree) { mid.appendChild(el('span', 'cw-loading', 'Looking at the categories')); }
@@ -564,7 +583,7 @@
             }
             mid.appendChild(rw);
           }
-          right = 'Continue'; rightFn = function () { if (S.sel) { go('details'); } };
+          right = 'Continue'; rightFn = function () { if (S.sel) { go('details'); } else { say('Pick one first.', true); } };
         } else if (S.step === 'resource') {
           var r2 = el('div', 'ikr');
           ['\u{1F4E6} Physical good', '\u{1F372} Consumable', '\u{1FAB4} Living', 'Digital'].forEach(function (x) { r2.appendChild(pill(x, function () { S.pick = x; go('details'); })); });
@@ -577,7 +596,7 @@
         } else if (S.step === 'details') {
           card = draftCard('', d.detailPh); mid.appendChild(card);
           right = d.other ? 'Continue' : 'Add';
-          rightFn = function () { if (card.check()) { afterDetails(); } };
+          rightFn = function () { if (card.check()) { if (d.other) { afterDetails(); } else { say('Saving is not built yet.'); } } };
         } else if (S.step === 'who') {
           mid.appendChild(el('p', 'cw-fq', 'Who are they?'));
           var nm = el('input'); nm.type = 'text'; nm.placeholder = 'Search my contacts'; nm.setAttribute('aria-label', 'Their name');
@@ -625,11 +644,12 @@
           mid.appendChild(gbox);
           mid.appendChild(checkbox('In my events', S.ev, function (on) { S.ev = on; }));
           mid.appendChild(checkbox('On my profile', S.prof, function (on) { S.prof = on; }));
-          var e3 = el('div', 'ike', 'Pick where to share first.'); e3.hidden = true; mid.appendChild(e3);
+          var e3 = el('div', 'ike', 'Pick one first.'); e3.hidden = true; mid.appendChild(e3);
           right = 'Add';
           rightFn = function () {
             var any = S.gOpen || S.ev || S.prof;
             e3.hidden = !!any;
+            if (any) { say('Saving is not built yet.'); }
           };
         }
         footer(right, rightFn);
@@ -660,8 +680,11 @@
       var add = el('button', 'cw-btn solid sm', 'Add'); add.type = 'button';
       ft.appendChild(grp); ft.appendChild(add); b.appendChild(ft);
       var card = null, tree = null;
+      var imsg = el('p', 'ike'); imsg.hidden = true; b.insertBefore(imsg, ft);
       add.addEventListener('click', function () {
-        if (card) { card.check(); return; }
+        if (card) { if (card.check()) { imsg.className = 'empty'; imsg.textContent = 'Saving is not built yet.'; imsg.hidden = false; } return; }
+        if (state.sel) { imsg.className = 'empty'; imsg.textContent = 'Saving is not built yet.'; imsg.hidden = false; }
+        else { imsg.className = 'ike'; imsg.textContent = 'Pick one first.'; imsg.hidden = false; }
       });
       function crumbs() {
         crumbsEl.innerHTML = '';
@@ -695,7 +718,7 @@
         return list;
       }
       function drawInterest() {
-        crumbs(); mid.innerHTML = ''; card = null;
+        crumbs(); mid.innerHTML = ''; card = null; imsg.hidden = true;
         if (state.other) {
           card = draftCard('Something that interests me', 'Details (optional)');
           mid.appendChild(card); return;
@@ -725,7 +748,7 @@
       shut();
       if (k === 'interest') {
         drawInterest();
-        loadWords('enjoy').then(function (t) { tree = t; drawInterest(); }).catch(function () { mid.innerHTML = ''; mid.appendChild(el('p', 'empty', 'This did not load. Reload the page to try again.')); });
+        loadTopics().then(function (t) { tree = t; drawInterest(); }).catch(function () { mid.innerHTML = ''; mid.appendChild(el('p', 'empty', 'This did not load. Reload the page to try again.')); });
       } else {
         crumbs(); card = draftCard(d.card, d.detailPh); mid.appendChild(card);
         if (d.other) {
