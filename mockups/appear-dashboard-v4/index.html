@@ -243,6 +243,9 @@
   .pills.all{max-width:60%;}
   @media(max-width:599px){.ni{flex-wrap:wrap;}.ni .tx{flex:1 1 calc(100% - 66px);}.ni .tx a.ul,.ni .sub{white-space:normal;overflow:visible;text-overflow:clip;}.ni .vn{text-align:left;max-width:100%;overflow-wrap:anywhere;}.ni .pills{flex:1 1 100%;max-width:100%;justify-content:flex-start;}.ni .pills.all{max-width:100%;}}
   .morer{display:flex;justify-content:flex-end;margin-top:10px;}
+  .efp{border:1.5px solid #C9DFF3;border-radius:12px;padding:12px;margin:10px 0 0;background:#fff;}
+  .efp .cw-fq{font-size:14px;margin:0 0 6px;}
+  .efp .cw-rad{margin:0 0 10px;}
   .ul2{color:var(--brand);text-decoration:underline;}
   .rlist{border:1.5px solid #DDE4EE;border-radius:12px;margin-top:10px;overflow:hidden;}
   .rlist .rb{padding:2px 12px 10px;}
@@ -288,7 +291,7 @@
           <div class="main">
             <div class="two">
               <section class="bx" id="b-ev"><h2>Events for me <span class="cnt" hidden></span></h2><p class="showing" hidden></p><div class="fl"></div><div class="body"></div></section>
-              <section class="bx" id="b-grp"><h2>My groups <span class="cnt" hidden></span></h2><div class="corner"><a class="view" href="/mygroups/">View</a></div><div class="body"></div></section>
+              <section class="bx" id="b-grp"><h2>My groups <span class="cnt" hidden></span></h2><div class="fl"></div><div class="body"></div></section>
             </div>
           </div>
           <aside class="rail">
@@ -1162,7 +1165,7 @@
         shw.hidden = false;
       } else { shw.hidden = true; }
     }
-    function set(v) { fState[k] = v; fSave(k, v); closeFilters(); paint(); rerender(); }
+    function set(v) { fState[k] = v; fSave(k, v); closeFilters(); paint(); if (k === 'ev') { openEvFull(true); } else { rerender(); } }
     btn.addEventListener('click', function (e) { e.stopPropagation(); if (openF && openF.btn === btn) { closeFilters(); return; } closeFilters(); list.hidden = false; btn.setAttribute('aria-expanded', 'true'); openF = { btn: btn, list: list, root: root }; });
     root.appendChild(btn); root.appendChild(list);
     paint();
@@ -1416,27 +1419,62 @@
   }
   function loadEvents() {
     var host = hostedUpcoming();
-    var mat = matchedEvents().then(function (m) { hasInts = m.ints.length > 0; return m.list; }, function () { return []; });
+    var mat = matchedEvents().then(function (m) { hasInts = m.ints.length > 0; store.evInts = m.ints; return m.list; }, function () { return []; });
     return Promise.all([mat, host]).then(function (r) {
       store.ev = r[0]; store.host = r[1];
       if (fState.ev === 'hosting' && !store.host.length) { fState.ev = 'all'; fSave('ev', 'all'); }
       evPaint(); drawEvents();
     });
   }
+  var evFull = false, evFiltOpen = false;
+  var efS = (function () { var o = { p: true, v: true, off: {} }; try { var j = JSON.parse(localStorage.getItem('cw-dash4-ev-filter') || 'null'); if (j) { o.p = j.p !== false; o.v = j.v !== false; o.off = j.off || {}; } } catch (e) {} return o; })();
+  function efOn() { return !(efS.p && efS.v && !Object.keys(efS.off).some(function (k) { return efS.off[k]; })); }
+  function efSave() { try { if (efOn()) { localStorage.removeItem('cw-dash4-ev-filter'); } else { localStorage.setItem('cw-dash4-ev-filter', JSON.stringify(efS)); } } catch (e) {} }
+  function efFmt(e) { var f = String(e.format || '').toLowerCase(); if (f === 'virtual' || f === 'online') { return efS.v; } if (f === 'inperson' || f === 'in person' || !f) { return efS.p; } return efS.p || efS.v; }
+  function efApply(list, hosting) {
+    return list.map(function (x) { return hosting ? x : { e: x.e, day: x.day, whys: (x.whys || []).filter(function (w) { return !efS.off[w]; }) }; })
+      .filter(function (x) { return efFmt(x.e) && (hosting || x.whys.length); });
+  }
+  function openEvFull(on) {
+    evFull = on;
+    var box = bx('b-ev'), lay = box.closest('.lay'), dashEl = document.getElementById('dash');
+    lay.classList.toggle('focus', on); dashEl.classList.toggle('focus', on); box.classList.toggle('open', on);
+    pageClose(on ? function () { openEvFull(false); } : null);
+    drawEvents();
+    if (on) { window.scrollTo(0, 0); }
+  }
+  function efPanel(hosting) {
+    var pn = el('div', 'efp');
+    function chk(label, on, fn) { var lab = el('label', 'cw-rc'), inp = el('input'); inp.type = 'checkbox'; inp.checked = !!on; inp.addEventListener('change', function () { fn(inp.checked); efSave(); drawEvents(); }); lab.appendChild(inp); lab.appendChild(document.createTextNode(' ' + label)); return lab; }
+    pn.appendChild(el('p', 'cw-fq', 'Where would you like to look?'));
+    var r1 = el('div', 'cw-rad'); r1.appendChild(chk('In person', efS.p, function (v) { efS.p = v; })); r1.appendChild(chk('Virtually', efS.v, function (v) { efS.v = v; })); pn.appendChild(r1);
+    var ints = store.evInts || [];
+    if (!hosting && ints.length) {
+      pn.appendChild(el('p', 'cw-fq', 'What would you like to be matched on?'));
+      var r2 = el('div', 'cw-rad');
+      ints.forEach(function (w) { r2.appendChild(chk(w, !efS.off[w], function (v) { if (v) { delete efS.off[w]; } else { efS.off[w] = true; } })); });
+      pn.appendChild(r2);
+    }
+    if (efOn()) { var rs = el('button', 'rs', 'Reset'); rs.type = 'button'; rs.addEventListener('click', function () { efS.p = true; efS.v = true; efS.off = {}; efSave(); drawEvents(); }); pn.appendChild(rs); }
+    return pn;
+  }
   function drawEvents() {
     if (!store.ev) { return; }
-    var hosting = fState.ev === 'hosting', evs = hosting ? store.host : store.ev;
+    var hosting = fState.ev === 'hosting', base = hosting ? store.host : store.ev;
     var b = bbody('b-ev');
+    var evs = efApply(base, hosting);
     bcount('b-ev', evs.length);
-    if (!evs.length) { nothing(b, 'to go to.', 'Find an event', '/events/'); return; }
-    var L = el('div', 'rlist'); b.appendChild(L);
-    function addE(x) { var blk = el('div', 'rb'); blk.appendChild(newsItem(x)); L.appendChild(blk); }
-    evs.slice(0, 3).forEach(addE);
-    if (evs.length > 3) {
-      var mr = el('div', 'morer'), mb = el('button', 'cw-btn ghost sm', 'Show more'); mb.type = 'button';
-      mb.addEventListener('click', function () { evs.slice(3).forEach(addE); mr.remove(); });
-      mr.appendChild(mb); b.appendChild(mr);
+    if (!base.length) { nothing(b, 'to go to.', 'Find an event', '/events/'); return; }
+    if (evFull) { b.appendChild(el('p', 'sub vh', hosting ? 'Events I\'m hosting' : 'My event matches')); }
+    if (evFiltOpen) { b.appendChild(efPanel(hosting)); }
+    if (!evs.length) { b.appendChild(el('p', 'none', 'Nothing coming up here.')); }
+    else {
+      var L = el('div', 'rlist'); b.appendChild(L);
+      (evFull ? evs : evs.slice(0, 3)).forEach(function (x) { var blk = el('div', 'rb'); blk.appendChild(newsItem(x)); L.appendChild(blk); });
     }
+    var mr = el('div', 'morer'), fb = el('button', 'cw-btn ghost sm', 'Filter'); fb.type = 'button'; fb.setAttribute('aria-expanded', evFiltOpen ? 'true' : 'false');
+    fb.addEventListener('click', function () { evFiltOpen = !evFiltOpen; drawEvents(); });
+    mr.appendChild(fb); b.appendChild(mr);
   }
   function loadGroups3() {
     var news = (READS_READY ? gate('getGroupNews') : Promise.resolve(null)).then(function (d) { return (d && d.status === 'ok' && Array.isArray(d.groups)) ? d.groups : []; }, function () { return []; });
@@ -1448,20 +1486,40 @@
         gn.forEach(function (g) { by[String(g.slug || '')] = g.lines || []; });
         bcount('b-grp', d.groups.length);
         if (!d.groups.length) { nothing(b, 'to join.', 'Find a group', '/groups/'); return; }
-        var L = el('div', 'rlist'); b.appendChild(L);
-        function addG(g) {
+        var gbox = bx('b-grp'), glay = gbox.closest('.lay'), gdash = document.getElementById('dash'), gmode = '';
+        function isHostG(g) { var ro = String(g.role || '').toLowerCase(); return ro === 'host' || ro === 'cohost'; }
+        var hostG = d.groups.filter(isHostG);
+        function addG(L, g) {
           var sl = String(g.slug || '').split(',')[0].trim();
           var ls = by[sl] || [];
           var blk = el('div', 'rb'); L.appendChild(blk);
           blk.appendChild(groupItem(g, groupWhys(g), ls.length ? '' : 'Nothing new.'));
           ls.slice(0, 2).forEach(function (it) { blk.appendChild(line(it)); });
         }
-        d.groups.slice(0, 3).forEach(addG);
-        if (d.groups.length > 3) {
-          var mr = el('div', 'morer'), mb = el('button', 'cw-btn ghost sm', 'Show more'); mb.type = 'button';
-          mb.addEventListener('click', function () { d.groups.slice(3).forEach(addG); mr.remove(); });
-          mr.appendChild(mb); b.appendChild(mr);
+        function drawG() {
+          var bb = bbody('b-grp');
+          if (gmode) { bb.appendChild(el('p', 'sub vh', gmode === 'host' ? 'Groups I host' : 'Groups I belong to')); }
+          var L = el('div', 'rlist'); bb.appendChild(L);
+          (gmode === 'host' ? hostG : (gmode === 'all' ? d.groups : d.groups.slice(0, 3))).forEach(function (g) { addG(L, g); });
         }
+        function setG(m) {
+          gmode = m; var on = !!m;
+          glay.classList.toggle('focus', on); gdash.classList.toggle('focus', on); gbox.classList.toggle('open', on);
+          pageClose(on ? function () { setG(''); } : null);
+          drawG();
+          if (on) { window.scrollTo(0, 0); }
+        }
+        var groot = gbox.querySelector('.fl'); groot.innerHTML = '';
+        var gbtn = el('button', 'view vb', 'View'); gbtn.type = 'button'; gbtn.setAttribute('aria-haspopup', 'true'); gbtn.setAttribute('aria-expanded', 'false');
+        var glist = el('div', 'flist'); glist.hidden = true; glist.setAttribute('role', 'menu');
+        [hostG.length ? ['host', 'Groups I host'] : null, ['all', 'Groups I belong to']].filter(Boolean).forEach(function (o) {
+          var it = el('button', 'fi', o[1]); it.type = 'button'; it.setAttribute('role', 'menuitem');
+          it.addEventListener('click', function () { closeFilters(); setG(o[0]); });
+          glist.appendChild(it);
+        });
+        gbtn.addEventListener('click', function (e) { e.stopPropagation(); if (openF && openF.btn === gbtn) { closeFilters(); return; } closeFilters(); glist.hidden = false; gbtn.setAttribute('aria-expanded', 'true'); openF = { btn: gbtn, list: glist, root: groot }; });
+        groot.appendChild(gbtn); groot.appendChild(glist);
+        drawG();
       });
     }).catch(function () { bfail('b-grp'); });
   }
