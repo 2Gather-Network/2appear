@@ -474,7 +474,7 @@
       if (!placeP) {
         placeP = gate('getIntake').then(function (d) {
           var r = (d && d.data) || {}, loc = String(r.location || '').split(',').map(function (x) { return x.trim(); }).filter(Boolean), tail = loc.length ? loc[loc.length - 1] : '';
-          var o = { state: '', country: '', county: String(r.county || '').trim(), city: String(r.city || '').trim(), zip: String(r.zip || r.zipcode || r.postalCode || '').replace(/[^0-9]/g, '').slice(0, 5) };
+          var o = { state: '', country: '', county: String(r.county || '').trim(), city: String(r.city || '').trim(), zip: String(r.postal || r.zip || '').replace(/[^0-9]/g, '').slice(0, 5) };
           if (tail === 'United States') { o.country = tail; o.state = loc.length > 1 ? loc[0] : ''; } else if (tail) { o.country = tail; }
           return o;
         }, function () { return { state: '', country: '', county: '', city: '', zip: '' }; });
