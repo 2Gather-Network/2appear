@@ -53,7 +53,7 @@
   .cnt{display:inline-flex;align-items:center;justify-content:center;min-width:22px;height:22px;padding:0 7px;border-radius:11px;background:var(--brand);color:#fff;font-size:12px;font-weight:800;}
   .cnt[hidden]{display:none;}
   .view{position:absolute;top:-1.5px;right:-1.5px;height:33px;display:flex;align-items:center;font-size:13.5px;font-weight:700;color:var(--brand);background:#fff;border:1.5px solid var(--panel-line);border-radius:16.5px;padding:0 14px;text-decoration:none;white-space:nowrap;}
-  .view:hover{background:#EEF2F7;}
+  .view:hover{background:#EEF1F5;}
   .view:focus-visible{outline:3px solid var(--ink);outline-offset:2px;}
   .pv{margin-top:10px;display:flex;flex-direction:column;gap:9px;}
   .row{display:flex;align-items:center;gap:10px;min-width:0;color:inherit;text-decoration:none;}
@@ -68,7 +68,7 @@
   .faces{display:flex;gap:6px;margin-top:10px;}
   .empty{font-size:14px;color:var(--soft);margin-top:8px;line-height:1.5;}
   .empty a{color:var(--brand);font-weight:700;text-decoration:none;}
-  .cw-loading{display:inline-flex;align-items:center;background:var(--brand);color:#fff;font-size:12.5px;font-weight:700;padding:6px 14px;border-radius:20px;margin-top:10px;animation:cw-breathe 1.6s ease-in-out infinite;}
+  .cw-loading{display:inline-flex;align-items:center;background:var(--brand);color:#fff;font-size:12.5px;font-weight:400;padding:6px 14px;border-radius:20px;margin-top:10px;animation:cw-breathe 1.6s ease-in-out infinite;}
   .lede.wait{animation:cw-breathe 1.6s ease-in-out infinite;}
   .cw-fq{font-size:16px;font-weight:700;color:var(--ink);margin:0 0 4px;}
   .cw-fchips{display:flex;gap:8px;flex-wrap:wrap;}
@@ -80,7 +80,7 @@
   .cw-btn.ghost{background:transparent;color:var(--brand);border:1.5px solid var(--brand);}
   .cw-btn.sm{padding:7px 14px;font-size:13px;}
   .cw-btn:focus-visible{outline:3px solid var(--ink);outline-offset:2px;}
-  .cw-search{display:flex;align-items:center;background:#F7F9FC;border:1px solid #DDE4EE;border-radius:18px;padding:2px 6px 2px 14px;max-width:320px;}
+  .cw-search{display:flex;align-items:center;background:#fff;border:1.5px solid #C9DFF3;border-radius:12px;min-height:38px;padding:0 6px 0 14px;max-width:320px;}
   .cw-search input{flex:1;border:0;background:transparent;font-family:inherit;font-size:14px;padding:8px 4px;outline:none;}
   .cw-fh{font-size:16px;font-weight:700;color:var(--ink);margin:0 0 10px;}
   .cw-btn.solid{background:var(--brand);color:#fff;border:1.5px solid var(--brand);}
@@ -109,13 +109,29 @@
   .mnl[hidden]{display:none;}
   .mni{display:block;width:100%;text-align:left;background:transparent;border:0;border-radius:10px;padding:10px 12px;font-family:inherit;font-size:14px;font-weight:600;color:var(--ink);cursor:pointer;}
   .mnd{border:0;border-top:1.5px solid #DDE4EE;margin:6px 8px;}
-  .mni:hover,.mni:focus-visible{background:#EEF2F7;outline:none;}
+  .mni:hover,.mni:focus-visible{background:#EEF1F5;outline:none;}
   .ikp{font-family:inherit;font-size:13px;padding:7px 14px;border-radius:24px;cursor:pointer;background:#fff;border:1.5px solid #C9DFF3;color:#1F699E;font-weight:700;}
   .ikp.ic{display:inline-flex;align-items:center;gap:6px;}.ikp.ic svg{width:16px;height:16px;flex:none;}.ikp.on{background:#1F699E;border-color:#1F699E;color:#fff;font-weight:700;}
   .ikp.ot{border:1.5px solid #1F699E;font-weight:700;}
   .ikp:focus-visible{outline:3px solid var(--ink);outline-offset:2px;}
   .ikr{display:flex;flex-wrap:wrap;gap:7px;}
   .ikd{border:1.5px dashed #1F699E;border-radius:12px;padding:12px 14px 13px;background:#fff;margin:4px 0 8px;}
+  .ach{display:flex;gap:10px;flex-wrap:wrap;margin:10px 0 0;}
+  .act{flex:1;min-width:150px;background:#fff;border:1.5px solid #C9DFF3;border-radius:14px;padding:16px 12px 14px;text-align:center;font:700 14px/1.3 'Nunito Sans',sans-serif;color:var(--ink);cursor:pointer;display:block;}
+  .act:hover,.act:focus-visible{background:#EEF1F5;outline:none;}
+  .act .aci{width:44px;height:44px;border-radius:50%;border:1.5px solid #1F699E;margin:0 auto 10px;display:flex;align-items:center;justify-content:center;background:#fff;}
+  .aibox{background:#fff;border:1.5px solid #C9DFF3;border-radius:14px;padding:16px 20px;}
+  .aibox p{margin:0;font-size:14px;line-height:1.5;}
+  .aibox .ft{justify-content:flex-end;}
+  .afr{display:flex;gap:8px;align-items:center;}
+  .afr input{flex:1;min-width:0;margin:0;height:38px;border:1.5px solid #C9DFF3;border-radius:12px;background:#fff;padding:0 12px;font:inherit;font-size:14px;color:#1A2E42;outline:none;}
+  .afb{height:38px;border:1.5px solid #1F699E;border-radius:12px;color:#1F699E;background:#fff;font:700 13px 'Nunito Sans',sans-serif;padding:0 16px;cursor:pointer;white-space:nowrap;}
+  .afl{font-size:14px;font-weight:800;margin:0 0 4px;}
+  .aim{display:flex;align-items:center;gap:10px;border:1.5px solid #C9DFF3;border-radius:12px;padding:8px 10px;background:#fff;}
+  .aim .ait{width:44px;height:44px;border-radius:10px;background:#DDE4EE;flex:none;display:flex;align-items:center;justify-content:center;}
+  .aim span.aph{flex:1;font-size:14px;color:#5A6878;}
+  .aup{display:flex;justify-content:flex-end;margin-top:8px;}
+  @media(max-width:767px){.act{flex:1 1 100%;display:flex;align-items:center;gap:12px;text-align:left;padding:12px;}.act .aci{width:38px;height:38px;margin:0;flex:none;}.act .aci svg{width:20px;height:20px;}}
   .ikt{font-size:12.5px;color:#4B5A6D;margin:0 0 8px;}
   .ikd input,.ikd textarea{width:100%;box-sizing:border-box;border:1.5px solid #C9DFF3;background:#fff;border-radius:12px;padding:0 12px;font:inherit;font-size:14px;color:#1A2E42;outline:none;margin-bottom:8px;resize:none;}.ikd input{height:38px;}.ikd textarea{min-height:80px;padding:9px 12px;line-height:1.45;overflow:hidden;}@media(max-width:599px){.ikd input,.ikd textarea{font-size:16px;}}
   .ikd .bad{border-color:#C4501A;}
@@ -139,7 +155,7 @@
   .pm[hidden]{display:none;}
   .pmn{font-size:13px;font-weight:700;color:var(--soft);padding:6px 12px 4px;}
   .pmi{display:block;padding:9px 12px;border-radius:10px;font-size:14px;font-weight:600;color:var(--ink);text-decoration:none;}
-  .pmi:hover,.pmi:focus-visible{background:#EEF2F7;outline:none;}
+  .pmi:hover,.pmi:focus-visible{background:#EEF1F5;outline:none;}
   .ask{margin-top:12px;display:flex;flex-direction:column;gap:10px;}
   @keyframes cw-breathe{0%,100%{opacity:1}50%{opacity:.62}}
   @media(max-width:700px){.tiles{grid-template-columns:1fr;}.greet{font-size:22px;}}
@@ -171,7 +187,7 @@
   .flist[hidden]{display:none;}
   .fi{display:block;width:100%;text-align:left;background:transparent;border:0;border-radius:10px;padding:9px 12px;font-family:inherit;font-size:14px;font-weight:600;color:var(--ink);cursor:pointer;}
   .fi.on,.fi.on:hover,.fi.on:focus-visible{background:#1F699E;color:#fff;}
-  .fi:hover,.fi:focus-visible{background:#EEF2F7;outline:none;}
+  .fi:hover,.fi:focus-visible{background:#EEF1F5;outline:none;}
   .showing{font-size:13px;color:var(--soft);margin:2px 0 0;}
   .showing[hidden]{display:none;}
   .rs{background:none;border:0;padding:0;font:inherit;color:var(--brand);text-decoration:underline;cursor:pointer;font-weight:600;}
@@ -199,7 +215,7 @@
   .gname{display:block;margin-top:10px;font-size:14px;font-weight:700;color:var(--ink);text-decoration:none;}
   .none{font-size:14px;color:var(--soft);margin:10px 0 0;line-height:1.5;}
   .none b{color:var(--ink);font-weight:700;}
-  .bx .sr{display:block;width:100%;box-sizing:border-box;margin-top:10px;background:#F7F9FC;border:1.5px solid #DDE4EE;border-radius:20px;padding:8px 14px;font:inherit;font-size:14px;color:var(--ink);outline:none;}
+  .bx .sr{display:block;width:100%;box-sizing:border-box;margin-top:10px;background:#fff;border:1.5px solid #C9DFF3;border-radius:12px;height:38px;padding:0 14px;font:inherit;font-size:14px;color:var(--ink);outline:none;}
   .bx .sr:focus{border-color:#7FB0D6;}
   .ln[hidden]{display:none;}
   .bx .pm{max-width:none;}
@@ -235,7 +251,7 @@
   .ivl .ivb{flex:none;}
   .ivf{margin:6px 0 10px;}
   .ivf .sres .fi{display:block;width:100%;text-align:left;background:transparent;border:0;border-radius:10px;padding:8px 10px;font:inherit;font-size:14px;cursor:pointer;}
-  .ivf .sres .fi:hover{background:#EEF2F7;}
+  .ivf .sres .fi:hover{background:#EEF1F5;}
   .ivf input[hidden]{display:none;}
   .vh{margin:10px 0 0;font-weight:700;color:var(--ink);}
   button.pmi{display:block;width:100%;text-align:left;background:transparent;border:0;font-family:inherit;cursor:pointer;}
@@ -368,6 +384,7 @@
   }
   function opt(t, next, extra) { var o = { t: t, next: next || null }; if (extra) { for (var k in extra) { o[k] = extra[k]; } } return o; }
   function yesNo() { return [opt('Yes', null, { go: true, primary: true })]; }
+  var aiOk = false;
   var N = {};
   var seenDone = false;
   N.connect = { q: 'Based on what you have shared, is it okay if we connect dots for you?', opts: yesNo() };
@@ -386,12 +403,12 @@
   N.grpOpen = { q: 'Are you open to meeting new people in your groups?', opts: [opt('Yes, show me anyone', N.grpPerm), opt('Show me just matches to people in my groups', N.grpPerm), opt('Don\'t show me matches', N.grpPerm)] };
   N.grp = { q: 'Who would you like to spend time with?', multi: true, opts: [opt('My own people', N.grpOpen), opt('The wider community', N.grpOpen)] };
   N.grpNews = { q: 'Who would you like to spend time with?', multi: true, opts: [opt('My own people', seenThen(N.grpOpen)), opt('The wider community', seenThen(N.grpOpen))] };
-  N.bm = { q: 'Who would you like to have around you?', dyn: function () { var o = []; o.push(opt('People I already know', null, { go: true })); o.push(opt('New people I meet as I look around', N.matchOn)); if (store.bmCount) { o.push(opt('People I bookmarked', null, { go: true, dest: '/network/' })); } return o; } };
+  N.bm = { q: 'Who would you like to have around you?', multi: true, dyn: function () { var o = []; o.push(opt('People I already know', null, { go: true })); o.push(opt('New people I meet as I look around', N.matchOn)); if (store.bmCount) { o.push(opt('People I bookmarked', null, { go: true, dest: '/network/' })); } return o; } };
   N.invPerm = { q: 'Is it okay if the people you chose can send you an invitation?', opts: yesNo() };
   N.invWho = { q: 'Who may invite you?', multi: true, opts: [opt('People I know', seenThen(N.invPerm)), opt('People in my groups', seenThen(N.invPerm)), opt('People I attend events with', seenThen(N.invPerm)), opt('Anyone', seenThen(N.invPerm))] };
   N.inv = {
     q: 'What would you like to be invited to?', multi: true,
-    opts: [opt('Events: in-person, virtual, topic specific', N.invWho), opt('Work opportunities: jobs, projects, gigs', N.invWho), opt('Places: to live, to work, to play', N.invWho), opt('Experiences', N.invWho), opt('Projects to fund: people, companies, non-profits', N.invWho), opt('Resources: things, living things', N.invWho)]
+    opts: [opt('Events: in-person, virtual, topic specific', N.invWho), opt('Groups', N.invWho), opt('Work opportunities: jobs, projects, gigs', N.invWho), opt('Places: to live, to work, to play', N.invWho), opt('Experiences', N.invWho), opt('Projects to fund: people, companies, non-profits', N.invWho), opt('Resources: things, living things', N.invWho)]
   };
   N.news = { q: 'What would you like to hear about?', multi: true, opts: [opt('Groups', N.grpNews), opt('Events', N.ev), opt('People', seenThen(N.connect))] };
   var SECOND = { msg: N.msg, inv: N.inv, ev: N.ev, match: N.matchOn, grp: N.grp, bm: N.bm, ppl: N.bm, news: N.news };
@@ -426,7 +443,7 @@
     function reset() { trail = []; queue = []; render(START, 0); }
     function leave(o) {
       if (o.close) { reset(); return; }
-      if (queue.length) { render(queue.shift(), 0); return; }
+      if (queue.length) { var nx = queue.shift(); if (nx.goTo) { window.location.href = nx.goTo; return; } render(nx, 0); return; }
       window.location.href = o.dest || DEST[key];
     }
     function crumbs(upto) {
@@ -449,7 +466,7 @@
       if (trail.length === 0) { host.appendChild(el('p', 'empty', 'Would you like to populate this section?')); }
       else { host.appendChild(crumbs(trail.length)); }
       node = resolve(node);
-      if (node && node.dyn) { node = { q: node.q, opts: node.dyn() }; }
+      if (node && node.dyn) { node = { q: node.q, multi: node.multi, opts: node.dyn() }; }
       while (node && node.seen && seenDone) { node = node.skipTo; }
       if (!node.hideQ) { host.appendChild(el('p', 'cw-fq', node.q)); }
       var opts = node.opts, searchMode = !!node.search;
@@ -459,9 +476,16 @@
       var holder = el('div', asRadio ? 'cw-rad' : (opts.length === 1 && opts[0].primary ? 'cw-fchips right' : 'cw-fchips'));
       var sel = [], cont = null;
       function advance(chosen, label) {
+        if (node.multi && chosen.length > 1) { chosen = chosen.filter(function (x) { return x.next; }).concat(chosen.filter(function (x) { return !x.next; })); }
         var o = chosen[0];
         if (node.seen) { seenDone = true; }
-        if (node.multi && chosen.length > 1) { var seenN = [o.next]; chosen.slice(1).forEach(function (x) { if (x.next && seenN.indexOf(x.next) < 0) { seenN.push(x.next); queue.push(x.next); } }); }
+        if (node.multi && chosen.length > 1) {
+          var seenN = [o.next], gone = !o.next;
+          chosen.slice(1).forEach(function (x) {
+            if (x.next && seenN.indexOf(x.next) < 0) { seenN.push(x.next); queue.push(x.next); }
+            else if (!x.next && x.go && !gone) { gone = true; queue.push({ goTo: x.dest || DEST[key] }); }
+          });
+        }
         trail.push({ node: node, label: o.crumb || label });
         if (o.close || o.go || (!o.next && !node.hideQ)) { leave(o); return; }
         if (!o.next) { leave(o); return; }
@@ -660,6 +684,7 @@
         var grp = el('div', 'ftl');
         var bk = el('button', 'cw-btn ghost sm', 'Back'); bk.type = 'button';
         bk.addEventListener('click', function () {
+          if (S.step === 'who' && S.how) { S.how = ''; draw(); return; }
           if (S.step === 'skill' && S.path.length) { S.path.pop(); draw(); return; }
           if (S.hist.length) { S.step = S.hist.pop(); if (S.step === 'type') { S.typeLabel = ''; S.type = ''; } draw(); return; }
           closeAll(); openMenu();
@@ -719,6 +744,36 @@
           card = draftCard('', d.detailPh); mid.appendChild(card);
           right = d.other ? 'Continue' : 'Add';
           rightFn = function () { if (card.check()) { if (d.other) { afterDetails(); } else { say('Saving is not built yet.'); } } };
+        } else if (S.step === 'who' && !S.how) {
+          mid.appendChild(el('p', 'cw-fq', 'How would you like to add them?'));
+          var ach = el('div', 'ach');
+          var AIC = { form: '<rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h4"/>', link: '<path d="M15 7h3a5 5 0 0 1 0 10h-3m-6 0H6A5 5 0 0 1 6 7h3"/><path d="M8 12h8"/>', pic: '<rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/>' };
+          [['type', 'form', 'Type it in'], ['link', 'link', 'Give a link'], ['pic', 'pic', 'Upload a picture of their card']].forEach(function (c) {
+            var t = el('button', 'act'); t.type = 'button';
+            var ci = el('span', 'aci'); ci.innerHTML = '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1F699E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + AIC[c[1]] + '</svg>';
+            t.appendChild(ci); t.appendChild(document.createTextNode(c[2]));
+            t.addEventListener('click', function () { S.how = c[0]; draw(); });
+            ach.appendChild(t);
+          });
+          mid.appendChild(ach);
+        } else if (S.step === 'who' && S.how !== 'type' && !aiOk) {
+          var ab = el('div', 'aibox');
+          ab.appendChild(el('p', '', 'To use this, the image (or link) uses AI to parse this information and that is the only job it does.'));
+          mid.appendChild(ab);
+          right = 'I agree'; rightFn = function () { aiOk = true; draw(); };
+        } else if (S.step === 'who' && S.how === 'link') {
+          var lf = el('div', 'afr'), li = el('input'); li.type = 'text'; li.placeholder = 'Ex: their website or LinkedIn page'; li.setAttribute('aria-label', 'Link');
+          var lb = el('button', 'afb', 'Fetch from link'); lb.type = 'button';
+          lb.addEventListener('click', function () { say('Reading a link is not built yet.'); });
+          lf.appendChild(li); lf.appendChild(lb); mid.appendChild(lf);
+        } else if (S.step === 'who' && S.how === 'pic') {
+          mid.appendChild(el('p', 'afl', 'Their card'));
+          var am = el('div', 'aim'), at = el('span', 'ait');
+          at.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#5A6878" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>';
+          am.appendChild(at); am.appendChild(el('span', 'aph', 'Paste an image, an image link, or upload one here.')); mid.appendChild(am);
+          var au = el('div', 'aup'), ub = el('button', 'cw-btn ghost sm', 'Upload'); ub.type = 'button';
+          ub.addEventListener('click', function () { say('Reading a picture is not built yet.'); });
+          au.appendChild(ub); mid.appendChild(au);
         } else if (S.step === 'who') {
           mid.appendChild(el('p', 'cw-fq', 'Who are they?'));
           var nm = el('input'); nm.type = 'text'; nm.placeholder = 'Search my contacts'; nm.setAttribute('aria-label', 'Their name');
