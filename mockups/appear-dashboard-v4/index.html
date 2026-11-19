@@ -1578,7 +1578,7 @@
       focus(false); b.innerHTML = '';
       if (past.length) {
         var names = past.slice(0, 3).map(function (iv) { return String(iv.name || 'a group'); });
-        var said = names.length > 1 ? names.slice(0, -1).join(', ') + ' and ' + names[names.length - 1] : names[0];
+        var said = names.length > 1 ? names.slice(0, -1).join(', ') + (names.length > 2 ? ', and ' : ' and ') + names[names.length - 1] : names[0];
         b.appendChild(el('p', 'none', 'Past invites you received included ' + said + '.'));
       }
       if (me.viewing) { return; }
