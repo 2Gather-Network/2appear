@@ -1592,7 +1592,7 @@
         var b = bbody('b-inv');
         var groups = (r[0] && Array.isArray(r[0].groups)) ? r[0].groups : [], hosted = r[1] || [];
         var mine = groups.filter(function (g) { var ro = String(g.role || '').toLowerCase(); return ro === 'host' || ro === 'cohost'; });
-        var toInvite = (mine.length ? mine : groups).slice(0, 3);
+        var toInvite = mine.concat(groups.filter(function (g) { return mine.indexOf(g) < 0; }));
         list.slice(0, 3).forEach(function (iv) {
           var who = String(iv.invitedByName || '').trim();
           var p = { name: who, code: String(iv.invitedByCode || '') };
