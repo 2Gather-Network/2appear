@@ -1219,7 +1219,7 @@
         shw.hidden = false;
       } else { shw.hidden = true; }
     }
-    function set(v) { fState[k] = v; fSave(k, v); closeFilters(); paint(); if (k === 'ev') { openEvFull(true); } else { rerender(); } }
+    function set(v) { fState[k] = v; if (k !== 'ev') { fSave(k, v); } closeFilters(); paint(); if (k === 'ev') { openEvFull(true); } else { rerender(); } }
     btn.addEventListener('click', function (e) { e.stopPropagation(); if (openF && openF.btn === btn) { closeFilters(); return; } closeFilters(); list.hidden = false; btn.setAttribute('aria-expanded', 'true'); openF = { btn: btn, list: list, root: root }; });
     root.appendChild(btn); root.appendChild(list);
     paint();
@@ -1376,7 +1376,7 @@
     if (!me.viewing) { try { first = String(localStorage.getItem('cw-first') || '').trim(); } catch (e) {} }
     if (first) { document.getElementById('greet').textContent = 'Welcome back, ' + first + '.'; }
     (function () { var root = bx('b-ppl').querySelector('.fl'), btn = root.querySelector('.view'), list = root.querySelector('.flist'); btn.addEventListener('click', function (e) { e.stopPropagation(); if (openF && openF.btn === btn) { closeFilters(); return; } closeFilters(); list.hidden = false; btn.setAttribute('aria-expanded', 'true'); openF = { btn: btn, list: list, root: root }; }); })();
-    fState.news = fLoad('news'); fState.match = fLoad('match'); fState.ev = fLoad('ev');
+    fState.news = fLoad('news'); fState.match = fLoad('match'); fState.ev = 'all'; fSave('ev', 'all');
     if (bx('b-news')) { filterUI('news', drawNews); } matchPaint = matchUI(); evPaint = filterUI('ev', drawEvents);
     var lede = document.getElementById('lede');
     var jobs = [loadNews(), loadEvents(), loadGroups3(), loadPeople(), loadMessages3(), loadInvites3(), loadMatch()];
@@ -1399,6 +1399,19 @@
     return getOnce('events', function () { return getJson(GS + '?t=' + Date.now()); }).then(function (d) { return (d && Array.isArray(d.events)) ? d.events : []; }, function () { return []; });
   }
   function evDay(v) { var s = String(v || '').slice(0, 10); return /^\d{4}-\d{2}-\d{2}$/.test(s) ? s : ''; }
+  function ymd(c) { return c.getFullYear() + '-' + ('0' + (c.getMonth() + 1)).slice(-2) + '-' + ('0' + c.getDate()).slice(-2); }
+  function nextDay(e, today) {
+    var d = evDay(e.date), f = String(e.recurFreq || '').toLowerCase(), dw = parseInt(e.dayOfWeek, 10);
+    if (f !== 'weekly' && f !== 'biweekly') { return d && d >= today ? d : ''; }
+    var end = evDay(e.recurEnd) || evDay(e.endDate);
+    if (isNaN(dw)) { if (!d) { return ''; } dw = new Date(d + 'T12:00:00').getDay(); }
+    var t = new Date(today + 'T12:00:00'), start = d ? new Date(d + 'T12:00:00') : t;
+    var c = new Date(Math.max(t.getTime(), start.getTime()));
+    while (c.getDay() !== dw) { c.setDate(c.getDate() + 1); }
+    if (f === 'biweekly' && d && Math.round((c - start) / 864e5 / 7) % 2 === 1) { c.setDate(c.getDate() + 7); }
+    var out = ymd(c);
+    return end && out > end ? '' : out;
+  }
   function matchedEvents() {
     return getOnce('matched', function () {
       return Promise.all([myInterests(), allEvents()]).then(function (r) {
@@ -1406,7 +1419,7 @@
         if (!ints.length) { return { ints: ints, list: [], upcoming: [] }; }
         evs.forEach(function (e) {
           if (!e || !e.id || String(e.isPrivate).toLowerCase() === 'true' || String(e.archived).toLowerCase() === 'true') { return; }
-          var day = evDay(e.date); if (!day || day < today) { return; }
+          var day = nextDay(e, today); if (!day) { return; }
           var cats = String(e.categories || '').split(',').map(function (c) { return c.trim().toLowerCase(); });
           if (/\[cancel+ed\]/i.test(String(e.title || ''))) { return; }
           var hay = (String(e.title || '') + ' ' + String(e.keywords || '')).toLowerCase(), hits = [];
@@ -1465,7 +1478,7 @@
       return Promise.all([gate('getMyEvents').then(function (d) { return (d && d.status === 'ok' && Array.isArray(d.events)) ? d.events : []; }, function () { return []; }), allEvents()]).then(function (r) {
         var ids = {}, today = new Date().toISOString().slice(0, 10), out = [];
         r[0].forEach(function (x) { if (!x || String(x.hostType || '').trim().toLowerCase() === 'socializer' || x.socializedByMe === true) { return; } var id = String(x.id || x.eventId || '').trim(); if (id) { ids[id] = 1; } });
-        r[1].forEach(function (e) { if (!e || !ids[String(e.id)]) { return; } if (/\[cancel+ed\]/i.test(String(e.title || ''))) { return; } var day = evDay(e.date); if (day && day >= today) { out.push({ e: e, day: day, whys: [] }); } });
+        r[1].forEach(function (e) { if (!e || !ids[String(e.id)]) { return; } if (/\[cancel+ed\]/i.test(String(e.title || ''))) { return; } var day = nextDay(e, today); if (day) { out.push({ e: e, day: day, whys: [] }); } });
         out.sort(function (a, b) { return a.day < b.day ? -1 : a.day > b.day ? 1 : 0; });
         var once = {};
         return out.filter(function (x) { var k = String(x.e.id); if (once[k]) { return false; } once[k] = 1; return true; });
@@ -1477,7 +1490,7 @@
     var mat = matchedEvents().then(function (m) { hasInts = m.ints.length > 0; store.evInts = m.ints; return m.list; }, function () { return []; });
     return Promise.all([mat, host]).then(function (r) {
       store.ev = r[0]; store.host = r[1];
-      if (fState.ev === 'hosting' && !store.host.length) { fState.ev = 'all'; fSave('ev', 'all'); }
+      if (fState.ev === 'hosting' && !store.host.length) { fState.ev = 'all'; }
       evPaint(); drawEvents();
     });
   }
@@ -1493,6 +1506,7 @@
   }
   function openEvFull(on) {
     evFull = on;
+    if (!on && fState.ev !== 'all') { fState.ev = 'all'; evPaint(); }
     var box = bx('b-ev'), lay = box.closest('.lay'), dashEl = document.getElementById('dash');
     lay.classList.toggle('focus', on); dashEl.classList.toggle('focus', on); box.classList.toggle('open', on);
     pageClose(on ? function () { openEvFull(false); } : null);
