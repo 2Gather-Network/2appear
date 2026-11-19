@@ -1430,7 +1430,13 @@
     bcount('b-ev', evs.length);
     if (!evs.length) { nothing(b, 'to go to.', 'Find an event', '/events/'); return; }
     var L = el('div', 'rlist'); b.appendChild(L);
-    evs.slice(0, 3).forEach(function (x) { var blk = el('div', 'rb'); blk.appendChild(newsItem(x)); L.appendChild(blk); });
+    function addE(x) { var blk = el('div', 'rb'); blk.appendChild(newsItem(x)); L.appendChild(blk); }
+    evs.slice(0, 3).forEach(addE);
+    if (evs.length > 3) {
+      var mr = el('div', 'morer'), mb = el('button', 'cw-btn ghost sm', 'Show more'); mb.type = 'button';
+      mb.addEventListener('click', function () { evs.slice(3).forEach(addE); mr.remove(); });
+      mr.appendChild(mb); b.appendChild(mr);
+    }
   }
   function loadGroups3() {
     var news = (READS_READY ? gate('getGroupNews') : Promise.resolve(null)).then(function (d) { return (d && d.status === 'ok' && Array.isArray(d.groups)) ? d.groups : []; }, function () { return []; });
