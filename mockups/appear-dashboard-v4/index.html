@@ -1481,9 +1481,10 @@
     });
   }
   var evFull = false, evFiltOpen = false;
-  var efS = (function () { var o = { p: true, v: true, off: {} }; try { var j = JSON.parse(localStorage.getItem('cw-dash4-ev-filter') || 'null'); if (j) { o.p = j.p !== false; o.v = j.v !== false; o.off = j.off || {}; } } catch (e) {} return o; })();
+  var efS = { p: true, v: true, off: {} };
+  try { localStorage.removeItem('cw-dash4-ev-filter'); } catch (e) {}
   function efOn() { return !(efS.p && efS.v && !Object.keys(efS.off).some(function (k) { return efS.off[k]; })); }
-  function efSave() { try { if (efOn()) { localStorage.removeItem('cw-dash4-ev-filter'); } else { localStorage.setItem('cw-dash4-ev-filter', JSON.stringify(efS)); } } catch (e) {} }
+  function efSave() {}
   function efFmt(e) { var f = String(e.format || '').toLowerCase(); if (f === 'virtual' || f === 'online') { return efS.v; } if (f === 'inperson' || f === 'in person' || !f) { return efS.p; } return efS.p || efS.v; }
   function efApply(list, hosting) {
     return list.map(function (x) { return hosting ? x : { e: x.e, day: x.day, whys: (x.whys || []).filter(function (w) { return !efS.off[w]; }) }; })
