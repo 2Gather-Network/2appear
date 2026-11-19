@@ -1482,8 +1482,8 @@
       var d = r0[0];
       if (!d || !Array.isArray(d.groups)) { throw new Error('not loaded'); }
       return news.then(function (gn) {
-        var b = bbody('b-grp'), by = {};
-        gn.forEach(function (g) { by[String(g.slug || '')] = g.lines || []; });
+        var b = bbody('b-grp'), by = {}, lastBy = {};
+        gn.forEach(function (g) { by[String(g.slug || '')] = g.lines || []; if (g.last) { lastBy[String(g.slug || '')] = g.last; } });
         bcount('b-grp', d.groups.length);
         if (!d.groups.length) { nothing(b, 'to join.', 'Find a group', '/groups/'); return; }
         var gbox = bx('b-grp'), glay = gbox.closest('.lay'), gdash = document.getElementById('dash'), gmode = '';
@@ -1493,7 +1493,8 @@
           var sl = String(g.slug || '').split(',')[0].trim();
           var ls = by[sl] || [];
           var blk = el('div', 'rb'); L.appendChild(blk);
-          blk.appendChild(groupItem(g, groupWhys(g), ls.length ? '' : 'Nothing new.'));
+          blk.appendChild(groupItem(g, groupWhys(g), ''));
+          if (!ls.length && lastBy[sl]) { ls = [lastBy[sl]]; }
           ls.slice(0, 2).forEach(function (it) { blk.appendChild(line(it)); });
         }
         function drawG() {
