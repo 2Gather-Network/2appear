@@ -1433,7 +1433,7 @@
       });
     });
   }
-  function dayWords(day) { var d = new Date(day + 'T12:00:00'); return d.toLocaleDateString('en-US', { weekday: 'short', day: 'numeric', month: 'short' }); }
+  function dayWords(day) { if (!day) { return 'Date and time to be announced'; } var d = new Date(day + 'T12:00:00'); return d.toLocaleDateString('en-US', { weekday: 'short', day: 'numeric', month: 'short' }); }
   function evHref(e) { return '/event/?id=' + encodeURIComponent(String(e.id)); }
   var hasInts = null, myInts = [];
   function groupHref(g) { var sl = String(g.slug || '').split(',')[0].trim(); return sl ? '/group/' + encodeURIComponent(sl) : '/mygroups/'; }
@@ -1478,8 +1478,8 @@
       return Promise.all([gate('getMyEvents').then(function (d) { return (d && d.status === 'ok' && Array.isArray(d.events)) ? d.events : []; }, function () { return []; }), allEvents()]).then(function (r) {
         var ids = {}, today = new Date().toISOString().slice(0, 10), out = [];
         r[0].forEach(function (x) { if (!x || String(x.hostType || '').trim().toLowerCase() === 'socializer' || x.socializedByMe === true) { return; } var id = String(x.id || x.eventId || '').trim(); if (id) { ids[id] = 1; } });
-        r[1].forEach(function (e) { if (!e || !ids[String(e.id)]) { return; } if (/\[cancel+ed\]/i.test(String(e.title || ''))) { return; } var day = nextDay(e, today); if (day) { out.push({ e: e, day: day, whys: [] }); } });
-        out.sort(function (a, b) { return a.day < b.day ? -1 : a.day > b.day ? 1 : 0; });
+        r[1].forEach(function (e) { if (!e || !ids[String(e.id)]) { return; } if (/\[cancel+ed\]/i.test(String(e.title || ''))) { return; } var day = nextDay(e, today); if (!day && !evDay(e.date) && !String(e.recurFreq || '').trim()) { out.push({ e: e, day: '', whys: [] }); return; } if (day) { out.push({ e: e, day: day, whys: [] }); } });
+        out.sort(function (a, b) { if (!a.day || !b.day) { return a.day ? -1 : b.day ? 1 : 0; } return a.day < b.day ? -1 : a.day > b.day ? 1 : 0; });
         var once = {};
         return out.filter(function (x) { var k = String(x.e.id); if (once[k]) { return false; } once[k] = 1; return true; });
       });
