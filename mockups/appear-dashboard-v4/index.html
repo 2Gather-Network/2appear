@@ -1464,10 +1464,11 @@
     return getOnce('hosted', function () {
       return Promise.all([gate('getMyEvents').then(function (d) { return (d && d.status === 'ok' && Array.isArray(d.events)) ? d.events : []; }, function () { return []; }), allEvents()]).then(function (r) {
         var ids = {}, today = new Date().toISOString().slice(0, 10), out = [];
-        r[0].forEach(function (x) { var id = String((x && (x.id || x.eventId)) || '').trim(); if (id) { ids[id] = 1; } });
+        r[0].forEach(function (x) { if (!x || String(x.hostType || '').trim().toLowerCase() === 'socializer' || x.socializedByMe === true) { return; } var id = String(x.id || x.eventId || '').trim(); if (id) { ids[id] = 1; } });
         r[1].forEach(function (e) { if (!e || !ids[String(e.id)]) { return; } if (/\[cancel+ed\]/i.test(String(e.title || ''))) { return; } var day = evDay(e.date); if (day && day >= today) { out.push({ e: e, day: day, whys: [] }); } });
         out.sort(function (a, b) { return a.day < b.day ? -1 : a.day > b.day ? 1 : 0; });
-        return out;
+        var once = {};
+        return out.filter(function (x) { var k = String(x.e.id); if (once[k]) { return false; } once[k] = 1; return true; });
       });
     });
   }
