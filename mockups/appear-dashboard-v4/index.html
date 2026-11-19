@@ -243,6 +243,7 @@
   .pills.all{max-width:60%;}
   @media(max-width:599px){.ni{flex-wrap:wrap;}.ni .tx{flex:1 1 calc(100% - 66px);}.ni .tx a.ul,.ni .sub{white-space:normal;overflow:visible;text-overflow:clip;}.ni .vn{text-align:left;max-width:100%;overflow-wrap:anywhere;}.ni .pills{flex:1 1 100%;max-width:100%;justify-content:flex-start;}.ni .pills.all{max-width:100%;}}
   .morer{display:flex;justify-content:flex-end;margin-top:10px;}
+  .plv{font-size:16px;font-weight:700;color:#1A2E42;margin:6px 0 8px;}
   .efp{border:1.5px solid #C9DFF3;border-radius:12px;padding:12px;margin:10px 0 0;background:#fff;}
   .efp .cw-fq{font-size:14px;margin:0 0 6px;}
   .efp .cw-rad{margin:0 0 10px;}
@@ -399,10 +400,12 @@
   }
   N.seen = seenThen(N.connect);
   N.msg = { q: 'Would you like to be introduced to other people?', multi: true, opts: [opt('Introduce me to other people', N.seen), opt('Introduce other people to me', N.seen)] };
-  N.evInts = { q: 'Would you like to add interests so events can match you?', opts: [opt('Add interests', null, { go: true, dest: '/ikigai/interests' })] };
-  N.evMode = { q: 'Would you like to see matches only, or all events?', opts: [opt('Matches only', seenThen(N.evInts)), opt('View all', null, { go: true, dest: '/events/' })] };
-  N.evRadius = { q: 'How far would you like to look?', opts: [opt('My neighborhood', N.evMode), opt('My city', N.evMode), opt('My county', N.evMode), opt('My state', N.evMode)] };
-  N.ev = { q: 'Where would you like to look?', multi: true, opts: [opt('In person', N.evRadius), opt('Virtually', N.evMode)] };
+  N.evGo = { q: 'Your interests open in a new tab. Choose what you care about there, then come back to this tab. Your event matches will be here.', opts: [opt('Continue', null, { go: true, primary: true, newTab: true, dest: '/ikigai/interests' })] };
+  N.evInts = { q: 'Would you like to add interests so events can match you?', opts: [opt('Add interests', N.evGo)] };
+  N.evNext = seenThen(N.evInts);
+  function placeNode(level) { return { place: level, q: '', after: N.evNext }; }
+  N.evRadius = { q: 'How far would you like to look?', opts: [opt('My neighborhood', placeNode('neighborhood')), opt('My city', placeNode('city')), opt('My county', placeNode('county')), opt('My state', placeNode('state'))] };
+  N.ev = { q: 'Where would you like to look?', multi: true, opts: [opt('In person', N.evRadius), opt('Virtually', N.evNext)] };
   N.matchOn = { q: 'What would you like to be matched on?', multi: true, opts: [opt('What I offer', N.seen), opt('What I seek', N.seen)] };
   N.grpPerm = { q: 'What would you like to do next?', multi: true, opts: [opt('Add my interests for groups', null, { go: true, dest: '/ikigai/interests' }), opt('Build my own group and invite people I trust', null, { go: true, dest: '/groups/create' }), opt('Wait for an invitation from someone I meet', null, { go: true, dest: '/mygroups/?tab=invites' })] };
   N.grpOpen = { q: 'Are you open to meeting new people in your groups?', opts: [opt('Yes, show me anyone', N.grpPerm), opt('Show me just matches to people in my groups', N.grpPerm), opt('Don\'t show me matches', N.grpPerm)] };
@@ -447,6 +450,7 @@
     var queue = [];
     function reset() { trail = []; queue = []; render(START, 0); }
     function leave(o) {
+      if (o.newTab) { window.open(o.dest, '_blank', 'noopener'); return; }
       if (o.close) { reset(); return; }
       if (queue.length) { var nx = queue.shift(); if (nx.goTo) { window.location.href = nx.goTo; return; } render(nx, 0); return; }
       window.location.href = o.dest || DEST[key];
@@ -465,12 +469,62 @@
       });
       return c;
     }
+    var placeP = null;
+    function myPlace() {
+      if (!placeP) {
+        placeP = gate('getIntake').then(function (d) {
+          var r = (d && d.data) || {}, loc = String(r.location || '').split(',').map(function (x) { return x.trim(); }).filter(Boolean), tail = loc.length ? loc[loc.length - 1] : '';
+          var o = { state: '', country: '', county: String(r.county || '').trim(), city: String(r.city || '').trim(), zip: String(r.zip || r.zipcode || r.postalCode || '').replace(/[^0-9]/g, '').slice(0, 5) };
+          if (tail === 'United States') { o.country = tail; o.state = loc.length > 1 ? loc[0] : ''; } else if (tail) { o.country = tail; }
+          return o;
+        }, function () { return { state: '', country: '', county: '', city: '', zip: '' }; });
+      }
+      return placeP;
+    }
+    function placeText(v, level) {
+      var st = v.state ? ', ' + v.state : '';
+      if (level === 'neighborhood') { return v.city ? (v.zip ? v.zip + ', ' : '') + v.city + st : (v.zip || ''); }
+      if (level === 'city') { return v.city ? v.city + st : ''; }
+      if (level === 'county') { return v.county ? v.county + st : ''; }
+      return v.state ? v.state + (v.country ? ', ' + v.country : '') : '';
+    }
+    function drawPlace(node) {
+      var w = el('div', 'plc'); host.appendChild(w);
+      w.appendChild(el('p', 'cw-fq', 'Looking up your information...'));
+      myPlace().then(function (v) {
+        w.innerHTML = '';
+        var lv = node.place, edit = false;
+        var val = el('p', 'plv'), ask = el('p', 'cw-fq', 'Is that right?'), yn = el('div', 'cw-fchips'), form = el('div', 'ikd'); form.hidden = true;
+        function show() { var t = placeText(v, lv); val.textContent = t || 'Choose a place'; }
+        var yes = el('button', 'cw-fchip on', 'Yes'); yes.type = 'button';
+        yes.addEventListener('click', function () { render(node.after, 0); });
+        var no = el('button', 'cw-fchip', 'No'); no.type = 'button';
+        no.addEventListener('click', function () { form.hidden = false; });
+        yn.appendChild(yes); yn.appendChild(no);
+        function field(ph, key, digits) {
+          var i = el('input'); i.type = 'text'; i.placeholder = ph; i.setAttribute('aria-label', ph); i.value = v[key] || '';
+          if (digits) { i.setAttribute('inputmode', 'numeric'); i.maxLength = 5; }
+          i.addEventListener('input', function () { if (digits) { i.value = i.value.replace(/[^0-9]/g, '').slice(0, 5); } v[key] = i.value.trim(); show(); });
+          form.appendChild(i);
+        }
+        if (lv === 'neighborhood') { field('Zip code (optional)', 'zip', true); field('City (type or pick)', 'city'); }
+        else if (lv === 'city') { field('City (type or pick)', 'city'); }
+        else if (lv === 'county') { field('County', 'county'); }
+        else { field('State', 'state'); }
+        show();
+        w.appendChild(val); w.appendChild(ask); w.appendChild(yn); w.appendChild(form);
+      });
+      var ft = el('div', 'ft'), grp = el('div', 'ftl'), bk = el('button', 'cw-btn ghost sm', 'Back'); bk.type = 'button';
+      bk.addEventListener('click', function () { var prev = trail[trail.length - 1].node; trail = trail.slice(0, -1); render(prev, 0); });
+      grp.appendChild(bk); ft.appendChild(grp); host.appendChild(ft);
+    }
     function render(node, expanded) {
       host.innerHTML = '';
       focus(trail.length > 0);
       if (trail.length === 0) { host.appendChild(el('p', 'empty', 'Would you like to populate this section?')); }
       else { host.appendChild(crumbs(trail.length)); }
       node = resolve(node);
+      if (node && node.place) { drawPlace(node); return; }
       if (node && node.dyn) { node = { q: node.q, multi: node.multi, opts: node.dyn() }; }
       while (node && node.seen && seenDone) { node = node.skipTo; }
       if (!node.hideQ) { host.appendChild(el('p', 'cw-fq', node.q)); }
