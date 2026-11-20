@@ -245,7 +245,8 @@
   .morer{display:flex;justify-content:flex-end;margin-top:10px;}
   .plv{font-size:16px;font-weight:700;color:#1A2E42;margin:6px 0 8px;}
   .efp{border:1.5px solid #C9DFF3;border-radius:12px;padding:12px;margin:10px 0 0;background:#fff;}
-  .efp .cw-fq{font-size:14px;margin:0 0 6px;}
+  .efp .cw-fq{margin:0 0 6px;}
+  .efp .rs{font-size:14px;font-weight:600;}
   .efp .cw-rad{margin:0 0 10px;}
   .ul2{color:var(--brand);text-decoration:underline;}
   .rlist{border:1.5px solid #DDE4EE;border-radius:12px;margin-top:10px;overflow:hidden;}
@@ -1569,6 +1570,7 @@
         }
         function drawG() {
           var bb = bbody('b-grp');
+          bcount('b-grp', gmode === 'host' ? hostG.length : d.groups.length);
           if (gmode) { bb.appendChild(el('p', 'sub vh', gmode === 'host' ? 'Groups I host' : 'Groups I belong to')); }
           var L = el('div', 'rlist'); bb.appendChild(L);
           (gmode === 'host' ? hostG : (gmode === 'all' ? d.groups : d.groups.slice(0, 3))).forEach(function (g) { addG(L, g); });
