@@ -69,6 +69,15 @@
   .empty a{color:var(--brand);font-weight:700;text-decoration:none;}
   .cw-loading{display:inline-flex;align-items:center;background:var(--brand);color:#fff;font-size:12.5px;font-weight:400;padding:6px 14px;border-radius:20px;margin-top:10px;animation:cw-breathe 1.6s ease-in-out infinite;}
   .lede.wait{animation:cw-breathe 1.6s ease-in-out infinite;}
+  .dash .lede.wait{color:var(--brand);}
+  .cwpre{display:flex;justify-content:center;padding:34px 0;}
+  .cwpre[hidden]{display:none;}
+  .cwpre .cw-loading{margin-top:0;}
+  #b-msg .nm{text-decoration:none;}
+  .dots{flex:none;align-self:center;width:32px;height:32px;border-radius:50%;border:0;background:none;color:var(--brand);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;padding:0;}
+  .dots:hover,.dots.sel{background:#EEF1F5;}
+  .dots:focus-visible{outline:3px solid var(--ink);outline-offset:2px;}
+  .vb::after,.mnb::after{content:"\22EF";margin-left:8px;font-weight:800;}
   .cw-fq{font-size:16px;font-weight:700;color:var(--ink);margin:0 0 4px;}
   .cw-fchips{display:flex;gap:8px;flex-wrap:wrap;}
   .cw-fchip{background:#fff;border:1.5px solid #DDE4EE;border-radius:22px;padding:8px 16px;font-size:14px;font-weight:600;color:var(--ink);cursor:pointer;user-select:none;font-family:inherit;text-decoration:none;display:inline-block;}
@@ -307,7 +316,7 @@
     </div>
 
     <p class="empty" id="loadfail" hidden>This did not load. Reload the page to try again.</p>
-    <p class="lede wait" id="pre" hidden>Looking up your information...</p>
+    <div class="cwpre" id="pre" hidden><span class="cw-loading">Looking up your information...</span></div>
     <div id="intro">
     <h1>Appear in your network. Make your network appear.</h1>
 
@@ -1636,7 +1645,11 @@
       ts.slice(0, 3).forEach(function (x) {
         var p = { name: x.other.name, photo: x.other.photo, code: x.other.code || (x.other.id ? cwCodeFor(x.other.id) : ''), vanity: x.other.vanity };
         var last = x.last && x.last.body ? String(x.last.body) : 'New message';
-        b.appendChild(line({ people: [p], text: [{ p: 0 }, ' ', { a: last, plain: true, href: p.code ? '/messages/?to=' + encodeURIComponent('c:' + p.code) : '/messages/' }] }));
+        var ml = line({ people: [p], text: [{ p: 0 }, ' ', { a: last, plain: true, href: p.code ? '/messages/?to=' + encodeURIComponent('c:' + p.code) : '/messages/' }] });
+        var dt = el('button', 'dots'); dt.type = 'button'; dt.setAttribute('aria-haspopup', 'true'); dt.setAttribute('aria-expanded', 'false'); dt.setAttribute('aria-label', 'More about ' + (String(p.name || '').trim() || 'this person'));
+        dt.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg>';
+        dt.addEventListener('click', function (e) { e.stopPropagation(); openMenu(dt, p, ml); });
+        ml.appendChild(dt); b.appendChild(ml);
       });
     }).catch(function () { bfail('b-msg'); });
   }
@@ -1651,7 +1664,14 @@
       if (past.length) {
         var names = past.slice(0, 3).map(function (iv) { return String(iv.name || 'a group'); });
         var said = names.length > 1 ? names.slice(0, -1).join(', ') + (names.length > 2 ? ', and ' : ' and ') + names[names.length - 1] : names[0];
-        b.appendChild(el('p', 'none', 'Past invites you received included ' + said + '.'));
+        var pp = el('p', 'none'); pp.appendChild(document.createTextNode('Past invites you received included '));
+        var shownPast = past.slice(0, 3);
+        shownPast.forEach(function (iv, i) {
+          var a = el('a', 'ul', String(iv.name || 'a group')); a.href = groupHref(iv); pp.appendChild(a);
+          var n = shownPast.length;
+          if (i < n - 1) { pp.appendChild(document.createTextNode(n > 2 ? (i === n - 2 ? ', and ' : ', ') : ' and ')); }
+        });
+        pp.appendChild(document.createTextNode('.')); b.appendChild(pp);
       }
       if (me.viewing) { return; }
       b.appendChild(el('p', 'none', 'Would you like to extend an invite to someone now?'));
