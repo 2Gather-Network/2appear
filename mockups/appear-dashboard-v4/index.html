@@ -1083,7 +1083,7 @@
   var fState = { news: 'all', match: 'all', ev: 'all' };
   var store = { news: null, match: null, ev: null, host: null };
 
-  function fKey(k) { return 'cw-dash3-filter-' + k; }
+  function fKey(k) { return 'cw-dash3-filter-' + me.id + '-' + k; }
   function fLoad(k) { var v = 'all'; try { v = localStorage.getItem(fKey(k)) || 'all'; } catch (e) {} return FILTERS[k].some(function (o) { return o[0] === v; }) ? v : 'all'; }
   function fSave(k, v) { try { if (v === 'all') { localStorage.removeItem(fKey(k)); } else { localStorage.setItem(fKey(k), v); } } catch (e) {} }
   function fLabel(k, v) { var l = ''; FILTERS[k].forEach(function (o) { if (o[0] === v) { l = o[1]; } }); return l; }
@@ -1120,7 +1120,7 @@
       m.appendChild(menuItem('msg', 'Send message', '/messages/?to=' + encodeURIComponent('c:' + code)));
       m.appendChild(menuItem('user', 'See profile', prof));
       var cal = String(p.calendar || '').trim();
-      if (/^https:\/\//.test(cal)) { var bk = menuItem('cal', 'Book a time', cal); bk.target = '_blank'; bk.rel = 'noopener noreferrer'; m.appendChild(bk); }
+      if (p.calendarAllowed === true && /^https:\/\//.test(cal)) { var bk = menuItem('cal', 'Book a time', cal); bk.target = '_blank'; bk.rel = 'noopener noreferrer'; m.appendChild(bk); }
       m.appendChild(menuItem('share', 'Make an intro', prof + '#intro'));
       m.appendChild(menuItem('plant', 'Show appreciation', prof + '#appreciation'));
     }
@@ -1308,7 +1308,7 @@
     if (!newsFull && items.length > 3) { var mr = el('div', 'morer'); var mb = el('button', 'rs', 'More'); mb.type = 'button'; mb.addEventListener('click', function () { openNewsFull({}); }); mr.appendChild(mb); b.appendChild(mr); }
   }
   var MSRC = [['groups', 'My groups'], ['past', 'My past events'], ['contacts', 'My contacts'], ['connections', 'My connections']];
-  var mOn = (function () { var o = {}; try { o = JSON.parse(localStorage.getItem('cw-dash4-match-on') || '{}') || {}; } catch (e) {} return o; })();
+  var mOn = (function () { var o = {}; try { o = JSON.parse(localStorage.getItem('cw-dash4-match-on-' + me.id) || '{}') || {}; } catch (e) {} return o; })();
   var mFull = false;
   function mIsOn(k) { return mOn[k] !== false; }
   function mAvail() { var a = {}; ((store.match && store.match.people) || []).forEach(function (p) { (p.sources || []).forEach(function (s) { a[s] = 1; }); }); return a; }
@@ -1322,7 +1322,7 @@
         if (!av[o[0]]) { return; }
         var r = el('button', 'fi tg'); r.type = 'button'; r.setAttribute('role', 'switch'); r.setAttribute('aria-checked', mIsOn(o[0]) ? 'true' : 'false');
         r.appendChild(el('span', '', o[1])); r.appendChild(el('span', 'sw'));
-        r.addEventListener('click', function (e) { e.stopPropagation(); mOn[o[0]] = !mIsOn(o[0]); try { localStorage.setItem('cw-dash4-match-on', JSON.stringify(mOn)); } catch (x) {} paint(); drawMatch(); });
+        r.addEventListener('click', function (e) { e.stopPropagation(); mOn[o[0]] = !mIsOn(o[0]); try { localStorage.setItem('cw-dash4-match-on-' + me.id, JSON.stringify(mOn)); } catch (x) {} paint(); drawMatch(); });
         list.appendChild(r);
         if (!mIsOn(o[0])) { off.push(o[1]); }
       });
@@ -1330,7 +1330,7 @@
       var shw = box.querySelector('.showing'); shw.innerHTML = '';
       if (off.length) {
         shw.appendChild(document.createTextNode('Hiding ' + off.join(', ') + ' · '));
-        var rs = el('button', 'rs', 'Reset'); rs.type = 'button'; rs.addEventListener('click', function () { mOn = {}; try { localStorage.removeItem('cw-dash4-match-on'); } catch (x) {} paint(); drawMatch(); }); shw.appendChild(rs);
+        var rs = el('button', 'rs', 'Reset'); rs.type = 'button'; rs.addEventListener('click', function () { mOn = {}; try { localStorage.removeItem('cw-dash4-match-on-' + me.id); } catch (x) {} paint(); drawMatch(); }); shw.appendChild(rs);
         shw.hidden = false;
       } else { shw.hidden = true; }
     }
