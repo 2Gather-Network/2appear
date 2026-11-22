@@ -71,7 +71,8 @@
   .cw-loading{display:inline-flex;align-items:center;background:var(--brand);color:#fff;font-size:12.5px;font-weight:400;padding:6px 14px;border-radius:20px;margin-top:10px;animation:cw-breathe 1.6s ease-in-out infinite;}
   .lede.wait{animation:cw-breathe 1.6s ease-in-out infinite;}
   .dash .lede.wait{color:var(--brand);}
-  .cwpre{display:flex;justify-content:center;padding:34px 0;}
+  .cwpre{display:flex;justify-content:center;align-items:center;min-height:60vh;}
+  .card:has(#pre:not([hidden])){background:none;padding:0;}
   .cwpre[hidden]{display:none;}
   .cwpre .cw-loading{margin-top:0;}
   #b-msg .nm{text-decoration:none;}
