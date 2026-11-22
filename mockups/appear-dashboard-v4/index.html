@@ -1571,20 +1571,19 @@
         function isHostG(g) { var ro = String(g.role || '').toLowerCase(); return ro === 'host' || ro === 'cohost'; }
         var hostG = d.groups.filter(isHostG);
         var gmBy = {};
+        function plain(it) { var w = line(it), lead = w.querySelector('.fs'); if (lead) { lead.remove(); } w.classList.add('gms'); return w; }
+        function joinW(a) { return a.length > 2 ? a.slice(0, -1).join(', ') + ', and ' + a[a.length - 1] : a.join(' and '); }
         function gmExtra(blk, gm) {
-          var ppl = (gm.people || []).filter(function (p) { return p && String(p.name || '').trim(); });
-          if (ppl.length) {
-            var text = ['People you know here: '];
-            ppl.forEach(function (p, i) {
-              text.push({ p: i });
-              var n = ppl.length + (gm.morePeople > 0 ? 1 : 0);
-              if (i < ppl.length - 1) { text.push(n > 2 ? (i === n - 2 ? ', and ' : ', ') : ' and '); }
-            });
-            if (gm.morePeople > 0) { text.push(ppl.length > 1 ? ', and ' + gm.morePeople + ' more' : ' and ' + gm.morePeople + ' more'); }
-            text.push('.');
-            blk.appendChild(line({ people: ppl, text: text }));
+          var mem = (gm.members || []).filter(function (p) { return p && String(p.name || '').trim(); }), n = Number(gm.memberCount) || 0;
+          if (mem.length && n >= mem.length) {
+            var t = [n + ' members are here including '];
+            mem.forEach(function (p, i) { t.push({ p: i }); if (i < mem.length - 1) { t.push(mem.length > 2 ? (i === mem.length - 2 ? ', and ' : ', ') : ' and '); } });
+            blk.appendChild(plain({ people: mem, text: t }));
+          } else if (n > 1) { blk.appendChild(el('p', 'sub gms', n + ' members are here')); }
+          var sh = gm.sharer;
+          if (sh && String(sh.name || '').trim() && (sh.words || []).length) {
+            blk.appendChild(plain({ people: [sh], text: ['You and ', { p: 0 }, ' share interests in ' + joinW(sh.words.map(String))] }));
           }
-          (gm.shared || []).forEach(function (x) { if (x && x.word && x.count >= 3) { blk.appendChild(el('p', 'sub gms', x.count + ' members share ' + x.word + '.')); } });
         }
         function addG(L, g) {
           var sl = String(g.slug || '').split(',')[0].trim();
@@ -1597,7 +1596,7 @@
           blk.appendChild(groupItem(g, gw, ''));
           if (gm) { gmExtra(blk, gm); }
           if (!ls.length && lastBy[sl]) { ls = [lastBy[sl]]; }
-          ls.slice(0, 2).forEach(function (it) { blk.appendChild(line(it)); });
+          ls.slice(0, 1).forEach(function (it) { if (Array.isArray(it.text)) { blk.appendChild(plain({ people: it.people, text: ['News: '].concat(it.text) })); } else { blk.appendChild(line(it)); } });
         }
         function drawG() {
           var bb = bbody('b-grp');
