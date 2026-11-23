@@ -176,7 +176,9 @@
   .lay.focus{display:block;}
   .lay.focus .bx:not(.open){display:none;}
   .lay.focus .two,.lay.focus .rail{display:block;margin:0;}
-  .pgbar{margin:12px 0 0;display:flex;justify-content:flex-end;}
+  .pgbar{margin:12px 0 0;display:flex;align-items:center;gap:12px;}
+  .pgbar #pgclose{margin-left:auto;}
+  .pgcrumb,.pgcrumb a,.pgcrumb i,.pgcrumb b{color:#fff;}
   .pgbar[hidden]{display:none;}
   .pgbar .cw-btn{border:1.5px solid #fff;}
   .lay{display:grid;grid-template-columns:minmax(0,1fr) 280px;gap:14px;align-items:start;}
@@ -292,9 +294,9 @@
           <div class="mnl" id="editlist" hidden>
             <button type="button" class="mni" data-k="interest">Add an interest</button>
             <button type="button" class="mni" data-k="offer">Add something I'm offering</button>
-            <button type="button" class="mni" data-k="need">Add something I need</button>
+            <button type="button" class="mni" data-k="need">Add something I'm seeking</button>
             <hr class="mnd">
-            <button type="button" class="mni" data-k="theyneed">I know someone looking for...</button>
+            <button type="button" class="mni" data-k="theyneed">I know someone seeking...</button>
             <button type="button" class="mni" data-k="theyoffer">I know someone who has...</button>
           </div>
         </div>
@@ -345,7 +347,7 @@
     </div>
 
   </div>
-  <div class="pgbar" id="pgbar" hidden><button class="cw-btn sm" id="pgclose" type="button">Close</button></div>
+  <div class="pgbar" id="pgbar" hidden><span class="pgcrumb bc" id="pgcrumb"></span><button class="cw-btn sm" id="pgclose" type="button">Close</button></div>
 </div>
 <script>
 (function () {
@@ -1617,19 +1619,35 @@
           if (!ls.length && lastBy[sl]) { ls = [lastBy[sl]]; }
           ls.slice(0, 1).forEach(function (it) { if (Array.isArray(it.text)) { gtx.appendChild(plain({ people: it.people, text: ['News: '].concat(it.text) })); } else { gtx.appendChild(line(it)); } });
         }
+        var memG = d.groups.filter(function (g) { return !isHostG(g); });
+        if (!memG.length) { memG = d.groups; }
         function drawG() {
           var bb = bbody('b-grp');
-          bcount('b-grp', gmode === 'host' ? hostG.length : d.groups.length);
-          if (gmode) { bb.appendChild(el('p', 'sub vh', gmode === 'host' ? 'Groups I host' : 'Groups I belong to')); }
+          bcount('b-grp', gmode === 'host' ? hostG.length : (gmode === 'all' ? memG.length : d.groups.length));
+          var pcr = document.getElementById('pgcrumb'); if (pcr) { pcr.innerHTML = ''; }
+          if (gmode) {
+            var bk = el('a', '', 'Dashboard'); bk.href = '#';
+            bk.addEventListener('click', function (e) { e.preventDefault(); setG(''); });
+            if (pcr) { pcr.appendChild(bk); pcr.appendChild(el('i', '', '\u203a')); pcr.appendChild(el('b', '', gmode === 'host' ? 'Host of groups' : 'Member of groups')); }
+            if (hostG.length) {
+              var tg = el('div', 'morer'); tg.style.justifyContent = 'flex-start'; tg.style.gap = '8px';
+              [['host', 'Groups I host'], ['all', 'Groups I belong to']].forEach(function (o) {
+                var tb = el('button', 'cw-btn sm ' + (gmode === o[0] ? '' : 'ghost'), o[1]); tb.type = 'button'; tb.setAttribute('aria-pressed', gmode === o[0] ? 'true' : 'false');
+                tb.addEventListener('click', function () { gmode = o[0]; drawG(); loadGM(o[0] === 'host' ? hostG : memG); });
+                tg.appendChild(tb);
+              });
+              bb.appendChild(tg);
+            }
+          }
           var L = el('div', 'rlist'); bb.appendChild(L);
-          (gmode === 'host' ? hostG : (gmode === 'all' ? d.groups : d.groups.slice(0, 3))).forEach(function (g) { addG(L, g); });
+          (gmode === 'host' ? hostG : (gmode === 'all' ? memG : d.groups.slice(0, 3))).forEach(function (g) { addG(L, g); });
         }
         function setG(m) {
           gmode = m; var on = !!m;
           glay.classList.toggle('focus', on); gdash.classList.toggle('focus', on); gbox.classList.toggle('open', on);
           pageClose(on ? function () { setG(''); } : null);
           drawG();
-          if (m) { loadGM(m === 'host' ? hostG : d.groups); }
+          if (m) { loadGM(m === 'host' ? hostG : memG); }
           if (on) { window.scrollTo(0, 0); }
         }
         var groot = gbox.querySelector('.fl'); groot.innerHTML = '';
