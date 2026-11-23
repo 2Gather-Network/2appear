@@ -535,7 +535,7 @@
     function render(node, expanded) {
       host.innerHTML = '';
       focus(trail.length > 0);
-      if (trail.length === 0) { host.appendChild(el('p', 'empty', 'Would you like to populate this section?')); }
+      if (trail.length === 0) { host.appendChild(el('p', 'empty', '🌱 Would you like to grow this section?')); }
       else { host.appendChild(crumbs(trail.length)); }
       node = resolve(node);
       if (node && node.place) { drawPlace(node); return; }
