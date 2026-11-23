@@ -645,8 +645,8 @@
     var panel = tile('t-add'), tiles = panel.parentNode, dash = document.getElementById('dash');
     var KIND = {
       interest: { crumb: 'Add an interest', hash: '#interests' },
-      offer: { crumb: "I'm offering something", path: '/me/offer', q: 'What would you like to offer?', card: '', detailPh: 'Details: what exactly are you offering? (required)', hash: '#offering' },
-      need: { crumb: "I'm seeking something", path: '/me/need', q: 'What do you need?', card: '', detailPh: 'Details: what exactly are you seeking? (required)', hash: '#needs' },
+      offer: { crumb: "I'm offering something", q: 'What would you like to offer?', card: '', detailPh: 'Details: what exactly are you offering? (required)', hash: '#offering' },
+      need: { crumb: "I'm seeking something", q: 'What do you need?', card: '', detailPh: 'Details: what exactly are you seeking? (required)', hash: '#needs' },
       theyneed: { crumb: 'I know someone seeking something', path: '/other/need', q: 'What are they seeking?', card: '', detailPh: 'Details: what exactly are they seeking? (required)', other: true },
       theyoffer: { crumb: 'I know someone offering something', path: '/other/offer', q: 'What are they offering?', card: '', detailPh: 'Details: what exactly are they offering? (required)', other: true }
     };
@@ -654,7 +654,7 @@
     function closeAll() {
       panel.classList.remove('open'); tiles.classList.remove('focus'); dash.classList.remove('focus'); shut(); pageClose(null);
       var pcb = document.getElementById('pgcrumb'); if (pcb) { pcb.innerHTML = ''; }
-      if (/^\/(me|other)\/(need|offer)$/.test(location.pathname)) { try { history.pushState({}, '', '/'); } catch (err) {} }
+      if (/^\/other\/(need|offer)$/.test(location.pathname)) { try { history.pushState({}, '', '/'); } catch (err) {} }
     }
     function openMenu() { list.hidden = false; btn.setAttribute('aria-expanded', 'true'); }
     btn.addEventListener('click', function () { if (list.hidden) { openMenu(); } else { shut(); } });
@@ -1050,7 +1050,7 @@
     Array.prototype.forEach.call(list.querySelectorAll('.mni'), function (it) {
       it.addEventListener('click', function () { showKind(it.getAttribute('data-k')); });
     });
-    var PATHK = { '/me/need': 'need', '/me/offer': 'offer', '/other/need': 'theyneed', '/other/offer': 'theyoffer' };
+    var PATHK = { '/other/need': 'theyneed', '/other/offer': 'theyoffer' };
     window.addEventListener('popstate', function () { var pk = PATHK[location.pathname]; if (pk) { showKind(pk); } else if (panel.classList.contains('open')) { closeAll(); } });
     if (PATHK[location.pathname]) { showKind(PATHK[location.pathname]); }
   }
