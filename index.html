@@ -744,12 +744,10 @@
         if (!bar) { return; }
         var root = el('a', '', 'Dashboard'); root.href = '#';
         root.addEventListener('click', function (e) { e.preventDefault(); closeAll(); });
-        bar.appendChild(root); bar.appendChild(el('i', '', '›'));
-        if (!S.typeLabel) { bar.appendChild(el('b', '', d.crumb)); return; }
-        var me1 = el('a', '', d.crumb); me1.href = '#';
-        me1.addEventListener('click', function (e) { e.preventDefault(); S.hist = []; S.step = 'type'; S.typeLabel = ''; S.type = ''; S.typed = ''; draw(); });
-        bar.appendChild(me1); bar.appendChild(el('i', '', '›'));
-        bar.appendChild(el('b', '', S.typeLabel));
+        bar.appendChild(root); bar.appendChild(el('i', '', '/'));
+        var prof = el('a', '', 'Profile'); prof.href = '/me/?mine=1';
+        bar.appendChild(prof); bar.appendChild(el('i', '', '/'));
+        bar.appendChild(el('b', '', 'Add something'));
       }
       function pill(label, fn, on) { var p = el('button', 'ikp' + (on ? ' on' : ''), label); p.type = 'button'; p.addEventListener('click', fn); return p; }
       function ipill(word, fn) { var p = el('button', 'ikp ic'); p.type = 'button'; p.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + PICON[word] + '</svg>'; p.appendChild(document.createTextNode(word)); p.addEventListener('click', fn); return p; }
