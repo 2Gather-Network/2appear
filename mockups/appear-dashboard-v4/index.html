@@ -77,7 +77,8 @@
   .cwpre .cw-loading{margin-top:0;}
   #b-msg .nm{text-decoration:none;}
   .gms{margin:6px 0 0 0;}
-  .rlist .ni.gi .im{width:104px;height:78px;}
+  .rlist .ni.gi{align-items:flex-start;}
+  .rlist .ni.gi .im{width:80px;height:60px;}
   .dots{flex:none;align-self:center;width:32px;height:32px;border-radius:50%;border:0;background:none;color:var(--brand);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;padding:0;}
   .dots:hover,.dots.sel{background:#EEF1F5;}
   .dots:focus-visible{outline:3px solid var(--ink);outline-offset:2px;}
@@ -1589,13 +1590,14 @@
                 var ix = tn.nodeValue.indexOf(' share interests in ');
                 if (ix > -1) {
                   var ws = sh.words.map(String), cut = ix + ' share interests in '.length;
-                  tn.nodeValue = tn.nodeValue.slice(0, cut);
-                  var par = tn.parentNode, nx = tn.nextSibling;
+                  var sp = document.createElement('span'), pre = tn.nodeValue.slice(0, cut);
+                  sp.appendChild(document.createTextNode(pre));
                   ws.forEach(function (w, i) {
                     var sep = i === 0 ? '' : (ws.length > 2 ? (i === ws.length - 1 ? ', and ' : ', ') : ' and ');
-                    if (sep) { par.insertBefore(document.createTextNode(sep), nx); }
-                    var wa = el('a', 'ul', w); wa.href = mhref; par.insertBefore(wa, nx);
+                    if (sep) { sp.appendChild(document.createTextNode(sep)); }
+                    var wa = el('a', 'ul', w); wa.href = mhref; sp.appendChild(wa);
                   });
+                  tn.parentNode.replaceChild(sp, tn);
                   break;
                 }
               }
