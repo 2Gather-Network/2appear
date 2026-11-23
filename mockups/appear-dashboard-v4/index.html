@@ -1664,15 +1664,15 @@
         var gmAsked = {};
         function loadGM(list) {
           if (me.viewing) { return; }
-          list.forEach(function (g0) {
-            var gid = String(g0.groupId || ''); if (!gid || gmAsked[gid]) { return; }
-            gmAsked[gid] = 1;
-            gate('getMyGroupMatches', { cache: 'no-store', referrerPolicy: 'no-referrer' }, '&groupId=' + encodeURIComponent(gid)).then(function (gd) {
+          var want = [];
+          list.forEach(function (g0) { var gid = String(g0.groupId || ''); if (!gid || gmAsked[gid]) { return; } gmAsked[gid] = 1; want.push(gid); });
+          for (var wi = 0; wi < want.length; wi += 8) {
+            gate('getMyGroupMatches', { cache: 'no-store', referrerPolicy: 'no-referrer' }, '&groupIds=' + want.slice(wi, wi + 8).map(encodeURIComponent).join('|')).then(function (gd) {
               if (!gd || gd.status !== 'ok' || !Array.isArray(gd.groups) || !gd.groups.length) { return; }
               gd.groups.forEach(function (x) { if (x && x.groupId) { gmBy[String(x.groupId)] = x; } });
               drawG();
             }).catch(function () {});
-          });
+          }
         }
         loadGM(d.groups.slice(0, 3));
       });
