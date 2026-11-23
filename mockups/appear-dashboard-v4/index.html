@@ -76,7 +76,8 @@
   .cwpre[hidden]{display:none;}
   .cwpre .cw-loading{margin-top:0;}
   #b-msg .nm{text-decoration:none;}
-  .gms{margin:6px 0 0 54px;}
+  .gms{margin:6px 0 0 0;}
+  .rlist .ni.gi .im{width:104px;height:78px;}
   .dots{flex:none;align-self:center;width:32px;height:32px;border-radius:50%;border:0;background:none;color:var(--brand);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;padding:0;}
   .dots:hover,.dots.sel{background:#EEF1F5;}
   .dots:focus-visible{outline:3px solid var(--ink);outline-offset:2px;}
@@ -1553,9 +1554,6 @@
       var L = el('div', 'rlist'); b.appendChild(L);
       (evFull ? evs : evs.slice(0, 3)).forEach(function (x) { var blk = el('div', 'rb'); blk.appendChild(newsItem(x)); L.appendChild(blk); });
     }
-    var mr = el('div', 'morer'), fb = el('button', 'cw-btn ghost sm', 'Filter'); fb.type = 'button'; fb.setAttribute('aria-expanded', evFiltOpen ? 'true' : 'false');
-    fb.addEventListener('click', function () { evFiltOpen = !evFiltOpen; drawEvents(); });
-    mr.appendChild(fb); b.appendChild(mr);
   }
   function loadGroups3() {
     var news = (READS_READY ? gate('getGroupNews') : Promise.resolve(null)).then(function (d) { return (d && d.status === 'ok' && Array.isArray(d.groups)) ? d.groups : []; }, function () { return []; });
@@ -1593,10 +1591,10 @@
           var gw = groupWhys(g), gwl = {};
           gw.forEach(function (w) { gwl[String(w).toLowerCase()] = 1; });
           if (gm) { (gm.myWords || []).forEach(function (w) { if (w && !gwl[String(w).toLowerCase()]) { gwl[String(w).toLowerCase()] = 1; gw.push(String(w)); } }); }
-          blk.appendChild(groupItem(g, gw, ''));
-          if (gm) { gmExtra(blk, gm); }
+          var gi = groupItem(g, gw, ''), gtx = gi.querySelector('.tx'); blk.appendChild(gi);
+          if (gm) { gmExtra(gtx, gm); }
           if (!ls.length && lastBy[sl]) { ls = [lastBy[sl]]; }
-          ls.slice(0, 1).forEach(function (it) { if (Array.isArray(it.text)) { blk.appendChild(plain({ people: it.people, text: ['News: '].concat(it.text) })); } else { blk.appendChild(line(it)); } });
+          ls.slice(0, 1).forEach(function (it) { if (Array.isArray(it.text)) { gtx.appendChild(plain({ people: it.people, text: ['News: '].concat(it.text) })); } else { gtx.appendChild(line(it)); } });
         }
         function drawG() {
           var bb = bbody('b-grp');
