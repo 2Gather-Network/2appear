@@ -80,6 +80,7 @@
   .rlist .ni.gi .im{width:66px;height:66px;}
   .rlist .ni.gi .tx > a.ul{font-size:16px;font-weight:700;}
   .rlist .ni.gi .tx .gms{font-size:13.5px;}
+  .rlist .rb > .gms.gbox a.ul{font-weight:400;}
   .rlist .rb > .gms.gbox{display:block;margin:8px 0 0;padding:8px 10px;background:#fff;border:1.5px solid #DDE4EE;border-radius:10px;font-size:13.5px;}
   .rlist .ni .tx .gms a.ul{display:inline;white-space:nowrap;overflow:visible;text-overflow:clip;}
   @media(max-width:599px){.rlist .ni.gi{flex-wrap:nowrap;}.rlist .ni.gi .tx{flex:1 1 0;min-width:0;}.rlist .ni.gi .pills{display:none;}}
@@ -1600,7 +1601,18 @@
         function isHostG(g) { var ro = String(g.role || '').toLowerCase(); return ro === 'host' || ro === 'cohost'; }
         var hostG = d.groups.filter(isHostG);
         var gmBy = {};
-        function plain(it) { var w = line(it), lead = w.querySelector('.fs'); if (lead) { lead.remove(); } w.classList.add('gms'); return w; }
+        function plain(it) {
+          var w = line(it), lead = w.querySelector('.fs'); if (lead) { lead.remove(); } w.classList.add('gms');
+          Array.prototype.forEach.call(w.querySelectorAll('button.nm'), function (nb) {
+            var nx = nb.nextSibling;
+            if (nx && nx.nodeType === 3 && /^[,.]/.test(nx.nodeValue)) {
+              var keep = document.createElement('span'); keep.style.whiteSpace = 'nowrap';
+              nb.parentNode.insertBefore(keep, nb); keep.appendChild(nb); keep.appendChild(document.createTextNode(nx.nodeValue.charAt(0)));
+              nx.nodeValue = nx.nodeValue.slice(1);
+            }
+          });
+          return w;
+        }
         function joinW(a) { return a.length > 2 ? a.slice(0, -1).join(', ') + ', and ' + a[a.length - 1] : a.join(' and '); }
         function gmExtra(blk, gm, g, card) {
           var mem = (gm.members || []).filter(function (p) { return p && String(p.name || '').trim(); }), n = Number(gm.memberCount) || 0;
