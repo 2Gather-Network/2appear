@@ -649,14 +649,13 @@
       interest: { crumb: 'Add an interest', hash: '#interests' },
       offer: { crumb: "I'm offering something", q: 'What would you like to offer?', card: '', detailPh: 'Details: what exactly are you offering? (required)', hash: '#offering' },
       need: { crumb: "I'm seeking something", q: 'What do you need?', card: '', detailPh: 'Details: what exactly are you seeking? (required)', hash: '#needs' },
-      theyneed: { crumb: 'I know someone seeking something', path: '/other/need', q: 'What are they seeking?', card: '', detailPh: 'Details: what exactly are they seeking? (required)', other: true },
-      theyoffer: { crumb: 'I know someone offering something', path: '/other/offer', q: 'What are they offering?', card: '', detailPh: 'Details: what exactly are they offering? (required)', other: true }
+      theyneed: { crumb: 'I know someone seeking something', q: 'What are they seeking?', card: '', detailPh: 'Details: what exactly are they seeking? (required)', other: true },
+      theyoffer: { crumb: 'I know someone offering something', q: 'What are they offering?', card: '', detailPh: 'Details: what exactly are they offering? (required)', other: true }
     };
     function shut() { list.hidden = true; btn.setAttribute('aria-expanded', 'false'); }
     function closeAll() {
       panel.classList.remove('open'); tiles.classList.remove('focus'); dash.classList.remove('focus'); shut(); pageClose(null);
       var pcb = document.getElementById('pgcrumb'); if (pcb) { pcb.innerHTML = ''; }
-      if (/^\/other\/(need|offer)$/.test(location.pathname)) { try { history.pushState({}, '', '/'); } catch (err) {} }
     }
     function openMenu() { list.hidden = false; btn.setAttribute('aria-expanded', 'true'); }
     btn.addEventListener('click', function () { if (list.hidden) { openMenu(); } else { shut(); } });
@@ -932,7 +931,6 @@
         footer(right, rightFn);
       }
       tiles.classList.add('focus'); dash.classList.add('focus'); panel.classList.add('open'); shut(); pageClose(closeAll);
-      if (d.path && location.pathname !== d.path) { try { history.pushState({}, '', d.path); } catch (err) {} }
       draw();
       loadWords('skill').then(function (t) { tree = t; if (S.step === 'skill') { draw(); } }).catch(function () {});
     }
@@ -1051,9 +1049,6 @@
     Array.prototype.forEach.call(list.querySelectorAll('.mni'), function (it) {
       it.addEventListener('click', function () { showKind(it.getAttribute('data-k')); });
     });
-    var PATHK = { '/other/need': 'theyneed', '/other/offer': 'theyoffer' };
-    window.addEventListener('popstate', function () { var pk = PATHK[location.pathname]; if (pk) { showKind(pk); } else if (panel.classList.contains('open')) { closeAll(); } });
-    if (PATHK[location.pathname]) { showKind(PATHK[location.pathname]); }
   }
   function cwCodeFor(id) {
     var v = String(id || '').split('.').join('').toLowerCase();
