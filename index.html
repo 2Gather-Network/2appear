@@ -77,7 +77,10 @@
   #b-msg .nm{text-decoration:none;}
   .gms{margin:6px 0 0 0;}
   .rlist .ni.gi{align-items:flex-start;}
-  .rlist .ni.gi .im{width:80px;height:60px;}
+  .rlist .ni.gi .im{width:66px;height:66px;}
+  .rlist .ni.gi .tx > a.ul{font-size:16px;font-weight:700;}
+  .rlist .ni.gi .tx .gms{font-size:13.5px;}
+  .rlist .rb > .gms.gbox{display:block;margin:8px 0 0;padding:8px 10px;background:#fff;border:1.5px solid #DDE4EE;border-radius:10px;font-size:13.5px;}
   .rlist .ni .tx .gms a.ul{display:inline;white-space:nowrap;overflow:visible;text-overflow:clip;}
   @media(max-width:599px){.rlist .ni.gi{flex-wrap:nowrap;}.rlist .ni.gi .tx{flex:1 1 0;min-width:0;}.rlist .ni.gi .pills{display:none;}}
   .dots{flex:none;align-self:center;width:32px;height:32px;border-radius:50%;border:0;background:none;color:var(--brand);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;padding:0;}
@@ -1599,7 +1602,7 @@
         var gmBy = {};
         function plain(it) { var w = line(it), lead = w.querySelector('.fs'); if (lead) { lead.remove(); } w.classList.add('gms'); return w; }
         function joinW(a) { return a.length > 2 ? a.slice(0, -1).join(', ') + ', and ' + a[a.length - 1] : a.join(' and '); }
-        function gmExtra(blk, gm, g) {
+        function gmExtra(blk, gm, g, card) {
           var mem = (gm.members || []).filter(function (p) { return p && String(p.name || '').trim(); }), n = Number(gm.memberCount) || 0;
           if (mem.length && n >= mem.length) {
             var t = [n + ' members are here including '];
@@ -1609,7 +1612,7 @@
           var sh = gm.sharer;
           if (sh && String(sh.name || '').trim() && (sh.words || []).length) {
             var shl = plain({ people: [sh], text: ['You and ', { p: 0 }, ' share interests in ' + joinW(sh.words.map(String))] });
-            blk.appendChild(shl);
+            shl.classList.add('gbox'); (card || blk).appendChild(shl);
             var gsl = String(g.slug || '').split(',')[0].trim(), mhref = gsl ? '/group/' + encodeURIComponent(gsl) + '/bulletin-board?view=matches' : (g.groupId ? '/attendees/?group=' + encodeURIComponent(String(g.groupId)) + '&view=matches' : '');
             if (mhref) {
               var wk = document.createTreeWalker(shl, NodeFilter.SHOW_TEXT), tn;
@@ -1640,7 +1643,7 @@
           gw.forEach(function (w) { gwl[String(w).toLowerCase()] = 1; });
           if (gm) { (gm.myWords || []).forEach(function (w) { if (w && !gwl[String(w).toLowerCase()]) { gwl[String(w).toLowerCase()] = 1; gw.push(String(w)); } }); }
           var gi = groupItem(g, gw, ''), gtx = gi.querySelector('.tx'); blk.appendChild(gi);
-          if (gm) { gmExtra(gtx, gm, g); }
+          if (gm) { gmExtra(gtx, gm, g, blk); }
           if (!ls.length && lastBy[sl]) { ls = [lastBy[sl]]; }
           ls.slice(0, 1).forEach(function (it) { if (Array.isArray(it.text)) { gtx.appendChild(plain({ people: it.people, text: ['News: '].concat(it.text) })); } else { gtx.appendChild(line(it)); } });
         }
