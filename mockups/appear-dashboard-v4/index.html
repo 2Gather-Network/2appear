@@ -78,7 +78,11 @@
   #b-msg .nm{text-decoration:none;}
   .gms{margin:6px 0 0 0;}
   .rlist .ni.gi{align-items:flex-start;}
-  .rlist .ni.gi .im{width:80px;height:60px;}
+  .rlist .ni.gi .im{width:66px;height:66px;}
+  .rlist .ni.gi .tx > a.ul{font-size:16px;font-weight:700;}
+  .rlist .ni.gi .tx .gms{font-size:13.5px;}
+  .rlist .rb > .gms.gbox a.ul{font-weight:400;}
+  .rlist .rb > .gms.gbox{display:block;margin:8px 0 0;padding:8px 10px;background:#fff;border:1.5px solid #DDE4EE;border-radius:10px;font-size:13.5px;}
   .rlist .ni .tx .gms a.ul{display:inline;white-space:nowrap;overflow:visible;text-overflow:clip;}
   @media(max-width:599px){.rlist .ni.gi{flex-wrap:nowrap;}.rlist .ni.gi .tx{flex:1 1 0;min-width:0;}.rlist .ni.gi .pills{display:none;}}
   .dots{flex:none;align-self:center;width:32px;height:32px;border-radius:50%;border:0;background:none;color:var(--brand);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;padding:0;}
@@ -119,10 +123,11 @@
   .mn[hidden]{display:none;}
   .cw-btn.mnb{display:inline-flex;align-items:center;border-color:#7FB0D6;color:var(--ink);}
   .cw-btn.mnb[aria-expanded="true"],.cw-btn.mnb[aria-expanded="true"]:hover,.cw-btn.mnb[aria-expanded="true"]:focus-visible{background:#1F699E;border-color:#1F699E;color:#fff;}
-  .mnl{position:absolute;right:0;top:44px;width:260px;background:#fff;border:1.5px solid #DDE4EE;border-radius:14px;padding:6px;z-index:5;}
+  .mnl{position:absolute;right:0;top:44px;width:320px;max-width:calc(100vw - 32px);background:#fff;border:1.5px solid #DDE4EE;border-radius:14px;padding:6px;z-index:5;}
   .mnl[hidden]{display:none;}
-  .mni{display:block;width:100%;text-align:left;background:transparent;border:0;border-radius:10px;padding:10px 12px;font-family:inherit;font-size:14px;font-weight:600;color:var(--ink);cursor:pointer;}
+  .mni{display:flex;align-items:center;gap:10px;width:100%;text-align:left;background:transparent;border:0;border-radius:10px;padding:10px 12px;font-family:inherit;font-size:14px;font-weight:600;color:var(--ink);cursor:pointer;}
   .mnd{border:0;border-top:1.5px solid #DDE4EE;margin:6px 8px;}
+  .mic{display:inline-flex;flex:none;line-height:0;}
   .mni:hover,.mni:focus-visible{background:#EEF1F5;outline:none;}
   .ikp{font-family:inherit;font-size:13px;padding:7px 14px;border-radius:24px;cursor:pointer;background:#fff;border:1.5px solid #C9DFF3;color:#1F699E;font-weight:700;}
   .ikp.ic{display:inline-flex;align-items:center;gap:6px;}.ikp.ic svg{width:16px;height:16px;flex:none;}.ikp.on{background:#1F699E;border-color:#1F699E;color:#fff;font-weight:700;}
@@ -179,7 +184,7 @@
   .lay.focus{display:block;}
   .lay.focus .bx:not(.open){display:none;}
   .lay.focus .two,.lay.focus .rail{display:block;margin:0;}
-  .pgbar{margin:12px 0 0;display:flex;align-items:center;gap:12px;}
+  .pgbar{margin:0 0 12px;display:flex;align-items:center;gap:12px;}
   .pgbar #pgclose{margin-left:auto;}
   .pgcrumb,.pgcrumb a,.pgcrumb i,.pgcrumb b{color:#fff;}
   .pgbar[hidden]{display:none;}
@@ -278,14 +283,16 @@
   .ivf input[hidden]{display:none;}
   .vh{margin:10px 0 0;font-weight:700;color:var(--ink);}
   button.pmi{display:block;width:100%;text-align:left;background:transparent;border:0;font-family:inherit;cursor:pointer;}
+  #intro{--panel:#F7FBFF;}
 </style>
 <script>window.CW_SIGNIN="/signin/?next="+encodeURIComponent(location.pathname+location.search);window.CW_SIGNUP="/signup/?next="+encodeURIComponent(location.pathname+location.search);</script>
-<script src="https://2gather.network/nav/identity.js?v=70"></script>
+<script src="https://2gather.network/nav/identity.js?v=74"></script>
 <script src="https://2gather.network/nav/firststop.js?v=11"></script>
 <script src="https://2gather.network/nav/topbar.js" defer></script>
 </head>
 <body>
 <div class="wrap">
+  <div class="pgbar" id="pgbar" hidden><span class="pgcrumb bc" id="pgcrumb"></span><button class="cw-btn sm" id="pgclose" type="button">Close</button></div>
   <div class="card">
     <div class="dash" id="dash" hidden>
       <div class="hdr">
@@ -294,12 +301,10 @@
         <div class="mn" id="editmenu" hidden>
           <button class="cw-btn ghost sm mnb" id="editbtn" type="button" aria-expanded="false" aria-haspopup="true">+ Add something</button>
           <div class="mnl" id="editlist" hidden>
-            <button type="button" class="mni" data-k="interest">Add an interest</button>
-            <button type="button" class="mni" data-k="offer">Add something I'm offering</button>
-            <button type="button" class="mni" data-k="need">Add something I'm seeking</button>
-            <hr class="mnd">
-            <button type="button" class="mni" data-k="theyneed">I know someone seeking...</button>
-            <button type="button" class="mni" data-k="theyoffer">I know someone who has...</button>
+            <button type="button" class="mni" data-k="need"><span class="mic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1F699E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12v8h16v-8"/><path d="M12 3v11"/><path d="M8 10l4 4 4-4"/></svg></span>I'm seeking something ...</button>
+            <button type="button" class="mni" data-k="offer"><span class="mic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1F699E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 15v4h16v-4"/><path d="M12 15V4"/><path d="M8 8l4-4 4 4"/></svg></span>I'm offering something ...</button>
+            <button type="button" class="mni" data-k="theyneed"><span class="mic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1F699E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5L21 21"/></svg></span>I know someone seeking something...</button>
+            <button type="button" class="mni" data-k="theyoffer"><span class="mic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1F699E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10v4h4l9 5V5L7 10z"/><path d="M19 9a4 4 0 0 1 0 6"/><path d="M7 14l1.2 5h2.3"/></svg></span>I know someone offering something...</button>
           </div>
         </div>
       </div>
@@ -349,7 +354,6 @@
     </div>
 
   </div>
-  <div class="pgbar" id="pgbar" hidden><span class="pgcrumb bc" id="pgcrumb"></span><button class="cw-btn sm" id="pgclose" type="button">Close</button></div>
 </div>
 <script>
 (function () {
@@ -648,14 +652,15 @@
     var panel = tile('t-add'), tiles = panel.parentNode, dash = document.getElementById('dash');
     var KIND = {
       interest: { crumb: 'Add an interest', hash: '#interests' },
-      offer: { crumb: 'I offer', q: 'What would you like to offer?', card: '', detailPh: 'Details: what exactly are you offering? (required)', hash: '#offering' },
-      need: { crumb: 'I need', q: 'What do you need?', card: '', detailPh: 'Details: what exactly are you seeking? (required)', hash: '#needs' },
-      theyneed: { crumb: 'They need', q: 'What are they seeking?', card: '', detailPh: 'Details: what exactly are they seeking? (required)', other: true },
-      theyoffer: { crumb: 'They offer', q: 'What are they offering?', card: '', detailPh: 'Details: what exactly are they offering? (required)', other: true }
+      offer: { crumb: "I'm offering something", q: 'What would you like to offer?', card: '', detailPh: 'Details: what exactly are you offering? (required)', hash: '#offering' },
+      need: { crumb: "I'm seeking something", q: 'What do you need?', card: '', detailPh: 'Details: what exactly are you seeking? (required)', hash: '#needs' },
+      theyneed: { crumb: 'I know someone seeking something', q: 'What are they seeking?', card: '', detailPh: 'Details: what exactly are they seeking? (required)', other: true },
+      theyoffer: { crumb: 'I know someone offering something', q: 'What are they offering?', card: '', detailPh: 'Details: what exactly are they offering? (required)', other: true }
     };
     function shut() { list.hidden = true; btn.setAttribute('aria-expanded', 'false'); }
     function closeAll() {
       panel.classList.remove('open'); tiles.classList.remove('focus'); dash.classList.remove('focus'); shut(); pageClose(null);
+      var pcb = document.getElementById('pgcrumb'); if (pcb) { pcb.innerHTML = ''; }
     }
     function openMenu() { list.hidden = false; btn.setAttribute('aria-expanded', 'true'); }
     btn.addEventListener('click', function () { if (list.hidden) { openMenu(); } else { shut(); } });
@@ -705,10 +710,10 @@
       var p = el('button', 'ikp' + (on ? ' on' : '') + (other ? ' ot' : ''), label); p.type = 'button'; return p;
     }
     document.addEventListener('input', function (ev) { var x = ev.target; if (x && x.tagName === 'TEXTAREA') { x.style.height = 'auto'; x.style.height = Math.max(80, x.scrollHeight + 3) + 'px'; } });
-    function draftCard(typeLabel, detailPh) {
+    function draftCard(typeLabel, detailPh, titleVal) {
       var card = el('div', 'ikd');
       if (typeLabel) { card.appendChild(el('div', 'ikt', typeLabel)); }
-      var t = el('input'); t.type = 'text'; t.placeholder = 'Title (required)'; t.setAttribute('aria-label', 'Title');
+      var t = el('input'); t.type = 'text'; t.placeholder = 'Title (required)'; t.setAttribute('aria-label', 'Title'); if (titleVal) { t.value = titleVal; }
       var e1 = el('div', 'ike', 'Add a title first.'); e1.hidden = true;
       var d = el('textarea'); d.rows = 2; d.placeholder = detailPh; d.setAttribute('aria-label', 'Details');
       var e2 = el('div', 'ike', 'Add the details first.'); e2.hidden = true;
@@ -729,7 +734,7 @@
     function showGive(k) {
       var d = KIND[k], b = panel.querySelector('.body');
       var isNeed = (k === 'need' || k === 'theyneed');
-      var S = { hist: [], step: 'type', type: '', typeLabel: '', pick: '', work: {}, path: [], sel: null, more: false, named: false, groups: null, gsel: {}, ev: false, prof: false };
+      var S = { hist: [], step: 'type', typed: '', type: '', typeLabel: '', pick: '', work: {}, path: [], sel: null, more: false, named: false, groups: null, gsel: {}, ev: false, prof: false };
       var tree = null, card = null, who = null;
       b.innerHTML = '';
       var crumbsEl = el('div', 'bc'), mid = el('div', 'ikm'), linkEl = el('p', 'addlink'), ft = el('div', 'ft');
@@ -739,14 +744,15 @@
       function go(step) { S.hist.push(S.step); S.step = step; draw(); }
       function crumbs() {
         crumbsEl.innerHTML = '';
-        var root = el('a', '', 'Add'); root.href = '#';
+        var bar = document.getElementById('pgcrumb'); if (bar) { bar.innerHTML = ''; }
+        if (!bar) { return; }
+        var root = el('a', '', 'Dashboard'); root.href = '#';
         root.addEventListener('click', function (e) { e.preventDefault(); closeAll(); });
-        crumbsEl.appendChild(root); crumbsEl.appendChild(el('i', '', '›'));
-        if (!S.typeLabel) { crumbsEl.appendChild(el('b', '', d.crumb)); return; }
-        var me1 = el('a', '', d.crumb); me1.href = '#';
-        me1.addEventListener('click', function (e) { e.preventDefault(); S.hist = []; S.step = 'type'; S.typeLabel = ''; S.type = ''; draw(); });
-        crumbsEl.appendChild(me1); crumbsEl.appendChild(el('i', '', '›'));
-        crumbsEl.appendChild(el('b', '', S.typeLabel));
+        bar.appendChild(root); bar.appendChild(el('i', '', '/'));
+        var own = (k === 'need' || k === 'offer');
+        var prof = el('a', '', own ? 'My profile' : 'Profile'); prof.href = '/me/?mine=1';
+        bar.appendChild(prof); bar.appendChild(el('i', '', '/'));
+        bar.appendChild(el('b', '', own ? (k === 'need' ? 'Seeking' : 'Offering') : 'Add something'));
       }
       function pill(label, fn, on) { var p = el('button', 'ikp' + (on ? ' on' : ''), label); p.type = 'button'; p.addEventListener('click', fn); return p; }
       function ipill(word, fn) { var p = el('button', 'ikp ic'); p.type = 'button'; p.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + PICON[word] + '</svg>'; p.appendChild(document.createTextNode(word)); p.addEventListener('click', fn); return p; }
@@ -768,11 +774,27 @@
         grp.appendChild(bk); ft.appendChild(grp);
         if (rightLabel) { var r = el('button', 'cw-btn solid sm', rightLabel); r.type = 'button'; r.addEventListener('click', rightFn); ft.appendChild(r); }
       }
-      function link() {
-        linkEl.innerHTML = '';
-        var a = el('a', '', 'Visit profile to share more');
-        a.href = S.type === 'work' ? '/ikigai/work' : (isNeed ? '/ikigai/needs' : '/ikigai/offers');
-        linkEl.appendChild(a);
+      function link() { linkEl.innerHTML = ''; }
+      function wordField() {
+        var box = el('div', 'ikd'), inp = el('input'), sug = el('div', 'ikr');
+        inp.type = 'text'; inp.placeholder = 'Add a word or a sentence'; inp.setAttribute('aria-label', 'Add a word or a sentence'); inp.value = S.typed || '';
+        function names(t, out, seen) { (t || []).forEach(function (n) { if (!seen[n.name]) { seen[n.name] = 1; out.push(n.name); } names(n.kids, out, seen); }); return out; }
+        function suggest() {
+          sug.innerHTML = '';
+          var v = inp.value.trim().toLowerCase();
+          if (!v || !tree) { return; }
+          var all = [], seen = {};
+          tree.names.forEach(function (c) { names(tree.by[c], all, seen); });
+          all.filter(function (w) { return w.toLowerCase().indexOf(v) > -1; }).sort(function (a, b) { return (a.toLowerCase() === v ? 0 : 1) - (b.toLowerCase() === v ? 0 : 1); }).slice(0, 6).forEach(function (w) {
+            sug.appendChild(pill(w, function () { inp.value = w; S.typed = w; suggest(); inp.focus(); }));
+          });
+        }
+        inp.addEventListener('input', function () { S.typed = inp.value; suggest(); });
+        inp.addEventListener('keydown', function (e) { if (e.key === 'Enter' && inp.value.trim()) { e.preventDefault(); go('details'); } });
+        box.appendChild(inp); box.appendChild(sug);
+        if (!tree) { loadWords('skill').then(function (t) { tree = t; suggest(); }).catch(function () {}); }
+        suggest();
+        return box;
       }
       function afterDetails() { if (d.other) { go('who'); } }
       function draw() {
@@ -786,6 +808,7 @@
           });
           mid.appendChild(row);
         } else if (S.step === 'work') {
+          mid.appendChild(wordField());
           var all = checkbox('Select all', S.work.paid && S.work.unpaid, function (on) { S.work.paid = on; S.work.unpaid = on; draw(); });
           mid.appendChild(all);
           mid.appendChild(checkbox('Paid', S.work.paid, function (on) { S.work.paid = on; draw(); }));
@@ -794,6 +817,7 @@
           right = 'Continue'; rightFn = function () { if (S.work.paid || S.work.unpaid) { mid.className = 'ikm'; go('details'); } else { say('Pick one first.', true); } };
         } else if (S.step === 'skill') {
           mid.className = 'ikm';
+          mid.appendChild(wordField());
           if (!tree) { mid.appendChild(el('span', 'cw-loading', 'Looking at the categories')); }
           else {
             var rw = el('div', 'ikr');
@@ -806,18 +830,22 @@
             }
             mid.appendChild(rw);
           }
-          right = 'Continue'; rightFn = function () { if (S.sel) { go('details'); } else { say('Pick one first.', true); } };
+          right = 'Continue'; rightFn = function () { if (S.sel || (S.typed || '').trim()) { go('details'); } else { say('Pick one first.', true); } };
         } else if (S.step === 'resource') {
+          mid.appendChild(wordField());
           var r2 = el('div', 'ikr');
           ['Physical good', 'Consumable', 'Living', 'Digital'].forEach(function (x) { r2.appendChild(ipill(x, function () { S.pick = x; go('details'); })); });
           mid.appendChild(r2);
+          if ((S.typed || '').trim()) { right = 'Continue'; rightFn = function () { go('details'); }; }
         } else if (S.step === 'space') {
+          mid.appendChild(wordField());
           var r3 = el('div', 'ikr'), shown = S.more ? SPACES : SPACES.slice(0, 3);
           shown.forEach(function (x) { r3.appendChild(ipill(x, function () { S.pick = x; go('details'); })); });
           if (!S.more) { var m = el('button', 'ikp ot', 'Show more'); m.type = 'button'; m.addEventListener('click', function () { S.more = true; draw(); }); r3.appendChild(m); }
           mid.appendChild(r3);
+          if ((S.typed || '').trim()) { right = 'Continue'; rightFn = function () { go('details'); }; }
         } else if (S.step === 'details') {
-          card = draftCard('', d.detailPh); mid.appendChild(card);
+          card = draftCard('', d.detailPh, S.typed); mid.appendChild(card);
           right = d.other ? 'Continue' : 'Add';
           rightFn = function () { if (card.check()) { if (d.other) { afterDetails(); } else { say('Saving is not built yet.'); } } };
         } else if (S.step === 'who' && !S.how) {
@@ -1574,9 +1602,20 @@
         function isHostG(g) { var ro = String(g.role || '').toLowerCase(); return ro === 'host' || ro === 'cohost'; }
         var hostG = d.groups.filter(isHostG);
         var gmBy = {};
-        function plain(it) { var w = line(it), lead = w.querySelector('.fs'); if (lead) { lead.remove(); } w.classList.add('gms'); return w; }
+        function plain(it) {
+          var w = line(it), lead = w.querySelector('.fs'); if (lead) { lead.remove(); } w.classList.add('gms');
+          Array.prototype.forEach.call(w.querySelectorAll('button.nm'), function (nb) {
+            var nx = nb.nextSibling;
+            if (nx && nx.nodeType === 3 && /^[,.]/.test(nx.nodeValue)) {
+              var keep = document.createElement('span'); keep.style.whiteSpace = 'nowrap';
+              nb.parentNode.insertBefore(keep, nb); keep.appendChild(nb); keep.appendChild(document.createTextNode(nx.nodeValue.charAt(0)));
+              nx.nodeValue = nx.nodeValue.slice(1);
+            }
+          });
+          return w;
+        }
         function joinW(a) { return a.length > 2 ? a.slice(0, -1).join(', ') + ', and ' + a[a.length - 1] : a.join(' and '); }
-        function gmExtra(blk, gm, g) {
+        function gmExtra(blk, gm, g, card) {
           var mem = (gm.members || []).filter(function (p) { return p && String(p.name || '').trim(); }), n = Number(gm.memberCount) || 0;
           if (mem.length && n >= mem.length) {
             var t = [n + ' members are here including '];
@@ -1586,7 +1625,7 @@
           var sh = gm.sharer;
           if (sh && String(sh.name || '').trim() && (sh.words || []).length) {
             var shl = plain({ people: [sh], text: ['You and ', { p: 0 }, ' share interests in ' + joinW(sh.words.map(String))] });
-            blk.appendChild(shl);
+            shl.classList.add('gbox'); (card || blk).appendChild(shl);
             var gsl = String(g.slug || '').split(',')[0].trim(), mhref = gsl ? '/group/' + encodeURIComponent(gsl) + '/bulletin-board?view=matches' : (g.groupId ? '/attendees/?group=' + encodeURIComponent(String(g.groupId)) + '&view=matches' : '');
             if (mhref) {
               var wk = document.createTreeWalker(shl, NodeFilter.SHOW_TEXT), tn;
@@ -1617,10 +1656,11 @@
           gw.forEach(function (w) { gwl[String(w).toLowerCase()] = 1; });
           if (gm) { (gm.myWords || []).forEach(function (w) { if (w && !gwl[String(w).toLowerCase()]) { gwl[String(w).toLowerCase()] = 1; gw.push(String(w)); } }); }
           var gi = groupItem(g, gw, ''), gtx = gi.querySelector('.tx'); blk.appendChild(gi);
-          if (gm) { gmExtra(gtx, gm, g); }
+          if (gm) { gmExtra(gtx, gm, g, blk); }
           if (!ls.length && lastBy[sl]) { ls = [lastBy[sl]]; }
           ls.slice(0, 1).forEach(function (it) { if (Array.isArray(it.text)) { gtx.appendChild(plain({ people: it.people, text: ['News: '].concat(it.text) })); } else { gtx.appendChild(line(it)); } });
         }
+        var gAll = false;
         var memG = d.groups.filter(function (g) { return !isHostG(g); });
         if (!memG.length) { memG = d.groups; }
         function drawG() {
@@ -1642,7 +1682,7 @@
             }
           }
           var L = el('div', 'rlist'); bb.appendChild(L);
-          (gmode === 'host' ? hostG : (gmode === 'all' ? memG : d.groups.slice(0, 3))).forEach(function (g) { addG(L, g); });
+          (gmode === 'host' ? hostG : (gmode === 'all' ? memG : (gAll ? d.groups : d.groups.slice(0, 3)))).forEach(function (g) { addG(L, g); });
         }
         function setG(m) {
           gmode = m; var on = !!m;
@@ -1655,9 +1695,13 @@
         var groot = gbox.querySelector('.fl'); groot.innerHTML = '';
         var gbtn = el('button', 'view vb', 'View'); gbtn.type = 'button'; gbtn.setAttribute('aria-haspopup', 'true'); gbtn.setAttribute('aria-expanded', 'false');
         var glist = el('div', 'flist'); glist.hidden = true; glist.setAttribute('role', 'menu');
-        [hostG.length ? ['host', 'Groups I host'] : null, ['all', 'Groups I belong to']].filter(Boolean).forEach(function (o) {
+        [d.groups.length > 3 ? ['inline', 'Show all groups'] : null, hostG.length ? ['host', 'Groups I host'] : null, ['all', 'Groups I belong to']].filter(Boolean).forEach(function (o) {
           var it = el('button', 'fi', o[1]); it.type = 'button'; it.setAttribute('role', 'menuitem');
-          it.addEventListener('click', function () { closeFilters(); setG(o[0]); });
+          it.addEventListener('click', function () {
+            closeFilters();
+            if (o[0] === 'inline') { gAll = !gAll; drawG(); if (gAll) { loadGM(d.groups); } return; }
+            setG(o[0]);
+          });
           glist.appendChild(it);
         });
         gbtn.addEventListener('click', function (e) { e.stopPropagation(); if (openF && openF.btn === gbtn) { closeFilters(); return; } closeFilters(); glist.hidden = false; gbtn.setAttribute('aria-expanded', 'true'); openF = { btn: gbtn, list: glist, root: groot }; });
