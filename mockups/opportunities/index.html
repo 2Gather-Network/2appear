@@ -130,7 +130,7 @@ var PEOPLE=[
  {n:'Rosa',contact:1,loc:'Edmonds',dir:'offered',kind:'Experience',cat:'Arts and craft',ex:'Time bank',time:'One time',title:'Learn to throw pots, one Sunday'},
  {n:'Tom',loc:'Mountlake Terrace',dir:'needed',kind:'Job',cat:'Bookkeeping',ex:'Paid',time:'Part-time',title:'Bookkeeper for a food co-op'},
  {n:'Priya',loc:'Lynnwood',dir:'needed',kind:'Experience',cat:'Arts and craft',ex:'Trade',time:'One time',title:'Looking for a pottery class to join'},
- {n:'Omar',loc:'Edmonds',dir:'offered',kind:'Project',cat:'Gardening',ex:'Gift',time:'Weekends',title:'Spare seedlings and garden know-how'},
+ {n:'Omar',group:'Lake Ballinger Center',loc:'Edmonds',dir:'offered',kind:'Project',cat:'Gardening',ex:'Gift',time:'Weekends',title:'Spare seedlings and garden know-how'},
  {n:'Lena',loc:'Seattle',dir:'offered',kind:'Job',cat:'Bookkeeping',ex:'Hourly',time:'Remote',title:'Bookkeeping by the hour'},
  {n:'Dev',loc:'Seattle',dir:'needed',kind:'Available place',cat:'Housing',ex:'Paid',time:'Full-time',title:'Looking for a room in Seattle'}
 ];
@@ -139,8 +139,8 @@ var FS={loc:[],cat:[],kind:[],dir:[],ex:[],time:[]},OPEN={},MYONLY=false,RAIL=tr
 function match(o){
  if(ME.near.indexOf(o.loc)<0)return null;
  var offerer=o.dir=='offered';
- if(offerer&&ME.needs.indexOf(o.cat)>-1)return{c:'#D2822F',t:'You need '+o.cat.toLowerCase()+'. '+(o.contact?o.n:'They')+' '+(o.contact?'has':'have')+' this.'};
- if(!offerer&&ME.offers.indexOf(o.cat)>-1)return{c:'#D2822F',t:'You offer '+o.cat.toLowerCase()+'. '+(o.contact?o.n:'They')+' '+(o.contact?'needs':'need')+' this.'};
+ if(offerer&&ME.needs.indexOf(o.cat)>-1)return{c:'#D2822F',t:'You need '+o.cat.toLowerCase()+'. '+((o.contact||o.group)?o.n:'They')+' '+((o.contact||o.group)?'has':'have')+' this.'};
+ if(!offerer&&ME.offers.indexOf(o.cat)>-1)return{c:'#D2822F',t:'You offer '+o.cat.toLowerCase()+'. '+((o.contact||o.group)?o.n:'They')+' '+((o.contact||o.group)?'needs':'need')+' this.'};
  if(!offerer&&ME.needs.indexOf(o.cat)>-1)return{c:'#7B6BD6',t:'You both seek '+o.cat.toLowerCase()+'.'};
  if(offerer&&ME.offers.indexOf(o.cat)>-1)return{c:'#4F9F7A',t:'You both have '+o.cat.toLowerCase()+' in common.'};
  return null}
@@ -163,7 +163,7 @@ function find(){
  +'<div class="cw-search" style="max-width:none;margin:0 0 6px"><input placeholder="&#128269; Search"></div>';
  if(!list.length)h+='<p class="cw-statement" style="margin-top:14px">Nothing here with these filters. Try Reset.</p>';
  list.forEach(function(x,i){var o=x.o,m=x.m;
-  h+='<div class="person" data-open="'+PEOPLE.indexOf(o)+'" style="cursor:pointer'+(o.contact?'':';grid-template-columns:1fr')+'">'+(o.contact?'<span class="cw-avatar">'+o.n[0]+'</span>':'')+'<div>'+(o.contact?'<h3 style="margin:0 0 4px">'+o.n+'</h3>':'')+'<div class="tag"><span class="cw-chip">'+(o.dir=='offered'?'Offered':'Needed')+'</span><span class="cw-chip">'+o.kind+'</span><span class="cw-chip">'+o.ex+'</span><span class="cw-chip">'+o.loc+'</span></div><h3>'+o.title+'</h3><ul>'+(m?'<li style="--c:'+m.c+'">'+m.t+'</li>':'')+'</ul>'+(o.contact?'':'<p class="cw-savestat" style="margin:6px 0 0">Name and photo show when you both say yes.</p>')+'</div>'+(o.contact?'<div class="btns"><a class="cw-btn sm ghost" data-act="noop">Visit profile</a></div>':'')+'</div>'});
+  h+='<div class="person" data-open="'+PEOPLE.indexOf(o)+'" style="cursor:pointer'+((o.contact||o.group)?'':';grid-template-columns:1fr')+'">'+((o.contact||o.group)?'<span class="cw-avatar">'+o.n[0]+'</span>':'')+'<div>'+((o.contact||o.group)?'<h3 style="margin:0 0 4px">'+o.n+'</h3>'+(o.group?'<p class="cw-savestat" style="margin:0 0 4px">In '+o.group+' with you</p>':''):'')+'<div class="tag"><span class="cw-chip">'+(o.dir=='offered'?'Offered':'Needed')+'</span><span class="cw-chip">'+o.kind+'</span><span class="cw-chip">'+o.ex+'</span><span class="cw-chip">'+o.loc+'</span></div><h3>'+o.title+'</h3><ul>'+(m?'<li style="--c:'+m.c+'">'+m.t+'</li>':'')+'</ul>'+((o.contact||o.group)?'':'<p class="cw-savestat" style="margin:6px 0 0">Name and photo show when you both say yes.</p>')+'</div>'+((o.contact||o.group)?'<div class="btns"><a class="cw-btn sm ghost" data-act="noop">Visit profile</a></div>':'')+'</div>'});
  return h+'</div></div>'+rail()+'</div>'}
 function el(h){var d=document.createElement('div');d.innerHTML=h;return d}
 function esc(s){return String(s).replace(/[&<>]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;'}[c]})}
@@ -171,7 +171,7 @@ function crumb(a,b){return '<div class="cw-breadcrumb"><a data-act="noop">Networ
 function open(){
  var o=PEOPLE[S.opp],m=match(o)||{t:o.title};
  var h=crumb('',o.title);
- h+='<div class="cw-card"><div class="top"><span class="cw-chip">'+(o.dir=='offered'?'Offered':'Needed')+'</span><span class="cw-chip">'+o.kind+'</span><span class="cw-chip">'+o.ex+'</span></div><h1 style="font-size:24px;margin:8px 0 2px">'+o.title+'</h1><p class="cw-savestat" style="margin:0 0 14px">'+(o.contact?'Shared by '+o.n+', in your contacts. ':'')+o.loc+'</p>';
+ h+='<div class="cw-card"><div class="top"><span class="cw-chip">'+(o.dir=='offered'?'Offered':'Needed')+'</span><span class="cw-chip">'+o.kind+'</span><span class="cw-chip">'+o.ex+'</span></div><h1 style="font-size:24px;margin:8px 0 2px">'+o.title+'</h1><p class="cw-savestat" style="margin:0 0 14px">'+((o.contact||o.group)?'Shared by '+o.n+(o.contact?', in your contacts. ':', in '+o.group+' with you. '):'')+o.loc+'</p>';
  h+='<p class="cw-statement" style="margin:0 0 12px"><b>'+m.t+'</b></p><div class="cols"><div class="cw-fbox"><h4>What you\'re looking for</h4><ul><li>'+(ME.needs.concat(ME.offers).indexOf(o.cat)>-1?o.cat:'Something else')+'</li><li>Near '+ME.near[0]+'</li></ul></div><div class="cw-fbox"><h4>What they\'re looking for</h4><ul><li>'+o.cat+'</li><li>'+o.time+'</li><li>'+o.ex+'</li></ul></div></div>';
  h+='<div class="cw-status info">Pay what you can: not offered</div>';
  if(S.both){
