@@ -784,7 +784,7 @@
           if (!v || !tree) { return; }
           var all = [], seen = {};
           tree.names.forEach(function (c) { names(tree.by[c], all, seen); });
-          all.filter(function (w) { return w.toLowerCase().indexOf(v) > -1 && w.toLowerCase() !== v; }).slice(0, 6).forEach(function (w) {
+          all.filter(function (w) { return w.toLowerCase().indexOf(v) > -1; }).sort(function (a, b) { return (a.toLowerCase() === v ? 0 : 1) - (b.toLowerCase() === v ? 0 : 1); }).slice(0, 6).forEach(function (w) {
             sug.appendChild(pill(w, function () { inp.value = w; S.typed = w; suggest(); inp.focus(); }));
           });
         }
