@@ -61,7 +61,7 @@
 </style>
   <script src="https://2gather.network/nav/identity.js?v=74"></script>
   <script src="https://2gather.network/nav/firststop.js?v=11"></script>
-  <script src="https://2gather.network/nav/google-signin.js?v=16"></script>
+  <script src="https://2gather.network/nav/google-signin.js?v=17"></script>
 <style>body{overflow-x:clip;overflow-wrap:break-word;}</style>
 <style>@media(max-width:768px){input:not([type=checkbox]):not([type=radio]):not([type=range]),select,textarea{font-size:16px !important;}}</style>
 </head>
@@ -192,6 +192,7 @@ window._safeNavGo = window._safeNavGo || function (el) {
   (function () {
     if (window.CW && CW.offerConnect && params.get('out') !== '1') { CW.offerConnect(document.querySelector('.card'), params.get('next') || '/'); }
     if (params.get('out') === '1') {
+      try { var _u = new URL(location.href); _u.searchParams.delete('out'); history.replaceState(history.state, '', _u.pathname + _u.search + _u.hash); } catch (e) {}
       var stillIn = (window.CW && CW.me) ? CW.me() : null;
       if (stillIn && stillIn.known && !stillIn.viewing) {
         if (CW.signOutAll && CW.signOutAll()) { return; }
