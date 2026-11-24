@@ -183,7 +183,7 @@
   .lay.focus{display:block;}
   .lay.focus .bx:not(.open){display:none;}
   .lay.focus .two,.lay.focus .rail{display:block;margin:0;}
-  .pgbar{margin:12px 0 0;display:flex;align-items:center;gap:12px;}
+  .pgbar{margin:0 0 12px;display:flex;align-items:center;gap:12px;}
   .pgbar #pgclose{margin-left:auto;}
   .pgcrumb,.pgcrumb a,.pgcrumb i,.pgcrumb b{color:#fff;}
   .pgbar[hidden]{display:none;}
@@ -291,6 +291,7 @@
 </head>
 <body>
 <div class="wrap">
+  <div class="pgbar" id="pgbar" hidden><span class="pgcrumb bc" id="pgcrumb"></span><button class="cw-btn sm" id="pgclose" type="button">Close</button></div>
   <div class="card">
     <div class="dash" id="dash" hidden>
       <div class="hdr">
@@ -352,7 +353,6 @@
     </div>
 
   </div>
-  <div class="pgbar" id="pgbar" hidden><span class="pgcrumb bc" id="pgcrumb"></span><button class="cw-btn sm" id="pgclose" type="button">Close</button></div>
 </div>
 <script>
 (function () {
