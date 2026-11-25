@@ -1053,6 +1053,12 @@
     Array.prototype.forEach.call(list.querySelectorAll('.mni'), function (it) {
       it.addEventListener('click', function () { showKind(it.getAttribute('data-k')); });
     });
+    try {
+      var addQ = new URLSearchParams(location.search).get('add');
+      if (addQ && /^(need|offer|theyneed|theyoffer)$/.test(addQ)) {
+        setTimeout(function () { var it0 = list.querySelector('.mni[data-k="' + addQ + '"]'); if (it0) { it0.click(); } }, 400);
+      }
+    } catch (e) {}
   }
   function cwCodeFor(id) {
     var v = String(id || '').split('.').join('').toLowerCase();
