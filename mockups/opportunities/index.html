@@ -171,7 +171,7 @@ function crumb(a,b){return '<div class="cw-breadcrumb"><a data-act="noop">Networ
 function open(){
  var o=PEOPLE[S.opp],m=match(o)||{t:o.title};
  var h=crumb('',o.title);
- h+='<div class="cw-card"><div class="top"><span class="cw-chip">'+(o.dir=='offered'?'Offered':'Needed')+'</span><span class="cw-chip">'+o.kind+'</span><span class="cw-chip">'+o.ex+'</span></div><h1 style="font-size:24px;margin:8px 0 2px">'+o.title+'</h1><p class="cw-savestat" style="margin:0 0 14px">'+((o.contact||o.group)?'Shared by '+o.n+(o.contact?', in your contacts. ':', in '+o.group+' with you. '):'')+o.loc+'</p>';
+ h+='<div class="cw-card"><div class="top"><span class="cw-chip">'+(o.dir=='offered'?'Offered':'Needed')+'</span><span class="cw-chip">'+o.kind+'</span><span class="cw-chip">'+o.ex+'</span></div><h1 style="font-size:24px;margin:8px 0 2px">'+o.title+'</h1><p class="cw-savestat" style="margin:0 0 14px">'+((o.contact||o.group)?'Shared by '+o.n+(o.contact?', in your network. ':', in '+o.group+' with you. '):'')+o.loc+'</p>';
  h+='<p class="cw-statement" style="margin:0 0 12px"><b>'+m.t+'</b></p><div class="cols"><div class="cw-fbox"><h4>What you\'re looking for</h4><ul><li>'+(ME.needs.concat(ME.offers).indexOf(o.cat)>-1?o.cat:'Something else')+'</li><li>Near '+ME.near[0]+'</li></ul></div><div class="cw-fbox"><h4>What they\'re looking for</h4><ul><li>'+o.cat+'</li><li>'+o.time+'</li><li>'+o.ex+'</li></ul></div></div>';
  h+='<div class="cw-status info">Pay what you can: not offered</div>';
  if(S.both){
