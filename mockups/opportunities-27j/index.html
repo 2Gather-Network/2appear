@@ -216,7 +216,7 @@ h1.t{color:#fff;font-size:28px;font-weight:800;margin:0 0 4px}
     } else if (s === 6) {
       h += '<p class="cw-pq">Here is your post</p><p class="cw-statement">' + esc(S.ans.dir) + ': ' + esc(S.ans.kind.toLowerCase()) + ', ' + esc(S.ans.ex.toLowerCase()) + '. Needs: ' + esc(S.ans.needs) + '. Shown to: ' + esc(S.ans.who.toLowerCase()) + '. Matching starts as soon as you publish.</p>';
     } else {
-      return h + '<p class="cw-pq">Your opportunity is live</p><p class="cw-statement">We are looking for who matches. You will get an email when someone is interested. No name or photo shows until you both say yes.</p><a class="cw-btn solid sm" data-act="list">See opportunities</a></div>';
+      return h + '<p class="cw-pq">Your opportunity is live</p><p class="cw-statement">We are looking for who matches. You will get an email when someone is interested. ' + (S.ans.stay.indexOf('anonymous') > -1 ? 'No name or photo shows until you both say yes.' : 'People you are connected with, and people in a group or at an event with you, see your name and photo. Everyone else sees them when you both say yes.') + '</p><a class="cw-btn solid sm" data-act="list">See opportunities</a></div>';
     }
     if (S.note) h += '<div class="cw-status info" style="margin-top:14px">' + esc(S.note) + '</div>';
     return h + '<div class="cw-foot" style="margin-top:44px"><a class="cw-btn ghost form" data-act="back">Back</a><a class="cw-btn solid form" data-act="next">' + (s === 6 ? 'Publish and match' : 'Continue') + '</a></div></div>';
