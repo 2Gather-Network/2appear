@@ -300,7 +300,7 @@ h1.t{color:#fff;font-size:28px;font-weight:800;margin:0 0 4px}
     if (!p) return h + '<span class="cw-savestat">Loading information...</span></div><div style="margin-top:16px"><a class="backb" data-act="mine">Back</a></div>';
     h += '<div class="top"><span class="cw-chip">' + esc(p.dir) + '</span><span class="cw-chip">' + esc(p.kind) + '</span><span class="cw-chip">' + esc(p.ex) + '</span></div><h1 style="font-size:24px;margin:8px 0 14px">' + esc(p.title) + '</h1>';
     h += '<p class="cw-pq" style="font-size:18px">People who are interested</p><p class="cw-fhelp">You see the category and city only. Names and photos open to the two of you when you both say yes.</p>';
-    if (S.resp === null) h += '<div style="min-height:90px"><span class="cw-savestat">Loading information...</span></div>';
+    if (S.resp === null) h += '<div style="min-height:37px"><span class="cw-savestat">Loading information...</span></div>';
     else if (!S.resp.length) h += '<p class="cw-statement">No one has answered yet. You will get an email when someone is.</p>';
     else S.resp.forEach(function (r) {
       h += '<div class="cw-fbox" style="margin:0 0 10px"><div class="tag">' + (r.categories || []).map(function (c) { return '<span class="cw-chip">' + esc(c) + '</span>'; }).join('') + (r.place ? '<span class="cw-chip">' + esc(r.place) + '</span>' : '') + '</div>';
@@ -309,7 +309,7 @@ h1.t{color:#fff;font-size:28px;font-weight:800;margin:0 0 4px}
       h += '</div>';
     });
     h += '<p class="cw-pq" style="font-size:18px;margin-top:22px">Questions</p><p class="cw-fhelp">Questions come without a name.</p>';
-    if (S.qs === null) h += '<div style="min-height:90px"><span class="cw-savestat">Loading information...</span></div>';
+    if (S.qs === null) h += '<div style="min-height:37px"><span class="cw-savestat">Loading information...</span></div>';
     else if (!S.qs.length) h += '<p class="cw-statement">No questions.</p>';
     else S.qs.forEach(function (q) { h += '<div class="cw-fbox" style="margin:0 0 10px"><p style="margin:0 0 8px">' + esc(q.text) + '</p><a class="cw-btn ghost sm" data-act="report" data-id="' + esc(q.questionId) + '">Report</a></div>'; });
     if (S.note) h += '<div class="cw-status info" style="margin-top:14px">' + esc(S.note) + '</div>';
