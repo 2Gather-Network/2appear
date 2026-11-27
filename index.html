@@ -1165,7 +1165,7 @@
     m.appendChild(el('div', 'pmn', nm));
     if (code) {
       var v = String(p.vanity || '').trim();
-      var prof = v ? '/hi/' + encodeURIComponent(v) : 'https://2gather.network/hi/?v=' + encodeURIComponent(code);
+      var prof = v ? '/hi/' + encodeURIComponent(v) : '/hi/?v=' + encodeURIComponent(code);
       m.appendChild(menuItem('msg', 'Send message', '/messages/?to=' + encodeURIComponent('c:' + code)));
       m.appendChild(menuItem('user', 'See profile', prof));
       var cal = String(p.calendar || '').trim();
