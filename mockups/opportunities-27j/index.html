@@ -200,6 +200,10 @@ h1.t{color:#fff;font-size:28px;font-weight:800;margin:0 0 4px}
     { q: 'Who sees your name?', help: 'People you are connected with, and people in a group or at an event with you, see your name and photo. Everyone else sees them only when you both say yes. You can change this later.', key: 'stay', opts: ['Show my name to people who know me', 'Keep me anonymous until we both say yes'] }
   ];
   function crumb(mid, now) { return '<div class="cw-breadcrumb"><a href="/network/">Network</a> / ' + (mid || now !== 'Opportunities' ? '<a href="/mockups/opportunities-27j/">Opportunities</a> / ' : '') + (mid ? esc(mid) + ' / ' : '') + '<span class="now">' + esc(now) + '</span></div>'; }
+  function addMenu() {
+    var row = function (label, attrs) { return '<a ' + attrs + ' style="display:block;padding:14px 4px;font:700 16px \'Nunito Sans\',sans-serif;color:#1F699E;border-top:1px solid #DDE5EE;cursor:pointer;text-decoration:none">' + label + '</a>'; };
+    return crumb('', 'Add something') + '<div class="cw-card"><p class="cw-pq">Add something</p>' + row('I&#39;m seeking something ...', 'data-act="addme" data-v="Seeking it"') + row('I&#39;m offering something ...', 'data-act="addme" data-v="Offering it"') + row('I know someone seeking something...', 'href="/?add=theyneed"') + row('I know someone offering something...', 'href="/?add=theyoffer"') + '</div>' + back();
+  }
   function back() { return '<div style="margin-top:16px"><a class="backb" data-act="list">Back</a></div>'; }
   function signedOut() {
     return crumb('', 'Opportunities') + '<div class="cw-card cw-invite"><h3>Would you like to see opportunities that match you?</h3><p>Sign up or sign in to see opportunities near you.</p><div class="btns"><a class="cw-btn solid" href="/signup/?next=%2Fmockups%2Fopportunities-27j%2F">Sign up</a><a class="cw-btn ghost" href="/">No, thank you</a></div><div style="margin-top:8px"><a href="/signin/?next=%2Fmockups%2Fopportunities-27j%2F" style="display:flex;align-items:center;min-height:44px;font-size:15px;color:#1F699E;text-decoration:underline">I already have an account</a></div></div>';
@@ -235,7 +239,7 @@ h1.t{color:#fff;font-size:28px;font-weight:800;margin:0 0 4px}
     h += '<div class="cap">' + ['All', 'Offered', 'Needed'].map(function (x) { return '<a data-act="cap" data-v="' + x + '" class="' + (S.dir === x ? 'on' : '') + '">' + x + '</a>'; }).join('') + '</div>';
     h += '<div class="mainhead"><h2>Opportunities</h2><a class="cw-cpill' + (S.myOnly ? ' on' : '') + '" data-act="myonly"><span class="c">' + (S.myOnly ? '&#10003;' : '') + '</span>Show my matches only</a></div>';
     if (S.list === null) return h + (S.err ? '<div class="cw-status info">' + esc(S.err) + '</div>' : '<span class="cw-savestat">Loading information...</span>') + '</div></div>' + rail() + '</div>';
-    if (!S.list.length) return h + '<p class="cw-pq">Nothing matches yet</p><p class="cw-statement">Tell us what you&#39;re offering and/or seeking and matches will show here.</p><a class="cw-btn solid sm" href="/">Add my opportunity</a></div></div>' + rail() + '</div>';
+    if (!S.list.length) return h + '<p class="cw-pq">Nothing matches yet</p><p class="cw-statement">Tell us what you&#39;re offering and/or seeking and matches will show here.</p><a class="cw-btn solid sm" data-act="add">Add my opportunity</a></div></div>' + rail() + '</div>';
     var shown = S.list.filter(pass), mine = shown.filter(function (p) { return p.reasons && p.reasons.length; }).length;
     h += '<p class="cw-fhelp" style="margin:0 0 10px">' + shown.length + (S.myOnly ? ' opportunities match you' : ' opportunities') + '. Matched on location and category.</p>';
     h += '<div class="legend"><span style="--c:' + DOT.need + '">You both match on a need or offer</span><span style="--c:' + DOT.seek + '">You both seek this</span><span style="--c:' + DOT.common + '">You both have in common</span></div>';
@@ -339,7 +343,7 @@ h1.t{color:#fff;font-size:28px;font-weight:800;margin:0 0 4px}
     var st = document.getElementById('stage');
     if (!ME) { st.innerHTML = signedOut(); return; }
     var top = '<div class="cw-tabs"><button type="button" data-act="list" class="' + (S.screen === 'list' ? 'on' : '') + '">Opportunities</button><button type="button" data-act="mine" class="' + (S.screen === 'mine' || S.screen === 'manage' ? 'on' : '') + '">My opportunities</button><button type="button" data-act="share" class="' + (S.screen === 'share' ? 'on' : '') + '">Share an opportunity</button></div>';
-    st.innerHTML = top + ({ list: list, post: post, share: share, mine: mineList, manage: manage, group: groupList })[S.screen]();
+    st.innerHTML = top + ({ list: list, post: post, share: share, add: addMenu, mine: mineList, manage: manage, group: groupList })[S.screen]();
   }
   function load() {
     S.list = null; S.err = ''; draw();
@@ -357,6 +361,8 @@ h1.t{color:#fff;font-size:28px;font-weight:800;margin:0 0 4px}
     var t = e.target.closest('[data-act]'); if (!t || S.busy) return;
     var a = t.getAttribute('data-act'), k = t.getAttribute('data-k'), v = t.getAttribute('data-v');
     if (a === 'list') { S.screen = 'list'; S.note = ''; if (S.list === null) load(); }
+    else if (a === 'add') { S.screen = 'add'; S.note = ''; window.scrollTo(0, 0); }
+    else if (a === 'addme') { S.ans.dir = v; S.screen = 'share'; S.step = 1; S.note = ''; loadCats(); }
     else if (a === 'share') { S.screen = 'share'; S.step = 0; S.note = ''; loadCats(); }
     else if (a === 'mine') { S.screen = 'mine'; S.note = ''; loadMine(); return; }
     else if (a === 'mail') { var want = !S.mailOff; S.busy = true; send('setOpportunityMail', { off: want ? '1' : '0' }).then(function (j) { S.busy = false; if (j && j.ok) S.mailOff = want; else S.note = 'That did not save. Please try again.'; draw(); }).catch(function () { S.busy = false; S.note = 'That did not save. Please try again.'; draw(); }); return; }
