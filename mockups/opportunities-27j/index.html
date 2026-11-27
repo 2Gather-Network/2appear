@@ -192,7 +192,7 @@ h1.t{color:#fff;font-size:28px;font-weight:800;margin:0 0 4px}
   }
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
   var DOT = { need: '#D2822F', seek: '#7B6BD6', common: '#4F9F7A' };
-  var S = { screen: 'list', dir: 'All', myOnly: false, open: {}, fs: { region: [], country: [], state: [], cat: [], kind: [], sub: [], paid: [], roles: [], type: [], where: [], pay: [], how: [], ex: [], time: [] }, cats: null, want: '', showOf: 'all', mm: null, list: null, err: '', post: null, step: 0, asking: false, ans: { dir: 'Offering it', kind: 'Experience', sub: 'Job', paid: 'Paid', roles: [], type: '', where: '', pay: '', how: '', time: 'One-time', cat: '', ex: 'Volunteer', needs: '', who: 'Anyone', stay: 'Show my name to people who know me' }, busy: false, note: '', mine: null, mailOff: false, group: new URLSearchParams(location.search).get('group') || '', gposts: null, mp: null, resp: null, qs: null, confirmDel: false };
+  var S = { screen: 'list', dir: 'All', myOnly: false, open: {}, fs: { region: [], country: [], state: [], cat: [], kind: [], sub: [], paid: [], roles: [], type: [], where: [], pay: [], how: [], ex: [], time: [] }, cats: null, want: '', showOf: 'all', kindOf: 'all', mm: null, list: null, err: '', post: null, step: 0, asking: false, ans: { dir: 'Offering it', kind: 'Experience', sub: 'Job', paid: 'Paid', roles: [], type: '', where: '', pay: '', how: '', time: 'One-time', cat: '', ex: 'Volunteer', needs: '', who: 'Anyone', stay: 'Show my name to people who know me' }, busy: false, note: '', mine: null, mailOff: false, group: new URLSearchParams(location.search).get('group') || '', gposts: null, mp: null, resp: null, qs: null, confirmDel: false };
   var STATES = ["Alabama","Alaska","Arizona","Arkansas","California","Colorado","Connecticut","Delaware","Florida","Georgia","Hawaii","Idaho","Illinois","Indiana","Iowa","Kansas","Kentucky","Louisiana","Maine","Maryland","Massachusetts","Michigan","Minnesota","Mississippi","Missouri","Montana","Nebraska","Nevada","New Hampshire","New Jersey","New Mexico","New York","North Carolina","North Dakota","Ohio","Oklahoma","Oregon","Pennsylvania","Rhode Island","South Carolina","South Dakota","Tennessee","Texas","Utah","Vermont","Virginia","Washington","West Virginia","Wisconsin","Wyoming","Washington D.C."];
   var REGIONS = ['North America', 'South America', 'Europe', 'Asia', 'Africa', 'Oceania', 'Antarctica'];
   var COUNTRIES = ['United States', 'Canada', 'Mexico'];
@@ -475,11 +475,13 @@ h1.t{color:#fff;font-size:28px;font-weight:800;margin:0 0 4px}
     return h + '<div class="row" style="margin-top:6px"><a class="cw-btn ghost sm" data-act="reset" style="padding:5px 14px;font-size:13px">Reset</a></div></div>';
   }
   var FP_BOX = 'If you both say yes, you see each other\u2019s names and you both appear in each other\u2019s Contacted tab. If you say not now, they are never told.';
+  function keep(t) { var c = kindOfLine(t); return S.kindOf === 'all' || (S.kindOf === 'match' ? c !== 'share' : c === 'share'); }
+  function kindOfLine(t) { var x = String(t || ''); return /^Offers .+, which you are seeking$/.test(x) || /^Seeking .+, which you offer$/.test(x) ? 'comp' : /^You are both seeking /.test(x) ? 'coseek' : 'share'; }
   function item(t) {
     var x = String(t || ''), m, cls = 'share', w = x;
     if ((m = x.match(/^Offers (.+), which you are seeking$/)) || (m = x.match(/^Seeking (.+), which you offer$/))) { cls = 'comp'; w = m[1]; }
     else if ((m = x.match(/^You are both seeking (.+)$/))) { cls = 'coseek'; w = m[1]; }
-    else if ((m = x.match(/^You both (?:offer|enjoy) (.+)$/))) { cls = 'share'; w = m[1]; }
+    else if ((m = x.match(/^You both (?:offer|enjoy|care about) (.+)$/))) { cls = 'share'; w = m[1]; }
     w = w.charAt(0).toUpperCase() + w.slice(1);
     return '<div class="mp-item"><span class="dot ' + cls + '"></span><div class="mp-item-text">' + esc(w) + '</div></div>';
   }
@@ -496,20 +498,23 @@ h1.t{color:#fff;font-size:28px;font-weight:800;margin:0 0 4px}
     var out = '', rows = [], boxShown = false, q = S.pq || '';
     if (d.needTopics) out += '<div class="cw-status info" style="margin:0 0 12px">Add a topic first so we can find your matches. <a href="/dashboard/" style="color:#1F699E;font-weight:700">Add a topic</a></div>';
     if (S.showOf !== 'anon') (d.known || []).forEach(function (k) {
-      if (!(k.reasons || []).length) return;
+      var rs = (k.reasons || []).filter(keep);
+      if (!rs.length) return;
       var name = String(k.name || '').trim() || 'Someone';
-      rows.push({ hay: (name + ' ' + k.reasons.join(' ')).toLowerCase(), html: '<div class="mp-row">' + photo(name, k.photo, false) + '<div class="mp-body"><div class="mp-name">' + esc(name) + '</div><div class="mp-list">' + k.reasons.map(item).join('') + '</div></div><div class="mp-actions">' + (k.person ? '<a class="mp-btn primary" href="/hi/?v=' + encodeURIComponent(k.person) + '">Visit profile</a>' : '') + '</div></div>' });
+      rows.push({ hay: (name + ' ' + rs.join(' ')).toLowerCase(), html: '<div class="mp-row">' + photo(name, k.photo, false) + '<div class="mp-body"><div class="mp-name">' + esc(name) + '</div><div class="mp-list">' + rs.map(item).join('') + '</div></div><div class="mp-actions">' + (k.person ? '<a class="mp-btn primary" href="/hi/?v=' + encodeURIComponent(k.person) + '">Visit profile</a>' : '') + '</div></div>' });
     });
     if (S.showOf !== 'known' && d.findMe === 'on') (d.anon || []).forEach(function (x) {
+      var ars = (x.reasons || []).filter(keep);
+      if (!ars.length) return;
       var acts = x.state === 'waiting' ? '<span class="mp-sub"><b>Waiting</b></span>' : '<a class="mp-btn primary" data-act="reach" data-id="' + esc(x.card) + '">Reach out</a><a class="mp-btn" data-act="notnow" data-id="' + esc(x.card) + '">Not now</a>';
       var box = '';
       if (x.state !== 'waiting' && !boxShown) { box = '<div class="cw-status info" style="margin:6px 0 0">' + esc(FP_BOX) + '</div>'; boxShown = true; }
-      rows.push({ hay: ('someone on 2appear ' + (x.city || '') + ' ' + (x.reasons || []).join(' ')).toLowerCase(), html: '<div class="mp-row">' + photo('', '', true) + '<div class="mp-body"><div class="mp-name">Someone on 2Appear</div>' + (x.city ? '<div class="mp-where">' + esc(x.city) + '</div>' : '') + '<div class="mp-list">' + (x.reasons || []).map(item).join('') + '</div>' + box + '</div><div class="mp-actions">' + acts + '</div></div>' });
+      rows.push({ hay: ('someone on 2appear ' + (x.city || '') + ' ' + ars.join(' ')).toLowerCase(), html: '<div class="mp-row">' + photo('', '', true) + '<div class="mp-body"><div class="mp-name">Someone on 2Appear</div>' + (x.city ? '<div class="mp-where">' + esc(x.city) + '</div>' : '') + '<div class="mp-list">' + ars.map(item).join('') + '</div>' + box + '</div><div class="mp-actions">' + acts + '</div></div>' });
     });
     var total = rows.length, list = q ? rows.filter(function (r) { return r.hay.indexOf(q) > -1; }) : rows;
     if (!total) return out + (d.needTopics ? '' : '<p class="cw-statement">No matches yet.</p>');
-    var title = q ? list.length + ' of ' + total + (total === 1 ? ' match' : ' matches') : total + (total === 1 ? ' person matches you' : ' people match you');
-    out += '<div class="mp-title">' + esc(title) + '</div><div class="mp-key"><span><span class="dot comp"></span>Offer/need match</span><span><span class="dot coseek"></span>You both need this</span><span><span class="dot share"></span>In common</span></div>';
+    var title = (q ? list.length + ' of ' : '') + total + (total === 1 ? ' opportunity' : ' opportunities');
+    out += '<div class="mp-title" style="margin-top:12px">' + esc(title) + '</div>' + (S.kindOf === 'match' ? '<div class="mp-key"><span><span class="dot comp"></span>An offer fulfills a request</span><span><span class="dot coseek"></span>You both seek this</span></div>' : '<div style="height:10px"></div>');
     if (total > 5) out += '<div class="mp-search-wrap"><input type="text" class="mp-search" id="mp-search" placeholder="Search your matches" aria-label="Search your matches" value="' + esc(S.pq || '') + '"></div>';
     out += list.length ? list.map(function (r) { return r.html; }).join('') : '<p class="mp-sub" style="padding:20px 0">No matches for "' + esc(q) + '".</p>';
     if (S.showOf !== 'known' && d.findMe === 'on' && d.dayFull) out += '<p class="cw-fhelp">That\u2019s everyone for today. More people tomorrow.</p>';
@@ -523,7 +528,7 @@ h1.t{color:#fff;font-size:28px;font-weight:800;margin:0 0 4px}
     var h = crumb('', 'Opportunities') + '<div class="layout"><div><div class="cw-card">';
     h += '<div class="mainhead"><h2>Opportunities</h2>' + shareBtn() + '</div>';
     if (S.list === null) return h + (S.err ? '<div class="cw-status info">' + esc(S.err) + '</div>' : '<span class="cw-savestat">Loading information...</span>') + '</div></div>' + rail() + '</div>';
-    h += '<div class="cap">' + [['all', 'All'], ['known', 'My people'], ['anon', 'Anonymous']].map(function (o) { return '<a data-act="showof" data-v="' + o[0] + '" class="' + (S.showOf === o[0] ? 'on' : '') + '">' + o[1] + '</a>'; }).join('') + '</div>' + people();
+    h += '<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap"><div class="cap">' + [['all', 'All'], ['known', 'My people'], ['anon', 'Anonymous']].map(function (o) { return '<a data-act="showof" data-v="' + o[0] + '" class="' + (S.showOf === o[0] ? 'on' : '') + '">' + o[1] + '</a>'; }).join('') + '</div><div class="cap">' + [['all', 'All'], ['common', 'In common'], ['match', 'Matches']].map(function (o) { return '<a data-act="kindof" data-v="' + o[0] + '" class="' + (S.kindOf === o[0] ? 'on' : '') + '">' + o[1] + '</a>'; }).join('') + '</div></div>' + people();
     if (!S.list.some(function (p) { return p.reasons && p.reasons.length; })) return h + '</div></div>' + rail() + '</div>';
     var shown = S.list.filter(pass), mine = shown.filter(function (p) { return p.reasons && p.reasons.length; }).length;
     h += '<p class="cw-fhelp" style="margin:0 0 10px">' + shown.length + ' opportunities match you' + '. Matched on location and category.</p>';
@@ -676,6 +681,7 @@ h1.t{color:#fff;font-size:28px;font-weight:800;margin:0 0 4px}
     else if (a === 'menu') { S.menu = !S.menu; }
     else if (a === 'want') { S.want = v; }
     else if (a === 'showof') { S.showOf = v; }
+    else if (a === 'kindof') { S.kindOf = v; }
     else if (a === 'reach' || a === 'notnow') {
       var cid = t.getAttribute('data-id'); S.busy = true;
       send(a === 'reach' ? 'reachOut57b' : 'fpNotNow57b', { card: cid }).then(function (y) {
