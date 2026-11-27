@@ -506,7 +506,7 @@ h1.t{color:#fff;font-size:28px;font-weight:800;margin:0 0 4px}
       var rs = (k.reasons || []).filter(keep);
       if (!rs.length) return;
       var name = String(k.name || '').trim() || 'Someone';
-      rows.push({ hay: (name + ' ' + rs.join(' ')).toLowerCase(), html: '<div class="mp-row"><span style="cursor:pointer"' + pm(k.person, name) + '>' + photo(name, k.photo, false) + '</span><div class="mp-body"><div class="mp-name" style="cursor:pointer"' + pm(k.person, name) + '>' + esc(name) + '</div><div class="mp-list">' + rs.map(item).join('') + '</div></div><div class="mp-actions">' + (k.person ? '<a class="mp-btn primary" href="/hi/?v=' + encodeURIComponent(k.person) + '">Visit profile</a><button type="button" class="mp-btn" aria-label="More for ' + esc(name) + '"' + pm(k.person, name) + '>\u22EF</button>' : '') + '</div></div>' });
+      rows.push({ hay: (name + ' ' + rs.join(' ')).toLowerCase(), html: '<div class="mp-row"><span style="cursor:pointer"' + pm(k.person, name) + '>' + photo(name, k.photo, false) + '</span><div class="mp-body"><div class="mp-name" style="cursor:pointer"' + pm(k.person, name) + '>' + esc(name) + '</div><div class="mp-list">' + rs.map(item).join('') + '</div></div><div class="mp-actions">' + (k.person ? '<button type="button" class="mp-btn" aria-label="More for ' + esc(name) + '"' + pm(k.person, name) + '>\u22EF</button>' : '') + '</div></div>' });
     });
     if (S.showOf !== 'known' && d.findMe === 'on') (d.anon || []).forEach(function (x) {
       var ars = (x.reasons || []).filter(keep);
