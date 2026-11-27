@@ -135,7 +135,7 @@ h1.t{color:#fff;font-size:28px;font-weight:800;margin:0 0 4px}
   }
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
   var DOT = { need: '#D2822F', seek: '#7B6BD6', common: '#4F9F7A' };
-  var S = { screen: 'list', dir: 'All', myOnly: false, open: {}, fs: { region: [], country: [], state: [], cat: [], kind: [], sub: [], paid: [], roles: [], type: [], where: [], pay: [], how: [], ex: [], time: [] }, cats: null, list: null, err: '', post: null, step: 0, asking: false, ans: { dir: 'Offering it', kind: 'Experience', sub: 'Job', paid: 'Paid', roles: [], type: '', where: '', pay: '', how: '', time: 'One-time', cat: '', ex: 'Volunteer', needs: '', who: 'Anyone', stay: 'Show my name to people who know me' }, busy: false, note: '', mine: null, mailOff: false, group: new URLSearchParams(location.search).get('group') || '', gposts: null, mp: null, resp: null, qs: null, confirmDel: false };
+  var S = { screen: 'list', dir: 'All', myOnly: false, open: {}, fs: { region: [], country: [], state: [], cat: [], kind: [], sub: [], paid: [], roles: [], type: [], where: [], pay: [], how: [], ex: [], time: [] }, cats: null, want: '', show: { known: false, anon: false }, list: null, err: '', post: null, step: 0, asking: false, ans: { dir: 'Offering it', kind: 'Experience', sub: 'Job', paid: 'Paid', roles: [], type: '', where: '', pay: '', how: '', time: 'One-time', cat: '', ex: 'Volunteer', needs: '', who: 'Anyone', stay: 'Show my name to people who know me' }, busy: false, note: '', mine: null, mailOff: false, group: new URLSearchParams(location.search).get('group') || '', gposts: null, mp: null, resp: null, qs: null, confirmDel: false };
   var STATES = ["Alabama","Alaska","Arizona","Arkansas","California","Colorado","Connecticut","Delaware","Florida","Georgia","Hawaii","Idaho","Illinois","Indiana","Iowa","Kansas","Kentucky","Louisiana","Maine","Maryland","Massachusetts","Michigan","Minnesota","Mississippi","Missouri","Montana","Nebraska","Nevada","New Hampshire","New Jersey","New Mexico","New York","North Carolina","North Dakota","Ohio","Oklahoma","Oregon","Pennsylvania","Rhode Island","South Carolina","South Dakota","Tennessee","Texas","Utah","Vermont","Virginia","Washington","West Virginia","Wisconsin","Wyoming","Washington D.C."];
   var REGIONS = ['North America', 'South America', 'Europe', 'Asia', 'Africa', 'Oceania', 'Antarctica'];
   var COUNTRIES = ['United States', 'Canada', 'Mexico'];
@@ -242,13 +242,13 @@ h1.t{color:#fff;font-size:28px;font-weight:800;margin:0 0 4px}
         h += '</div>';
       }
     });
-    return h + '<div class="row" style="margin-top:6px"><a class="cw-btn ghost sm" data-act="reset">Reset</a></div></div>';
+    return h + '<div class="row" style="margin-top:6px"><a class="cw-btn ghost sm" data-act="reset" style="padding:5px 14px;font-size:13px">Reset</a></div></div>';
   }
   function list() {
     var h = crumb('', 'Opportunities') + '<div class="layout"><div><div class="cw-card">';
     h += '<div class="mainhead"><h2>Opportunities</h2>' + shareBtn() + '</div>';
     if (S.list === null) return h + (S.err ? '<div class="cw-status info">' + esc(S.err) + '</div>' : '<span class="cw-savestat">Loading information...</span>') + '</div></div>' + rail() + '</div>';
-    if (!S.list.some(function (p) { return p.reasons && p.reasons.length; })) return h + '<p class="cw-pq">Nothing matches yet</p><p class="cw-statement">Tell us what you&#39;re offering and/or seeking and matches will show here.</p><a class="cw-btn solid sm" data-act="add">Add my opportunity</a></div></div>' + rail() + '</div>';
+    if (!S.list.some(function (p) { return p.reasons && p.reasons.length; })) return h + '<p class="cw-pq" style="font-size:18px">Would you like to see matches here based on what you&#39;re seeking or offering?</p><div class="cw-fchips"><button type="button" class="cw-fchip' + (S.want === 'yes' ? ' on' : '') + '" data-act="want" data-v="yes">Yes</button><button type="button" class="cw-fchip' + (S.want === 'no' ? ' on' : '') + '" data-act="want" data-v="no">No</button></div>' + (S.want === 'yes' ? '<p class="cw-fq" style="margin:16px 0 8px">Show matches of:</p><div class="cw-fchips"><button type="button" class="cw-fchip' + (S.show.known ? ' on' : '') + '" data-act="showof" data-v="known">People I know</button><button type="button" class="cw-fchip' + (S.show.anon ? ' on' : '') + '" data-act="showof" data-v="anon">Anonymous matches</button></div>' : '') + '</div></div>' + rail() + '</div>';
     var shown = S.list.filter(pass), mine = shown.filter(function (p) { return p.reasons && p.reasons.length; }).length;
     h += '<p class="cw-fhelp" style="margin:0 0 10px">' + shown.length + ' opportunities match you' + '. Matched on location and category.</p>';
     h += '<div class="legend"><span style="--c:' + DOT.need + '">You both match on a need or offer</span><span style="--c:' + DOT.seek + '">You both seek this</span><span style="--c:' + DOT.common + '">You both have in common</span></div>';
@@ -373,6 +373,8 @@ h1.t{color:#fff;font-size:28px;font-weight:800;margin:0 0 4px}
     if (a !== 'menu') S.menu = false;
     if (a === 'list') { S.screen = 'list'; S.note = ''; if (S.list === null) load(); }
     else if (a === 'menu') { S.menu = !S.menu; }
+    else if (a === 'want') { S.want = v; }
+    else if (a === 'showof') { S.show[v] = !S.show[v]; }
     else if (a === 'add') { S.screen = 'add'; S.note = ''; window.scrollTo(0, 0); }
     else if (a === 'addme') { S.ans.dir = v; S.fromAdd = true; S.screen = 'share'; S.step = 1; S.note = ''; loadCats(); }
     else if (a === 'share') { S.fromAdd = false; S.screen = 'share'; S.step = 0; S.note = ''; loadCats(); }
