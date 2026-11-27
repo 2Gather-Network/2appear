@@ -200,6 +200,10 @@ h1.t{color:#fff;font-size:28px;font-weight:800;margin:0 0 4px}
     { q: 'Who sees your name?', help: 'People you are connected with, and people in a group or at an event with you, see your name and photo. Everyone else sees them only when you both say yes. You can change this later.', key: 'stay', opts: ['Show my name to people who know me', 'Keep me anonymous until we both say yes'] }
   ];
   function crumb(mid, now) { return '<div class="cw-breadcrumb"><a href="/network/">Network</a> / ' + (mid || now !== 'Opportunities' ? '<a href="/mockups/opportunities-27j/">Opportunities</a> / ' : '') + (mid ? esc(mid) + ' / ' : '') + '<span class="now">' + esc(now) + '</span></div>'; }
+  function shareBtn() {
+    var row = function (label, attrs) { return '<a ' + attrs + ' style="display:block;padding:12px 16px;font:700 15px \'Nunito Sans\',sans-serif;color:#1A2E42;cursor:pointer;text-decoration:none">' + label + '</a>'; };
+    return '<div style="position:relative;margin-left:auto"><a class="cw-btn solid sm" data-act="menu">Share an opportunity</a>' + (S.menu ? '<div style="position:absolute;right:0;top:44px;z-index:20;background:#fff;border:1.5px solid #DDE5EE;border-radius:18px;box-shadow:0 8px 24px rgba(26,46,66,.15);min-width:300px;padding:6px 0">' + row('I&#39;m seeking something ...', 'data-act="addme" data-v="Seeking it"') + row('I&#39;m offering something ...', 'data-act="addme" data-v="Offering it"') + row('I know someone seeking something...', 'href="/?add=theyneed"') + row('I know someone offering something...', 'href="/?add=theyoffer"') + '<div style="border-top:1px solid #DDE5EE;margin-top:4px"></div>' + row('My opportunities', 'data-act="mine"') + '</div>' : '') + '</div>';
+  }
   function addMenu() {
     var row = function (label, attrs) { return '<a ' + attrs + ' style="display:block;padding:14px 4px;font:700 16px \'Nunito Sans\',sans-serif;color:#1F699E;border-top:1px solid #DDE5EE;cursor:pointer;text-decoration:none">' + label + '</a>'; };
     return crumb('', 'Add something') + '<div class="cw-card"><p class="cw-pq">Add something</p>' + row('I&#39;m seeking something ...', 'data-act="addme" data-v="Seeking it"') + row('I&#39;m offering something ...', 'data-act="addme" data-v="Offering it"') + row('I know someone seeking something...', 'href="/?add=theyneed"') + row('I know someone offering something...', 'href="/?add=theyoffer"') + '</div>' + back();
@@ -214,8 +218,7 @@ h1.t{color:#fff;font-size:28px;font-weight:800;margin:0 0 4px}
     return (f && f.o) || [];
   }
   function pass(p) {
-    if (S.dir !== 'All' && p.dir !== S.dir) return false;
-    if (S.myOnly && !(p.reasons && p.reasons.length)) return false;
+    if (!(p.reasons && p.reasons.length)) return false;
     for (var k in S.fs) { if (!S.fs[k].length) continue; var v = val(p, k); var hit = Array.isArray(v) ? v.some(function (x) { return S.fs[k].indexOf(x) > -1; }) : S.fs[k].indexOf(v) > -1; if (!hit) return false; }
     return true;
   }
@@ -236,12 +239,11 @@ h1.t{color:#fff;font-size:28px;font-weight:800;margin:0 0 4px}
   }
   function list() {
     var h = crumb('', 'Opportunities') + '<div class="layout"><div><div class="cw-card">';
-    h += '<div class="cap">' + ['All', 'Offered', 'Needed'].map(function (x) { return '<a data-act="cap" data-v="' + x + '" class="' + (S.dir === x ? 'on' : '') + '">' + x + '</a>'; }).join('') + '</div>';
-    h += '<div class="mainhead"><h2>Opportunities</h2><a class="cw-cpill' + (S.myOnly ? ' on' : '') + '" data-act="myonly"><span class="c">' + (S.myOnly ? '&#10003;' : '') + '</span>Show my matches only</a></div>';
+    h += '<div class="mainhead"><h2>Opportunities</h2>' + shareBtn() + '</div>';
     if (S.list === null) return h + (S.err ? '<div class="cw-status info">' + esc(S.err) + '</div>' : '<span class="cw-savestat">Loading information...</span>') + '</div></div>' + rail() + '</div>';
-    if (!S.list.length) return h + '<p class="cw-pq">Nothing matches yet</p><p class="cw-statement">Tell us what you&#39;re offering and/or seeking and matches will show here.</p><a class="cw-btn solid sm" data-act="add">Add my opportunity</a></div></div>' + rail() + '</div>';
+    if (!S.list.some(function (p) { return p.reasons && p.reasons.length; })) return h + '<p class="cw-pq">Nothing matches yet</p><p class="cw-statement">Tell us what you&#39;re offering and/or seeking and matches will show here.</p><a class="cw-btn solid sm" data-act="add">Add my opportunity</a></div></div>' + rail() + '</div>';
     var shown = S.list.filter(pass), mine = shown.filter(function (p) { return p.reasons && p.reasons.length; }).length;
-    h += '<p class="cw-fhelp" style="margin:0 0 10px">' + shown.length + (S.myOnly ? ' opportunities match you' : ' opportunities') + '. Matched on location and category.</p>';
+    h += '<p class="cw-fhelp" style="margin:0 0 10px">' + shown.length + ' opportunities match you' + '. Matched on location and category.</p>';
     h += '<div class="legend"><span style="--c:' + DOT.need + '">You both match on a need or offer</span><span style="--c:' + DOT.seek + '">You both seek this</span><span style="--c:' + DOT.common + '">You both have in common</span></div>';
     h += '<div class="cw-search" style="max-width:none;margin:0 0 10px"><input type="search" id="q" placeholder="&#128269; Search" aria-label="Search opportunities"></div>';
     if (!shown.length) h += '<p class="cw-statement" style="margin-top:14px">Nothing here with these filters. Try Reset.</p>';
@@ -344,9 +346,7 @@ h1.t{color:#fff;font-size:28px;font-weight:800;margin:0 0 4px}
     if (!ME) { st.innerHTML = signedOut(); return; }
     var top = '<div class="cw-tabs"><button type="button" data-act="list" class="' + (S.screen === 'list' ? 'on' : '') + '">Opportunities</button><button type="button" data-act="mine" class="' + (S.screen === 'mine' || S.screen === 'manage' ? 'on' : '') + '">My opportunities</button><button type="button" data-act="share" class="' + (S.screen === 'share' ? 'on' : '') + '">Share an opportunity</button></div>';
     var body = ({ list: list, post: post, share: share, add: addMenu, mine: mineList, manage: manage, group: groupList })[S.screen]();
-    var tabs = top.replace('class="cw-tabs"', 'class="cw-tabs" style="margin:0 0 14px;padding:0;background:none"');
-    var at = body.indexOf('<div class="cw-card');
-    st.innerHTML = at > -1 ? body.slice(0, at) + body.slice(at).replace(/<div class="cw-card([^"]*)">/, function (m) { return m + tabs; }) : tabs + body;
+    st.innerHTML = body;
   }
   function load() {
     S.list = null; S.err = ''; draw();
@@ -363,7 +363,9 @@ h1.t{color:#fff;font-size:28px;font-weight:800;margin:0 0 4px}
   document.addEventListener('click', function (e) {
     var t = e.target.closest('[data-act]'); if (!t || S.busy) return;
     var a = t.getAttribute('data-act'), k = t.getAttribute('data-k'), v = t.getAttribute('data-v');
+    if (a !== 'menu') S.menu = false;
     if (a === 'list') { S.screen = 'list'; S.note = ''; if (S.list === null) load(); }
+    else if (a === 'menu') { S.menu = !S.menu; }
     else if (a === 'add') { S.screen = 'add'; S.note = ''; window.scrollTo(0, 0); }
     else if (a === 'addme') { S.ans.dir = v; S.fromAdd = true; S.screen = 'share'; S.step = 1; S.note = ''; loadCats(); }
     else if (a === 'share') { S.fromAdd = false; S.screen = 'share'; S.step = 0; S.note = ''; loadCats(); }
