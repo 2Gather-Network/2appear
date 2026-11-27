@@ -178,6 +178,7 @@ h1.t{color:#fff;font-size:28px;font-weight:800;margin:0 0 4px}
 <script src="/nav/identity.js?v=75"></script>
 <script src="/nav/waiting-words.js?v=16"></script>
 <script src="/nav/topbar.js?v=7.15"></script>
+<script src="/nav/person-menu.js?v=2"></script>
 <script>
 (function () {
   var GS_URL = 'https://cw-api-gate.jessieupp.workers.dev';
@@ -485,6 +486,10 @@ h1.t{color:#fff;font-size:28px;font-weight:800;margin:0 0 4px}
     w = w.charAt(0).toUpperCase() + w.slice(1);
     return '<div class="mp-item"><span class="dot ' + cls + '"></span><div class="mp-item-text">' + esc(w) + '</div></div>';
   }
+  function pm(code, name) {
+    if (!window.cwPersonMenu || !code) return '';
+    try { return cwPersonMenu.attrs({ code: code, name: String(name || '').split(' ')[0], profile: 'https://2appear.network/hi/?v=' + encodeURIComponent(code) }); } catch (e) { return ''; }
+  }
   function photo(name, ph, blank) {
     ph = String(ph || '').trim();
     if (blank) return '<span class="mp-photo blank"></span>';
@@ -501,7 +506,7 @@ h1.t{color:#fff;font-size:28px;font-weight:800;margin:0 0 4px}
       var rs = (k.reasons || []).filter(keep);
       if (!rs.length) return;
       var name = String(k.name || '').trim() || 'Someone';
-      rows.push({ hay: (name + ' ' + rs.join(' ')).toLowerCase(), html: '<div class="mp-row">' + photo(name, k.photo, false) + '<div class="mp-body"><div class="mp-name">' + esc(name) + '</div><div class="mp-list">' + rs.map(item).join('') + '</div></div><div class="mp-actions">' + (k.person ? '<a class="mp-btn primary" href="/hi/?v=' + encodeURIComponent(k.person) + '">Visit profile</a><a class="mp-btn" href="https://2appear.network/people/' + encodeURIComponent(k.person) + '/introduce">Make an intro</a>' : '') + '</div></div>' });
+      rows.push({ hay: (name + ' ' + rs.join(' ')).toLowerCase(), html: '<div class="mp-row"><span style="cursor:pointer"' + pm(k.person, name) + '>' + photo(name, k.photo, false) + '</span><div class="mp-body"><div class="mp-name" style="cursor:pointer"' + pm(k.person, name) + '>' + esc(name) + '</div><div class="mp-list">' + rs.map(item).join('') + '</div></div><div class="mp-actions">' + (k.person ? '<a class="mp-btn primary" href="/hi/?v=' + encodeURIComponent(k.person) + '">Visit profile</a><button type="button" class="mp-btn" aria-label="More for ' + esc(name) + '"' + pm(k.person, name) + '>\u22EF</button>' : '') + '</div></div>' });
     });
     if (S.showOf !== 'known' && d.findMe === 'on') (d.anon || []).forEach(function (x) {
       var ars = (x.reasons || []).filter(keep);
