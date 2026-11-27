@@ -200,13 +200,20 @@ h1.t{color:#fff;font-size:28px;font-weight:800;margin:0 0 4px}
     { q: 'Who sees your name?', help: 'People you are connected with, and people in a group or at an event with you, see your name and photo. Everyone else sees them only when you both say yes. You can change this later.', key: 'stay', opts: ['Show my name to people who know me', 'Keep me anonymous until we both say yes'] }
   ];
   function crumb(mid, now) { return '<div class="cw-breadcrumb"><a href="/network/">Network</a> / ' + (mid || now !== 'Opportunities' ? '<a href="/mockups/opportunities-27j/">Opportunities</a> / ' : '') + (mid ? esc(mid) + ' / ' : '') + '<span class="now">' + esc(now) + '</span></div>'; }
+  var IC = {
+    need: '<path d="M4 12v8h16v-8"/><path d="M12 3v11"/><path d="M8 10l4 4 4-4"/>',
+    offer: '<path d="M4 15v4h16v-4"/><path d="M12 15V4"/><path d="M8 8l4-4 4 4"/>',
+    theyneed: '<circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5L21 21"/>',
+    theyoffer: '<path d="M3 10v4h4l9 5V5L7 10z"/><path d="M19 9a4 4 0 0 1 0 6"/><path d="M7 14l1.2 5h2.3"/>',
+    mine: '<path d="M8 6h12"/><path d="M8 12h12"/><path d="M8 18h12"/><path d="M4 6h.01"/><path d="M4 12h.01"/><path d="M4 18h.01"/>'
+  };
+  function mrow(ic, label, attrs) { return '<a ' + attrs + ' style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;font:600 14px \'Nunito Sans\',sans-serif;color:#1A2E42;cursor:pointer;text-decoration:none"><span style="display:inline-flex;flex:none;line-height:0"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1F699E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + IC[ic] + '</svg></span>' + label + '</a>'; }
+  function menuRows() { return mrow('need', 'I&#39;m seeking something ...', 'data-act="addme" data-v="Seeking it"') + mrow('offer', 'I&#39;m offering something ...', 'data-act="addme" data-v="Offering it"') + mrow('theyneed', 'I know someone seeking something...', 'href="/?add=theyneed"') + mrow('theyoffer', 'I know someone offering something...', 'href="/?add=theyoffer"'); }
   function shareBtn() {
-    var row = function (label, attrs) { return '<a ' + attrs + ' style="display:block;padding:12px 16px;font:700 15px \'Nunito Sans\',sans-serif;color:#1A2E42;cursor:pointer;text-decoration:none">' + label + '</a>'; };
-    return '<div style="position:relative;margin-left:auto"><a class="cw-btn solid sm" data-act="menu">Share an opportunity</a>' + (S.menu ? '<div style="position:absolute;right:0;top:44px;z-index:20;background:#fff;border:1.5px solid #DDE5EE;border-radius:18px;box-shadow:0 8px 24px rgba(26,46,66,.15);min-width:300px;padding:6px 0">' + row('I&#39;m seeking something ...', 'data-act="addme" data-v="Seeking it"') + row('I&#39;m offering something ...', 'data-act="addme" data-v="Offering it"') + row('I know someone seeking something...', 'href="/?add=theyneed"') + row('I know someone offering something...', 'href="/?add=theyoffer"') + '<div style="border-top:1px solid #DDE5EE;margin-top:4px"></div>' + row('My opportunities', 'data-act="mine"') + '</div>' : '') + '</div>';
+    return '<div style="position:relative;margin-left:auto"><a class="cw-btn solid sm" data-act="menu">Share an opportunity</a>' + (S.menu ? '<div style="position:absolute;right:0;top:44px;z-index:20;background:#fff;border:1.5px solid #DDE4EE;border-radius:14px;width:320px;max-width:calc(100vw - 32px);padding:6px">' + menuRows() + '<div style="border-top:1px solid #DDE4EE;margin:4px 0"></div>' + mrow('mine', 'My opportunities', 'data-act="mine"') + '</div>' : '') + '</div>';
   }
   function addMenu() {
-    var row = function (label, attrs) { return '<a ' + attrs + ' style="display:block;padding:14px 4px;font:700 16px \'Nunito Sans\',sans-serif;color:#1F699E;border-top:1px solid #DDE5EE;cursor:pointer;text-decoration:none">' + label + '</a>'; };
-    return crumb('', 'Add something') + '<div class="cw-card"><p class="cw-pq">Add something</p>' + row('I&#39;m seeking something ...', 'data-act="addme" data-v="Seeking it"') + row('I&#39;m offering something ...', 'data-act="addme" data-v="Offering it"') + row('I know someone seeking something...', 'href="/?add=theyneed"') + row('I know someone offering something...', 'href="/?add=theyoffer"') + '</div>' + back();
+    return crumb('', 'Add something') + '<div class="cw-card"><p class="cw-pq">Add something</p>' + menuRows() + '</div>' + back();
   }
   function back() { return '<div style="margin-top:16px"><a class="backb" data-act="list">Back</a></div>'; }
   function signedOut() {
