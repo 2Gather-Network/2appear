@@ -1170,8 +1170,8 @@
       m.appendChild(menuItem('user', 'See profile', prof));
       var cal = String(p.calendar || '').trim();
       if (p.calendarAllowed === true && /^https:\/\//.test(cal)) { var bk = menuItem('cal', 'Book a time', cal); bk.target = '_blank'; bk.rel = 'noopener noreferrer'; m.appendChild(bk); }
-      m.appendChild(menuItem('share', 'Make an intro', '/people/met/?intro=' + encodeURIComponent(code)));
-      m.appendChild(menuItem('plant', 'Show appreciation', '/people/appreciation/?c=' + encodeURIComponent(code)));
+      m.appendChild(menuItem('share', 'Make an intro', '/people/' + encodeURIComponent(code) + '/introduce'));
+      m.appendChild(menuItem('plant', 'Show appreciation', '/people/' + encodeURIComponent(code) + '/appreciate'));
     }
     after.insertAdjacentElement('afterend', m);
     pmenu = m; pmenuFor = btn; btn.classList.add('sel'); btn.setAttribute('aria-expanded', 'true');
