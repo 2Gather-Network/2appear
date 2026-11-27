@@ -362,8 +362,8 @@ h1.t{color:#fff;font-size:28px;font-weight:800;margin:0 0 4px}
     var a = t.getAttribute('data-act'), k = t.getAttribute('data-k'), v = t.getAttribute('data-v');
     if (a === 'list') { S.screen = 'list'; S.note = ''; if (S.list === null) load(); }
     else if (a === 'add') { S.screen = 'add'; S.note = ''; window.scrollTo(0, 0); }
-    else if (a === 'addme') { S.ans.dir = v; S.screen = 'share'; S.step = 1; S.note = ''; loadCats(); }
-    else if (a === 'share') { S.screen = 'share'; S.step = 0; S.note = ''; loadCats(); }
+    else if (a === 'addme') { S.ans.dir = v; S.fromAdd = true; S.screen = 'share'; S.step = 1; S.note = ''; loadCats(); }
+    else if (a === 'share') { S.fromAdd = false; S.screen = 'share'; S.step = 0; S.note = ''; loadCats(); }
     else if (a === 'mine') { S.screen = 'mine'; S.note = ''; loadMine(); return; }
     else if (a === 'mail') { var want = !S.mailOff; S.busy = true; send('setOpportunityMail', { off: want ? '1' : '0' }).then(function (j) { S.busy = false; if (j && j.ok) S.mailOff = want; else S.note = 'That did not save. Please try again.'; draw(); }).catch(function () { S.busy = false; S.note = 'That did not save. Please try again.'; draw(); }); return; }
     else if (a === 'openmine') { if (S.mine === null) { S.mine = []; } openMine(t.getAttribute('data-id')); return; }
@@ -386,7 +386,7 @@ h1.t{color:#fff;font-size:28px;font-weight:800;margin:0 0 4px}
     else if (a === 'sendq') { var q = (document.getElementById('qtext') || {}).value || ''; if (!q.trim()) return; S.busy = true; send('askOpportunityQuestion', { postId: S.post.postId, text: q }).then(function (j) { S.busy = false; S.asking = false; S.note = j && j.ok ? 'Sent without your name.' : 'That did not send. Please try again.'; draw(); }).catch(function () { S.busy = false; S.note = 'That did not send. Please try again.'; draw(); }); return; }
     else if (a === 'next' || a === 'back') {
       var x = document.getElementById('txt'); if (x) S.ans.needs = x.value;
-      if (a === 'back') { if (S.step === 0) S.screen = 'list'; else S.step--; }
+      if (a === 'back') { if (S.step === 0) S.screen = 'list'; else if (S.step === 1 && S.fromAdd) { S.screen = 'add'; S.fromAdd = false; } else S.step--; }
       else if ((steps()[S.step] || {}).key === 'needs' && !S.ans.needs.trim()) { S.note = 'Tell us what it needs.'; }
       else if ((steps()[S.step] || {}).key === 'cat' && !S.ans.cat) { S.note = 'Pick a category.'; }
       else if (S.step < steps().length && (function () { var q = steps()[S.step] || {}; if (!q.opts || q.key === 'ex' || q.key === 'who' || q.key === 'stay') return false; var v = S.ans[q.key]; return q.multi ? !(v && v.length) : !v; })()) { S.note = 'Pick one to continue.'; }
