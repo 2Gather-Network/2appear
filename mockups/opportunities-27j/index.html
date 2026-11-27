@@ -208,6 +208,7 @@ h1.t{color:#fff;font-size:28px;font-weight:800;margin:0 0 4px}
     out.push({ q: 'How much time does it take?', help: 'Pick the one that fits best.', key: 'time', opts: TIMES });
     out.push({ q: 'Which category fits best?', help: 'Pick the one that fits best.', key: 'cat', opts: (S.cats || []).map(function (c) { return c.label; }) });
     out = out.concat(STEPS.slice(2));
+    if (S.fromFlow && A.forceAnon) out = out.map(function (q) { return q.key === 'stay' ? { q: q.q, help: A.freeText ? 'Your name stays hidden until you both say yes, because your post has your own words in it.' : 'Your name stays hidden until you both say yes, because of the reason you picked.', key: 'stay', opts: ['Keep me anonymous until we both say yes'] } : q; });
     if (S.fromFlow) out = out.filter(function (q) { if (q.key === 'dir' || q.key === 'needs') return false; if (q.key === 'kind' && A.kindKnown) return false; if (q.key === 'sub' && A.subKnown) return false; if (q.key === 'ex' && A.exAsked) return false; return true; });
     return out;
   }
@@ -319,8 +320,9 @@ h1.t{color:#fff;font-size:28px;font-weight:800;margin:0 0 4px}
     function wayNext(){return isThing()?go('vis'):go('review');}
     function el(t,a,c){var e=document.createElement(t);if(a)for(var k in a){if(k==='on')for(var ev in a.on)e.addEventListener(ev,a.on[ev]);else if(k==='cls')e.className=a[k];else e.setAttribute(k,a[k]);}(c||[]).forEach(function(x){e.appendChild(typeof x==='string'?document.createTextNode(x):x);});return e;}
     function btn(txt,cls,fn){return el('button',{type:'button',cls:cls,on:{click:fn}},[txt]);}
-    function finish(){onDone({dir:S.kind==='offer'?'Offering it':'Seeking it',kind:S.path.length?'':(S.lk||''),sub:!S.path.length&&S.lk==='Experience'?(S.lj||''):'',sentence:sentence(),level:isSvc()?(S.level||''):'',ways:(isSvc()||isThing())?S.ways.slice():null});}
-    function clearPick(){S.level=null;S.way=null;S.ways=[];S.exchange=null;S.skipEx=false;S.xt={};S.xo={};S.xtext='';S.word=null;S.saved=[];S.lastN=0;}
+    function inVocab(w){var L=String(w).toLowerCase().trim();return ALLWORDS.some(function(x){return x.toLowerCase()===L;});}
+    function finish(){onDone({free:!!(S.wordFree||Object.keys(S.own).some(function(k){return (S.own[k]||[]).length;})||(S.xtext||'').trim()||Object.keys(S.xo).some(function(k){return (S.xo[k]||[]).length;})),dir:S.kind==='offer'?'Offering it':'Seeking it',kind:S.path.length?'':(S.lk||''),sub:!S.path.length&&S.lk==='Experience'?(S.lj||''):'',sentence:sentence(),level:isSvc()?(S.level||''):'',ways:(isSvc()||isThing())?S.ways.slice():null});}
+    function clearPick(){S.wordFree=false;S.level=null;S.way=null;S.ways=[];S.exchange=null;S.skipEx=false;S.xt={};S.xo={};S.xtext='';S.word=null;S.saved=[];S.lastN=0;}
     function go(s){if(s==='review'&&isSvc()){if(!S.level)s='level';else if(!S.way)s='way';}else if(s==='review'&&isThingOffer()){s=S.way?'vis':'way';}else if(s==='review'){if(S.skipEx)s='vis';else if(!S.exchange)s='exchange';}
      if(s==='vis'){finish();return;}
      S.other=false;S.hist.push({s:s});S.screen=s;render();}
@@ -337,7 +339,7 @@ h1.t{color:#fff;font-size:28px;font-weight:800;margin:0 0 4px}
     function kindOf(w){var L=w.toLowerCase(),found=null;Object.keys(XKIND).forEach(function(x){if(x.toLowerCase()===L)found=XKIND[x];});if(found)return found;Object.keys(TREE).forEach(function(c){var sp=TREE[c].k;Object.keys(sp).forEach(function(g){var ar=sp[g];Object.keys(ar).forEach(function(a){var n=ar[a];if(n&&!Array.isArray(n)&&('Things' in n)){[['People/skills','Skill or service'],['Things','Thing'],['Space','Place']].forEach(function(p){if((n[p[0]]||[]).some(function(x){return x.toLowerCase()===L&&['beginner','experienced','guide'].indexOf(L)<0;}))found=p[1];});}});});});return found;}
     function pick(word){if(S.otherKey){var k=S.otherKey;S.own[k]=(S.own[k]||[]).concat(word.charAt(0).toUpperCase()+word.slice(1));S.otherKey=null;render();return;}
      if(S.screen==='start'&&!S.lk){var kd=kindOf(word);if(kd)S.lk=kd;else{S.pendingWord=word;S.askCat=true;render();return;}}
-     S.word=word;S.lastN=1;S.saved.push({word:word,kind:S.kind});go('review');}
+     S.word=word;S.wordFree=!inVocab(word);S.lastN=1;S.saved.push({word:word,kind:S.kind});go('review');}
     function after(){if(isThingOffer()){if(!S.way)return go('way');return go('vis');}if(isSvc())return go('vis');if(!S.exchange)return go('exchange');go('vis');}
     function proceed(){var w=[];(function walk(path){var n=nodeAt(path);if(!n)return;var t=tickedOf(path);if(Array.isArray(n)){w=w.concat(t);return;}if(!Array.isArray(n)&&('Things' in n)){t.forEach(function(k){var st=nodeAt(path.concat([k]))?tickedOf(path.concat([k])):[];if(st.length)w=w.concat(st);else w.push(k);});return;}t.forEach(function(k){if(nodeAt(path.concat([k])))walk(path.concat([k]));else w.push(k);});})([S.path[0]]);
      if(!w.length)return;S.word=listAnd(w);S.lastN=w.length;w.forEach(function(x){S.saved.push({word:x,kind:S.kind});});go('review');}
@@ -584,6 +586,7 @@ h1.t{color:#fff;font-size:28px;font-weight:800;margin:0 0 4px}
     S.ans = { dir: dk === 'offer' ? 'Offering it' : 'Seeking it', kind: '', sub: '', paid: 'Paid', roles: [], type: '', where: '', pay: '', how: '', time: 'One-time', cat: S.cats && S.cats[0] ? S.cats[0].label : '', ex: 'Volunteer', needs: '', who: 'Anyone', stay: 'Show my name to people who know me', kindKnown: false, subKnown: false, exAsked: false, ways: [], level: '', sentence: '' };
     S.flow = aoFlow(dk, function (r) {
       var A = S.ans; A.dir = r.dir; A.kind = r.kind; A.sub = r.sub; A.kindKnown = !!r.kind; A.subKnown = !!r.sub; A.sentence = r.sentence; A.needs = r.sentence; A.level = r.level; A.exAsked = !!r.ways; A.ways = r.ways || [];
+      A.freeText = !!r.free; A.reasonSens = (function (m) { var i = m.search(/because i['\u2019]d like/); if (i < 0) return false; var t = ' ' + m.slice(i).replace(/[^a-z' ]+/g, ' ') + ' '; return ['earn money', 'feel better', 'express myself', 'find purpose', 'build confidence', 'home life', 'essentials'].some(function (w) { return t.indexOf(' ' + w + ' ') > -1; }); })(r.sentence.toLowerCase()); A.forceAnon = A.freeText || A.reasonSens; A.stay = A.forceAnon ? 'Keep me anonymous until we both say yes' : 'Show my name to people who know me';
       S.screen = 'share'; S.step = 0; S.note = ''; draw(); window.scrollTo(0, 0);
     }, function () { S.screen = 'list'; S.fromFlow = false; if (S.list === null) load(); else draw(); });
     S.screen = 'flow'; loadCats(); draw(); window.scrollTo(0, 0);
@@ -626,7 +629,7 @@ h1.t{color:#fff;font-size:28px;font-weight:800;margin:0 0 4px}
       else if ((steps()[S.step] || {}).key === 'cat' && !S.ans.cat) { S.note = 'Pick a category.'; }
       else if (S.step < steps().length && (function () { var q = steps()[S.step] || {}; if (!q.opts || q.key === 'ex' || q.key === 'who' || q.key === 'stay') return false; var v = S.ans[q.key]; return q.multi ? !(v && v.length) : !v; })()) { S.note = 'Pick one to continue.'; }
       else if (S.step < steps().length) { S.step++; S.note = ''; }
-      else { S.busy = true; draw(); send('saveOpportunity', { dir: S.ans.dir, kind: S.ans.kind, sub: S.ans.kind === 'Experience' ? S.ans.sub : '', time: S.ans.time, category: S.ans.cat, answers: S.fromFlow && S.ans.kind === 'Skill or service' ? (S.ans.level ? JSON.stringify({ level: S.ans.level }) : '') : answersJson(), ex: S.fromFlow && S.ans.exAsked ? S.ans.ways.join(', ') : S.ans.ex, needs: String(S.ans.needs).slice(0, 600), who: S.ans.who, stayAnonymous: S.ans.stay.indexOf('anonymous') > -1 ? 'TRUE' : 'FALSE', groupId: S.group }).then(function (j) { S.busy = false; if (j && j.ok) { S.step = steps().length + 1; S.list = null; S.note = ''; } else S.note = 'That did not save. Please try again.'; draw(); }).catch(function () { S.busy = false; S.note = 'That did not save. Please try again.'; draw(); }); return; }
+      else { S.busy = true; draw(); send('saveOpportunity', { dir: S.ans.dir, kind: S.ans.kind, sub: S.ans.kind === 'Experience' ? S.ans.sub : '', time: S.ans.time, category: S.ans.cat, answers: S.fromFlow && S.ans.kind === 'Skill or service' ? (S.ans.level ? JSON.stringify({ level: S.ans.level }) : '') : answersJson(), ex: S.fromFlow && S.ans.exAsked ? S.ans.ways.join(', ') : S.ans.ex, needs: String(S.ans.needs).slice(0, 600), who: S.ans.who, stayAnonymous: S.ans.stay.indexOf('anonymous') > -1 ? 'TRUE' : 'FALSE', freeText: S.fromFlow && S.ans.freeText ? 'TRUE' : 'FALSE', groupId: S.group }).then(function (j) { S.busy = false; if (j && j.ok) { S.step = steps().length + 1; S.list = null; S.note = ''; } else S.note = 'That did not save. Please try again.'; draw(); }).catch(function () { S.busy = false; S.note = 'That did not save. Please try again.'; draw(); }); return; }
     }
     draw();
   });
