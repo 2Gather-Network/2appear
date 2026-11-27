@@ -511,10 +511,11 @@ h1.t{color:#fff;font-size:28px;font-weight:800;margin:0 0 4px}
     if (S.showOf !== 'known' && d.findMe === 'on') (d.anon || []).forEach(function (x) {
       var ars = (x.reasons || []).filter(keep);
       if (!ars.length) return;
-      var acts = x.state === 'waiting' ? '<span class="mp-sub"><b>Waiting</b></span>' : '<a class="mp-btn primary" data-act="reach" data-id="' + esc(x.card) + '">Reach out</a><a class="mp-btn" data-act="notnow" data-id="' + esc(x.card) + '">Not now</a>';
+      var sv = x.staff && x.staff.name ? x.staff : null;
+      var acts = sv ? '' : x.state === 'waiting' ? '<span class="mp-sub"><b>Waiting</b></span>' : '<a class="mp-btn primary" data-act="reach" data-id="' + esc(x.card) + '">Reach out</a><a class="mp-btn" data-act="notnow" data-id="' + esc(x.card) + '">Not now</a>';
       var box = '';
-      if (x.state !== 'waiting' && !boxShown) { box = '<div class="cw-status info" style="margin:6px 0 0">' + esc(FP_BOX) + '</div>'; boxShown = true; }
-      rows.push({ hay: ('someone on 2appear ' + (x.city || '') + ' ' + ars.join(' ')).toLowerCase(), html: '<div class="mp-row">' + photo('', '', true) + '<div class="mp-body"><div class="mp-name">Someone on 2Appear</div>' + (x.city ? '<div class="mp-where">' + esc(x.city) + '</div>' : '') + '<div class="mp-list">' + ars.map(item).join('') + '</div>' + box + '</div><div class="mp-actions">' + acts + '</div></div>' });
+      if (!sv && x.state !== 'waiting' && !boxShown) { box = '<div class="cw-status info" style="margin:6px 0 0">' + esc(FP_BOX) + '</div>'; boxShown = true; }
+      rows.push({ hay: ((sv ? sv.name : 'someone on 2appear') + ' ' + (x.city || '') + ' ' + ars.join(' ')).toLowerCase(), html: '<div class="mp-row">' + (sv ? photo(sv.name, sv.photo, false) : photo('', '', true)) + '<div class="mp-body"><div class="mp-name">' + (sv ? esc(sv.name) + ' <span class="cw-badge cohost" style="margin-left:6px">Shown to you as support</span>' : 'Someone on 2Appear') + '</div>' + (x.city ? '<div class="mp-where">' + esc(x.city) + '</div>' : '') + '<div class="mp-list">' + ars.map(item).join('') + '</div>' + box + '</div><div class="mp-actions">' + acts + '</div></div>' });
     });
     var total = rows.length, list = q ? rows.filter(function (r) { return r.hay.indexOf(q) > -1; }) : rows;
     if (!total) return out + (d.needTopics ? '' : '<p class="cw-statement">No matches yet.</p>');
