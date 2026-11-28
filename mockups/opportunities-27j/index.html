@@ -136,6 +136,13 @@ h1.t{color:#fff;font-size:28px;font-weight:800;margin:0 0 4px}
 .mp-name{font-size:14px;font-weight:700;color:#1A2E42;margin:0 0 4px}
 .mp-where{font-size:12px;color:#2F3D4F;margin-bottom:6px;overflow-wrap:anywhere}
 .mp-list{display:flex;flex-direction:column;gap:8px;margin-top:6px}
+.mp-cols{display:grid;grid-template-columns:1fr 1fr;gap:0 24px}
+@media(max-width:600px){.mp-cols{grid-template-columns:1fr}}
+.mp-name a{color:inherit;text-decoration:none}
+.mp-name a:hover{text-decoration:underline}
+.mp-btn.dots{padding:6px 13px}
+.mp-stats{display:flex;flex-direction:column;gap:6px;font-size:14px;color:#1A2E42;margin:12px 0 14px}
+.mp-stats span{display:inline-flex;align-items:center;gap:8px}
 .mp-item{display:flex;align-items:flex-start;gap:8px;font-size:13px;color:#1A2E42}
 .mp-item .dot{margin-top:6px}
 .mp-item-text{display:flex;flex-direction:column;overflow-wrap:anywhere}
@@ -430,7 +437,7 @@ h1.t{color:#fff;font-size:28px;font-weight:800;margin:0 0 4px}
     function pick3(){if(isThingSeek()&&!S.way)return go('way');go('vis');}
     return { mount: function (r) { root = r; render(); } };
   }
-  function crumb(mid, now) { return '<div class="cw-breadcrumb"><a href="/network/">Network</a> / ' + (mid || now !== 'Opportunities' ? '<a href="/mockups/opportunities-27j/">Opportunities</a> / ' : '') + (mid ? esc(mid) + ' / ' : '') + '<span class="now">' + esc(now) + '</span></div>'; }
+  function crumb(mid, now) { return '<div class="cw-breadcrumb"><a href="https://2appear.network/dashboard/">Dashboard</a> / ' + (mid || now !== 'Opportunities' ? '<a href="/mockups/opportunities-27j/">Opportunities</a> / ' : '') + (mid ? esc(mid) + ' / ' : '') + '<span class="now">' + esc(now) + '</span></div>'; }
   var IC = {
     need: '<path d="M4 12v8h16v-8"/><path d="M12 3v11"/><path d="M8 10l4 4 4-4"/>',
     offer: '<path d="M4 15v4h16v-4"/><path d="M12 15V4"/><path d="M8 8l4-4 4 4"/>',
@@ -488,13 +495,34 @@ h1.t{color:#fff;font-size:28px;font-weight:800;margin:0 0 4px}
   }
   function pm(code, name) {
     if (!window.cwPersonMenu || !code) return '';
-    try { return cwPersonMenu.attrs({ code: code, name: String(name || '').split(' ')[0], profile: 'https://2appear.network/hi/?v=' + encodeURIComponent(code) }); } catch (e) { return ''; }
+    try { return cwPersonMenu.attrs({ code: code, name: String(name || '').split(' ')[0], profile: '' }); } catch (e) { return ''; }
   }
   function photo(name, ph, blank) {
     ph = String(ph || '').trim();
     if (blank) return '<span class="mp-photo blank"></span>';
     if (/^https:\/\//i.test(ph)) return '<span class="mp-photo"><img src="' + esc(ph) + '" alt=""></span>';
     return '<span class="mp-photo">' + esc(String(name || '?').trim().charAt(0).toUpperCase()) + '</span>';
+  }
+  function sort6(texts) {
+    var g = { seek: [], offer: [], joy: [], care: [], sector: [], skill: [] }, cats = {};
+    var cap = function (w) { w = String(w || ''); return w.charAt(0).toUpperCase() + w.slice(1); };
+    var it = function (cls, t) { return '<div class="mp-item"><span class="dot ' + cls + '"></span><div class="mp-item-text">' + esc(t) + '</div></div>'; };
+    (texts || []).forEach(function (t) {
+      var x = String(t || ''), m;
+      if ((m = x.match(/^Seeking (.+), which you offer$/))) { g.seek.push(it('comp', 'Seeking: ' + cap(m[1]))); cats.theySeek = 1; }
+      else if (x === 'They are seeking something you offer') { g.seek.push(it('comp', 'Seeking something you offer')); cats.theySeek = 1; }
+      else if ((m = x.match(/^You are both seeking (.+)$/))) { g.seek.push(it('coseek', cap(m[1]))); cats.bothSeek = 1; }
+      else if ((m = x.match(/^Offers (.+), which you are seeking$/))) { g.offer.push(it('comp', 'Offering: ' + cap(m[1]))); cats.theyOffer = 1; }
+      else if (x === 'They offer something you are seeking') { g.offer.push(it('comp', 'Offering something you are seeking')); cats.theyOffer = 1; }
+      else if ((m = x.match(/^You both enjoy (.+)$/))) { g.joy.push(it('share', cap(m[1]))); cats.common = 1; }
+      else if ((m = x.match(/^You both care about (.+)$/))) { g.care.push(it('share', cap(m[1]))); cats.common = 1; }
+      else if ((m = x.match(/^You both work in (.+)$/))) { g.sector.push(it('share', cap(m[1]))); cats.common = 1; }
+      else if ((m = x.match(/^You both offer (.+)$/))) { g.skill.push(it('share', cap(m[1]))); cats.common = 1; }
+      else { g.joy.push(it('share', x)); cats.common = 1; }
+    });
+    var left = g.seek.concat(g.offer, g.joy), right = g.care.concat(g.sector, g.skill);
+    var html = '<div class="mp-cols">' + (left.length ? '<div class="mp-list">' + left.join('') + '</div>' : '') + (right.length ? '<div class="mp-list">' + right.join('') + '</div>' : '') + '</div>';
+    return { html: html, cats: cats };
   }
   function people() {
     var d = S.mm;
@@ -506,7 +534,8 @@ h1.t{color:#fff;font-size:28px;font-weight:800;margin:0 0 4px}
       var rs = (k.reasons || []).filter(keep);
       if (!rs.length) return;
       var name = String(k.name || '').trim() || 'Someone';
-      rows.push({ hay: (name + ' ' + rs.join(' ')).toLowerCase(), html: '<div class="mp-row"><span style="cursor:pointer"' + pm(k.person, name) + '>' + photo(name, k.photo, false) + '</span><div class="mp-body"><div class="mp-name" style="cursor:pointer"' + pm(k.person, name) + '>' + esc(name) + '</div><div class="mp-list">' + rs.map(item).join('') + '</div></div><div class="mp-actions">' + (k.person ? '<button type="button" class="mp-btn" aria-label="More for ' + esc(name) + '"' + pm(k.person, name) + '>\u22EF</button>' : '') + '</div></div>' });
+      var g6 = sort6(rs), nameHtml = k.person ? '<a href="/hi/?v=' + encodeURIComponent(k.person) + '">' + esc(name) + '</a>' : esc(name);
+      rows.push({ cats: g6.cats, hay: (name + ' ' + rs.join(' ')).toLowerCase(), html: '<div class="mp-row">' + photo(name, k.photo, false) + '<div class="mp-body"><div class="mp-name">' + nameHtml + '</div>' + g6.html + '</div><div class="mp-actions">' + (k.person ? '<button type="button" class="mp-btn dots" aria-label="More for ' + esc(name) + '"' + pm(k.person, name) + '>\u22EF</button>' : '') + '</div></div>' });
     });
     if (S.showOf !== 'known' && d.findMe === 'on') (d.anon || []).forEach(function (x) {
       var ars = (x.reasons || []).filter(keep);
@@ -515,7 +544,8 @@ h1.t{color:#fff;font-size:28px;font-weight:800;margin:0 0 4px}
       var acts = sv ? '' : x.state === 'waiting' ? '<span class="mp-sub"><b>Waiting</b></span>' : '<a class="mp-btn primary" data-act="reach" data-id="' + esc(x.card) + '">Reach out</a><a class="mp-btn" data-act="notnow" data-id="' + esc(x.card) + '">Not now</a>';
       var box = '';
       if (!sv && x.state !== 'waiting' && !boxShown) { box = '<div class="cw-status info" style="margin:6px 0 0">' + esc(FP_BOX) + '</div>'; boxShown = true; }
-      rows.push({ hay: ((sv ? sv.name : 'someone on 2appear') + ' ' + (x.city || '') + ' ' + ars.join(' ')).toLowerCase(), html: '<div class="mp-row">' + (sv ? photo(sv.name, sv.photo, false) : photo('', '', true)) + '<div class="mp-body"><div class="mp-name">' + (sv ? esc(sv.name) + ' <span class="cw-badge cohost" style="margin-left:6px">Shown to you as support</span>' : 'Someone on 2Appear') + '</div>' + (x.city ? '<div class="mp-where">' + esc(x.city) + '</div>' : '') + '<div class="mp-list">' + ars.map(item).join('') + '</div>' + box + '</div><div class="mp-actions">' + acts + '</div></div>' });
+      var a6 = sort6(ars);
+      rows.push({ cats: a6.cats, hay: ((sv ? sv.name : 'someone on 2appear') + ' ' + (x.city || '') + ' ' + ars.join(' ')).toLowerCase(), html: '<div class="mp-row">' + (sv ? photo(sv.name, sv.photo, false) : photo('', '', true)) + '<div class="mp-body"><div class="mp-name">' + (sv ? esc(sv.name) + ' <span class="cw-badge cohost" style="margin-left:6px">Shown to you as support</span>' : 'Someone on 2Appear') + '</div>' + (x.city ? '<div class="mp-where">' + esc(x.city) + '</div>' : '') + a6.html + box + '</div><div class="mp-actions">' + acts + '</div></div>' });
     });
     (S.list || []).forEach(function (p) {
       if (!(p.reasons || []).length || !pass(p)) return;
@@ -525,12 +555,14 @@ h1.t{color:#fff;font-size:28px;font-weight:800;margin:0 0 4px}
       if (!prs.length) return;
       var nm = named ? String(p.poster.name || '').trim() || 'Someone' : 'Someone on 2Appear';
       var where = named && p.poster.group ? 'In ' + p.poster.group + ' with you' : named && p.poster.event ? 'At ' + p.poster.event + ' with you' : '';
-      rows.push({ hay: (nm + ' ' + (p.title || '') + ' ' + prs.map(function (r) { return r.word; }).join(' ')).toLowerCase(), html: '<div class="mp-row">' + photo(nm, named ? p.poster.photo : '', !named) + '<div class="mp-body"><div class="mp-name">' + esc(nm) + '</div>' + (where ? '<div class="mp-where">' + esc(where) + '</div>' : '') + '<div class="mp-where">' + esc(p.title || '') + '</div>' + (p.place ? '<div class="mp-where">' + esc(p.place) + '</div>' : '') + '<div class="mp-list">' + prs.map(function (r) { var c = r.type === 'need' ? 'comp' : r.type === 'seek' ? 'coseek' : 'share'; var w = String(r.word || ''); return '<div class="mp-item"><span class="dot ' + c + '"></span><div class="mp-item-text">' + esc(w.charAt(0).toUpperCase() + w.slice(1)) + '</div></div>'; }).join('') + '</div></div><div class="mp-actions"><a class="mp-btn primary" data-act="openpost" data-id="' + esc(p.postId) + '">Open</a></div></div>' });
+      var p6 = sort6(prs.map(function (r) { return r.text; }));
+      rows.push({ cats: p6.cats, hay: (nm + ' ' + (p.title || '') + ' ' + prs.map(function (r) { return r.word; }).join(' ')).toLowerCase(), html: '<div class="mp-row">' + photo(nm, named ? p.poster.photo : '', !named) + '<div class="mp-body"><div class="mp-name">' + esc(nm) + '</div>' + (where ? '<div class="mp-where">' + esc(where) + '</div>' : '') + '<div class="mp-where">' + esc(p.title || '') + '</div>' + (p.place ? '<div class="mp-where">' + esc(p.place) + '</div>' : '') + p6.html + '</div><div class="mp-actions"><a class="mp-btn primary" data-act="openpost" data-id="' + esc(p.postId) + '">Open</a></div></div>' });
     });
     var total = rows.length, list = q ? rows.filter(function (r) { return r.hay.indexOf(q) > -1; }) : rows;
     if (!total) return out + (d.needTopics ? '' : '<p class="cw-statement">No matches yet.</p>');
-    var title = (q ? list.length + ' of ' : '') + total + (total === 1 ? ' opportunity' : ' opportunities');
-    out += '<div class="mp-title" style="margin-top:12px">' + esc(title) + '</div>' + (S.kindOf === 'match' ? '<div class="mp-key"><span><span class="dot comp"></span>An offer fulfills a request</span><span><span class="dot coseek"></span>You both seek this</span></div>' : '<div style="height:10px"></div>');
+    var cnt = function (c) { return rows.filter(function (r) { return r.cats && r.cats[c]; }).length; };
+    var st = [[cnt('theySeek'), 'comp', ' person is seeking what you offer', ' people are seeking what you offer'], [cnt('theyOffer'), 'comp', ' person offers what you\u2019re seeking', ' people offer what you\u2019re seeking'], [cnt('bothSeek'), 'coseek', ' person shares what you\u2019re seeking', ' people share what you\u2019re seeking'], [cnt('common'), 'share', ' person in common', ' people in common']].filter(function (x) { return x[0] > 0; });
+    out += '<div class="mp-stats">' + st.map(function (x) { return '<span><span class="dot ' + x[1] + '"></span>' + x[0] + (x[0] === 1 ? x[2] : x[3]) + '</span>'; }).join('') + (q ? '<span class="mp-sub">' + list.length + ' of ' + total + ' shown</span>' : '') + '</div>';
     if (total > 5) out += '<div class="mp-search-wrap"><input type="text" class="mp-search" id="mp-search" placeholder="Search your matches" aria-label="Search your matches" value="' + esc(S.pq || '') + '"></div>';
     out += list.length ? list.map(function (r) { return r.html; }).join('') : '<p class="mp-sub" style="padding:20px 0">No matches for "' + esc(q) + '".</p>';
     if (S.showOf !== 'known' && d.findMe === 'on' && d.dayFull) out += '<p class="cw-fhelp">That\u2019s everyone for today. More people tomorrow.</p>';
