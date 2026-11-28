@@ -515,7 +515,7 @@ label.cw-lp{display:inline-flex;align-items:center;gap:8px;box-sizing:border-box
     var st = document.getElementById('stage');
     if (!ME) { st.innerHTML = signedOut(); return; }
     var top = '<div class="cw-tabs"><button type="button" data-act="list" class="' + (S.screen === 'list' ? 'on' : '') + '">Opportunities</button><button type="button" data-act="mine" class="' + (S.screen === 'mine' || S.screen === 'manage' ? 'on' : '') + '">My opportunities</button><button type="button" data-act="share" class="' + (S.screen === 'share' ? 'on' : '') + '">Share an opportunity</button></div>';
-    if (S.screen === 'share') { if (!document.getElementById('addroot')) { st.innerHTML = crumb('', 'Share an opportunity') + '<div class="cw-card" id="addroot"></div><div style="margin-top:16px" id="addbackw"><a class="backb" id="addback">Back</a></div>'; S.addm = CWAdd.start(document.getElementById('addroot'), { dir: S.addDir, gs: GS_URL, send: send, group: S.group, onExit: function () { S.screen = 'list'; if (S.list === null) load(); else draw(); }, onSaved: function () { S.list = null; }, onMine: function () { S.screen = 'mine'; S.note = ''; loadMine(); }, onList: function () { S.screen = 'list'; S.note = ''; if (S.list === null) load(); else draw(); }, onChange: function (sc) { var w = document.getElementById('addbackw'); if (w) w.style.display = sc === 'done' ? 'none' : ''; } }); document.getElementById('addback').addEventListener('click', function () { if (S.addm) S.addm.back(); }); } return; }
+    if (S.screen === 'share') { if (!document.getElementById('addroot')) { st.innerHTML = crumb('', 'Share an opportunity') + '<div class="cw-card" id="addroot"></div><div style="margin-top:16px" id="addbackw"><a class="backb" id="addback">Back</a></div>'; S.addm = CWAdd.start(document.getElementById('addroot'), { dir: S.addDir, gs: GS_URL, send: send, group: S.group, onExit: function () { setPath('/opportunities/'); S.screen = 'list'; if (S.list === null) load(); else draw(); }, onSaved: function () { S.list = null; }, onMine: function () { setPath('/opportunities/'); S.screen = 'mine'; S.note = ''; loadMine(); }, onList: function () { setPath('/opportunities/'); S.screen = 'list'; S.note = ''; if (S.list === null) load(); else draw(); }, onChange: function (sc) { var w = document.getElementById('addbackw'); if (w) w.style.display = sc === 'done' ? 'none' : ''; } }); document.getElementById('addback').addEventListener('click', function () { if (S.addm) S.addm.back(); }); } return; }
     var body = ({ list: list, post: post, add: addMenu, mine: mineList, manage: manage, group: groupList })[S.screen]();
     st.innerHTML = body;
   }
@@ -533,7 +533,10 @@ label.cw-lp{display:inline-flex;align-items:center;gap:8px;box-sizing:border-box
     S.screen = 'post'; S.post = null; S.note = ''; S.asking = false; draw(); window.scrollTo(0, 0);
     ask('getOpportunity', { postId: id }).then(function (j) { S.post = j && j.ok ? j.post : null; if (!S.post) S.note = 'This opportunity is not available.'; draw(); }).catch(function () { S.note = 'This opportunity is not available.'; draw(); });
   }
-  function startFlow(dk) { S.addDir = dk; S.addm = null; S.screen = 'share'; S.note = ''; draw(); window.scrollTo(0, 0); }
+  function myCode() { try { return ME && CW.refCode ? String(CW.refCode(ME) || '') : ''; } catch (e) { return ''; } }
+  var ON_MEMBERS = location.pathname.indexOf('/opportunities/') === 0;
+  function setPath(p) { if (!ON_MEMBERS) return; try { if (location.pathname !== p) history.replaceState(null, '', p + location.search.replace(/([?&])add=[^&]*&?/, '$1').replace(/[?&]$/, '')); } catch (e) {} }
+  function startFlow(dk) { S.addDir = dk; S.addm = null; S.screen = 'share'; S.note = ''; if (myCode()) setPath('/opportunities/' + myCode() + '/' + (dk === 'offer' ? 'offering' : 'seeking')); draw(); window.scrollTo(0, 0); }
   document.addEventListener('input', function (e) {
     if (e.target && e.target.id === 'lpq') { S.locQ = e.target.value; draw(); var lq = document.getElementById('lpq'); if (lq) { lq.focus(); var lv = lq.value; lq.value = ''; lq.value = lv; } return; }
     if (!e.target || e.target.id !== 'mp-search') return;
@@ -544,7 +547,7 @@ label.cw-lp{display:inline-flex;align-items:center;gap:8px;box-sizing:border-box
     var t = e.target.closest('[data-act]'); if (!t || S.busy) return;
     var a = t.getAttribute('data-act'), k = t.getAttribute('data-k'), v = t.getAttribute('data-v');
     if (a !== 'menu') S.menu = false;
-    if (a === 'list') { S.screen = 'list'; S.note = ''; if (S.list === null) load(); }
+    if (a === 'list') { setPath('/opportunities/'); S.screen = 'list'; S.note = ''; if (S.list === null) load(); }
     else if (a === 'menu') { S.menu = !S.menu; }
     else if (a === 'want') { S.want = v; }
     else if (a === 'showof') { S.showOf = v; }
@@ -564,7 +567,7 @@ label.cw-lp{display:inline-flex;align-items:center;gap:8px;box-sizing:border-box
     else if (a === 'add') { S.screen = 'add'; S.note = ''; window.scrollTo(0, 0); }
     else if (a === 'addme') { startFlow(v === 'Offering it' ? 'offer' : 'seek'); return; }
     else if (a === 'share') { S.screen = 'add'; S.note = ''; window.scrollTo(0, 0); }
-    else if (a === 'mine') { S.screen = 'mine'; S.note = ''; loadMine(); return; }
+    else if (a === 'mine') { setPath('/opportunities/'); S.screen = 'mine'; S.note = ''; loadMine(); return; }
     else if (a === 'mail') { var want = !S.mailOff; S.busy = true; send('setOpportunityMail', { off: want ? '1' : '0' }).then(function (j) { S.busy = false; if (j && j.ok) S.mailOff = want; else S.note = 'That did not save. Please try again.'; draw(); }).catch(function () { S.busy = false; S.note = 'That did not save. Please try again.'; draw(); }); return; }
     else if (a === 'openmine') { if (S.mine === null) { S.mine = []; } openMine(t.getAttribute('data-id')); return; }
     else if (a === 'answer') { S.busy = true; send('answerOpportunityResponse', { responseId: t.getAttribute('data-id'), yes: v }).then(function (j) { S.busy = false; if (j && j.ok) { if (S.mp) openMine(S.mp.postId); } else { S.note = 'That did not save. Please try again.'; draw(); } }).catch(function () { S.busy = false; S.note = 'That did not save. Please try again.'; draw(); }); return; }
@@ -593,9 +596,10 @@ label.cw-lp{display:inline-flex;align-items:center;gap:8px;box-sizing:border-box
   loadCats();
   if (ME && S.group) { S.screen = 'group'; draw(); loadGroup(); }
   else if (ME && new URLSearchParams(location.search).get('mine')) { S.screen = 'mine'; draw(); loadMine(); load(); }
+  else if (ME && (location.pathname.match(/^\/opportunities\/([0-9a-z]{6})\/(seeking|offering)\/?$/) || [])[1] === myCode() && myCode()) { load(); startFlow(/\/offering\/?$/.test(location.pathname) ? 'offer' : 'seek'); }
   else if (ME && /^(need|offer)$/.test(new URLSearchParams(location.search).get('add') || '')) { load(); startFlow(new URLSearchParams(location.search).get('add') === 'offer' ? 'offer' : 'seek'); }
   else if (ME && /^(theyneed|theyoffer)$/.test(new URLSearchParams(location.search).get('add') || '')) { S.screen = 'add'; draw(); load(); }
-  else { draw(); if (ME) load(); }
+  else { if (/^\/opportunities\/[0-9a-z]{6}\//.test(location.pathname)) setPath('/opportunities/'); draw(); if (ME) load(); }
 })();
 </script>
 </body>
