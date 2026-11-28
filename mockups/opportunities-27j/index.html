@@ -142,7 +142,9 @@ h1.t{color:#fff;font-size:28px;font-weight:800;margin:0 0 4px}
 .mp-name a:hover{text-decoration:underline}
 .mp-btn.dots{padding:6px 13px}
 .mp-stats{display:flex;flex-direction:column;gap:6px;font-size:14px;color:#1A2E42;margin:12px 0 14px}
-.mp-stats span{display:inline-flex;align-items:center;gap:8px}
+.mp-stats .mp-stat{display:inline-flex;align-items:center;gap:8px;cursor:pointer;color:#1A2E42;text-decoration:none;align-self:flex-start;border-radius:14px;padding:2px 8px;margin-left:-8px}
+.mp-stats .mp-stat:hover{background:#F1F7FC}
+.mp-stats .mp-stat.on{background:#EAF2FA;font-weight:700}
 .mp-item{display:flex;align-items:flex-start;gap:8px;font-size:13px;color:#1A2E42}
 .mp-item .dot{margin-top:6px}
 .mp-item-text{display:flex;flex-direction:column;overflow-wrap:anywhere}
@@ -200,7 +202,7 @@ h1.t{color:#fff;font-size:28px;font-weight:800;margin:0 0 4px}
   }
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
   var DOT = { need: '#D2822F', seek: '#7B6BD6', common: '#4F9F7A' };
-  var S = { screen: 'list', dir: 'All', myOnly: false, open: {}, fs: { region: [], country: [], state: [], cat: [], kind: [], sub: [], paid: [], roles: [], type: [], where: [], pay: [], how: [], ex: [], time: [] }, cats: null, want: '', showOf: 'all', kindOf: 'all', mm: null, list: null, err: '', post: null, step: 0, asking: false, ans: { dir: 'Offering it', kind: 'Experience', sub: 'Job', paid: 'Paid', roles: [], type: '', where: '', pay: '', how: '', time: 'One-time', cat: '', ex: 'Volunteer', needs: '', who: 'Anyone', stay: 'Show my name to people who know me' }, busy: false, note: '', mine: null, mailOff: false, group: new URLSearchParams(location.search).get('group') || '', gposts: null, mp: null, resp: null, qs: null, confirmDel: false };
+  var S = { screen: 'list', dir: 'All', myOnly: false, open: {}, fs: { region: [], country: [], state: [], cat: [], kind: [], sub: [], paid: [], roles: [], type: [], where: [], pay: [], how: [], ex: [], time: [] }, cats: null, want: '', showOf: 'all', kindOf: 'all', statOf: '', mm: null, list: null, err: '', post: null, step: 0, asking: false, ans: { dir: 'Offering it', kind: 'Experience', sub: 'Job', paid: 'Paid', roles: [], type: '', where: '', pay: '', how: '', time: 'One-time', cat: '', ex: 'Volunteer', needs: '', who: 'Anyone', stay: 'Show my name to people who know me' }, busy: false, note: '', mine: null, mailOff: false, group: new URLSearchParams(location.search).get('group') || '', gposts: null, mp: null, resp: null, qs: null, confirmDel: false };
   var STATES = ["Alabama","Alaska","Arizona","Arkansas","California","Colorado","Connecticut","Delaware","Florida","Georgia","Hawaii","Idaho","Illinois","Indiana","Iowa","Kansas","Kentucky","Louisiana","Maine","Maryland","Massachusetts","Michigan","Minnesota","Mississippi","Missouri","Montana","Nebraska","Nevada","New Hampshire","New Jersey","New Mexico","New York","North Carolina","North Dakota","Ohio","Oklahoma","Oregon","Pennsylvania","Rhode Island","South Carolina","South Dakota","Tennessee","Texas","Utah","Vermont","Virginia","Washington","West Virginia","Wisconsin","Wyoming","Washington D.C."];
   var REGIONS = ['North America', 'South America', 'Europe', 'Asia', 'Africa', 'Oceania', 'Antarctica'];
   var COUNTRIES = ['United States', 'Canada', 'Mexico'];
@@ -504,14 +506,14 @@ h1.t{color:#fff;font-size:28px;font-weight:800;margin:0 0 4px}
     return '<span class="mp-photo">' + esc(String(name || '?').trim().charAt(0).toUpperCase()) + '</span>';
   }
   function sort6(texts) {
-    var g = { seek: [], offer: [], joy: [], care: [], sector: [], skill: [] }, cats = {};
+    var g = { seek: [], offer: [], both: [], joy: [], care: [], sector: [], skill: [] }, cats = {};
     var cap = function (w) { w = String(w || ''); return w.charAt(0).toUpperCase() + w.slice(1); };
     var it = function (cls, t) { return '<div class="mp-item"><span class="dot ' + cls + '"></span><div class="mp-item-text">' + esc(t) + '</div></div>'; };
     (texts || []).forEach(function (t) {
       var x = String(t || ''), m;
       if ((m = x.match(/^Seeking (.+), which you offer$/))) { g.seek.push(it('comp', 'Seeking: ' + cap(m[1]))); cats.theySeek = 1; }
       else if (x === 'They are seeking something you offer') { g.seek.push(it('comp', 'Seeking something you offer')); cats.theySeek = 1; }
-      else if ((m = x.match(/^You are both seeking (.+)$/))) { g.seek.push(it('coseek', cap(m[1]))); cats.bothSeek = 1; }
+      else if ((m = x.match(/^You are both seeking (.+)$/))) { g.both.push(it('coseek', 'Seeking in common: ' + cap(m[1]))); cats.bothSeek = 1; }
       else if ((m = x.match(/^Offers (.+), which you are seeking$/))) { g.offer.push(it('comp', 'Offering: ' + cap(m[1]))); cats.theyOffer = 1; }
       else if (x === 'They offer something you are seeking') { g.offer.push(it('comp', 'Offering something you are seeking')); cats.theyOffer = 1; }
       else if ((m = x.match(/^You both enjoy (.+)$/))) { g.joy.push(it('share', cap(m[1]))); cats.common = 1; }
@@ -520,7 +522,7 @@ h1.t{color:#fff;font-size:28px;font-weight:800;margin:0 0 4px}
       else if ((m = x.match(/^You both offer (.+)$/))) { g.skill.push(it('share', cap(m[1]))); cats.common = 1; }
       else { g.joy.push(it('share', x)); cats.common = 1; }
     });
-    var left = g.seek.concat(g.offer, g.joy), right = g.care.concat(g.sector, g.skill);
+    var left = g.seek.concat(g.offer, g.both, g.joy), right = g.care.concat(g.sector, g.skill);
     var html = '<div class="mp-cols">' + (left.length ? '<div class="mp-list">' + left.join('') + '</div>' : '') + (right.length ? '<div class="mp-list">' + right.join('') + '</div>' : '') + '</div>';
     return { html: html, cats: cats };
   }
@@ -545,7 +547,7 @@ h1.t{color:#fff;font-size:28px;font-weight:800;margin:0 0 4px}
       var box = '';
       if (!sv && x.state !== 'waiting' && !boxShown) { box = '<div class="cw-status info" style="margin:6px 0 0">' + esc(FP_BOX) + '</div>'; boxShown = true; }
       var a6 = sort6(ars);
-      rows.push({ cats: a6.cats, hay: ((sv ? sv.name : 'someone on 2appear') + ' ' + (x.city || '') + ' ' + ars.join(' ')).toLowerCase(), html: '<div class="mp-row">' + (sv ? photo(sv.name, sv.photo, false) : photo('', '', true)) + '<div class="mp-body"><div class="mp-name">' + (sv ? esc(sv.name) + ' <span class="cw-badge cohost" style="margin-left:6px">Shown to you as support</span>' : 'Someone on 2Appear') + '</div>' + (x.city ? '<div class="mp-where">' + esc(x.city) + '</div>' : '') + a6.html + box + '</div><div class="mp-actions">' + acts + '</div></div>' });
+      rows.push({ cats: a6.cats, hay: ((sv ? sv.name : 'someone on 2appear') + ' ' + (x.city || '') + ' ' + ars.join(' ')).toLowerCase(), html: '<div class="mp-row">' + (sv ? photo(sv.name, sv.photo, false) : photo('', '', true)) + '<div class="mp-body"><div class="mp-name">' + (sv ? esc(sv.name) + ' <span title="Shown to you as support" aria-label="Shown to you as support" style="font-size:12px;margin-left:4px">\u2B50</span>' : 'Someone on 2Appear') + '</div>' + (x.city ? '<div class="mp-where">' + esc(x.city) + '</div>' : '') + a6.html + box + '</div><div class="mp-actions">' + acts + '</div></div>' });
     });
     (S.list || []).forEach(function (p) {
       if (!(p.reasons || []).length || !pass(p)) return;
@@ -558,11 +560,11 @@ h1.t{color:#fff;font-size:28px;font-weight:800;margin:0 0 4px}
       var p6 = sort6(prs.map(function (r) { return r.text; }));
       rows.push({ cats: p6.cats, hay: (nm + ' ' + (p.title || '') + ' ' + prs.map(function (r) { return r.word; }).join(' ')).toLowerCase(), html: '<div class="mp-row">' + photo(nm, named ? p.poster.photo : '', !named) + '<div class="mp-body"><div class="mp-name">' + esc(nm) + '</div>' + (where ? '<div class="mp-where">' + esc(where) + '</div>' : '') + '<div class="mp-where">' + esc(p.title || '') + '</div>' + (p.place ? '<div class="mp-where">' + esc(p.place) + '</div>' : '') + p6.html + '</div><div class="mp-actions"><a class="mp-btn primary" data-act="openpost" data-id="' + esc(p.postId) + '">Open</a></div></div>' });
     });
-    var total = rows.length, list = q ? rows.filter(function (r) { return r.hay.indexOf(q) > -1; }) : rows;
+    var total = rows.length, list = rows.filter(function (r) { return (!q || r.hay.indexOf(q) > -1) && (!S.statOf || (r.cats && r.cats[S.statOf])); });
     if (!total) return out + (d.needTopics ? '' : '<p class="cw-statement">No matches yet.</p>');
     var cnt = function (c) { return rows.filter(function (r) { return r.cats && r.cats[c]; }).length; };
-    var st = [[cnt('theySeek'), 'comp', ' person is seeking what you offer', ' people are seeking what you offer'], [cnt('theyOffer'), 'comp', ' person offers what you\u2019re seeking', ' people offer what you\u2019re seeking'], [cnt('bothSeek'), 'coseek', ' person shares what you\u2019re seeking', ' people share what you\u2019re seeking'], [cnt('common'), 'share', ' person in common', ' people in common']].filter(function (x) { return x[0] > 0; });
-    out += '<div class="mp-stats">' + st.map(function (x) { return '<span><span class="dot ' + x[1] + '"></span>' + x[0] + (x[0] === 1 ? x[2] : x[3]) + '</span>'; }).join('') + (q ? '<span class="mp-sub">' + list.length + ' of ' + total + ' shown</span>' : '') + '</div>';
+    var st = [[cnt('theySeek'), 'comp', ' person is seeking what you offer', ' people are seeking what you offer', 'theySeek'], [cnt('theyOffer'), 'comp', ' person offers what you\u2019re seeking', ' people offer what you\u2019re seeking', 'theyOffer'], [cnt('bothSeek'), 'coseek', ' person shares what you\u2019re seeking', ' people share what you\u2019re seeking', 'bothSeek'], [cnt('common'), 'share', ' person in common', ' people in common', 'common']].filter(function (x) { return x[0] > 0; });
+    out += '<div class="mp-stats">' + st.map(function (x) { return '<a class="mp-stat' + (S.statOf === x[4] ? ' on' : '') + '" data-act="statof" data-v="' + x[4] + '"><span class="dot ' + x[1] + '"></span>' + x[0] + (x[0] === 1 ? x[2] : x[3]) + '</a>'; }).join('') + (q ? '<span class="mp-sub">' + list.length + ' of ' + total + ' shown</span>' : '') + '</div>';
     if (total > 5) out += '<div class="mp-search-wrap"><input type="text" class="mp-search" id="mp-search" placeholder="Search your matches" aria-label="Search your matches" value="' + esc(S.pq || '') + '"></div>';
     out += list.length ? list.map(function (r) { return r.html; }).join('') : '<p class="mp-sub" style="padding:20px 0">No matches for "' + esc(q) + '".</p>';
     if (S.showOf !== 'known' && d.findMe === 'on' && d.dayFull) out += '<p class="cw-fhelp">That\u2019s everyone for today. More people tomorrow.</p>';
@@ -576,7 +578,7 @@ h1.t{color:#fff;font-size:28px;font-weight:800;margin:0 0 4px}
     var h = crumb('', 'Opportunities') + '<div class="layout"><div><div class="cw-card">';
     h += '<div class="mainhead"><h2>Opportunities</h2>' + shareBtn() + '</div>';
     if (S.list === null) return h + (S.err ? '<div class="cw-status info">' + esc(S.err) + '</div>' : '<span class="cw-savestat">Loading information...</span>') + '</div></div>' + rail() + '</div>';
-    h += '<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap"><div class="cap">' + [['all', 'All'], ['known', 'My people'], ['anon', 'Anonymous']].map(function (o) { return '<a data-act="showof" data-v="' + o[0] + '" class="' + (S.showOf === o[0] ? 'on' : '') + '">' + o[1] + '</a>'; }).join('') + '</div><div class="cap">' + [['all', 'All'], ['common', 'In common'], ['match', 'Matches']].map(function (o) { return '<a data-act="kindof" data-v="' + o[0] + '" class="' + (S.kindOf === o[0] ? 'on' : '') + '">' + o[1] + '</a>'; }).join('') + '</div></div>' + people();
+    h += '<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap"><div class="cap">' + [['all', 'All'], ['known', 'My people'], ['anon', 'Anonymous']].map(function (o) { return '<a data-act="showof" data-v="' + o[0] + '" class="' + (S.showOf === o[0] ? 'on' : '') + '">' + o[1] + '</a>'; }).join('') + '</div></div>' + people();
     return h + '</div></div>' + rail() + '</div>';
   }
   function post() {
@@ -719,6 +721,7 @@ h1.t{color:#fff;font-size:28px;font-weight:800;margin:0 0 4px}
     else if (a === 'want') { S.want = v; }
     else if (a === 'showof') { S.showOf = v; }
     else if (a === 'kindof') { S.kindOf = v; }
+    else if (a === 'statof') { S.statOf = S.statOf === v ? '' : v; }
     else if (a === 'reach' || a === 'notnow') {
       var cid = t.getAttribute('data-id'); S.busy = true;
       send(a === 'reach' ? 'reachOut57b' : 'fpNotNow57b', { card: cid }).then(function (y) {
