@@ -610,7 +610,7 @@ h1.t{color:#fff;font-size:28px;font-weight:800;margin:0 0 4px}
     return h + '</div>' + back();
   }
   function share() {
-    var ST = steps(), N = ST.length, s = S.step, h = crumb('Share an opportunity', 'Step ' + (Math.min(s, N) + 1) + ((S.fromFlow ? (S.ans.kind && (S.ans.kind !== 'Experience' || S.ans.sub)) : s >= (S.ans.kind === 'Experience' ? 3 : 2)) ? ' of ' + (N + 1) : '')) + '<div class="cw-card">';
+    var ST = steps(), N = ST.length, s = S.step, stepTxt = 'Step ' + (Math.min(s, N) + 1) + ((S.fromFlow ? (S.ans.kind && (S.ans.kind !== 'Experience' || S.ans.sub)) : s >= (S.ans.kind === 'Experience' ? 3 : 2)) ? ' of ' + (N + 1) : ''), h = crumb('', 'Share an opportunity') + '<div class="cw-card">' + (s <= N ? '<p class="cw-fhelp" style="margin:0 0 8px;font-weight:700">' + stepTxt + '</p>' : '');
     if (s < N) {
       var q = ST[s]; h += '<p class="cw-pq">' + q.q + '</p><p class="cw-fhelp">' + q.help + '</p>';
       if (q.text) h += '<div class="cw-fbox"><textarea id="txt" maxlength="600" style="width:100%;border:0;font:inherit;font-size:15px;outline:none;min-height:80px">' + esc(S.ans.needs) + '</textarea></div>';
