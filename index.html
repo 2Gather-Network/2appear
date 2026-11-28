@@ -1051,7 +1051,7 @@
       }
     }
     Array.prototype.forEach.call(list.querySelectorAll('.mni'), function (it) {
-      it.addEventListener('click', function () { showKind(it.getAttribute('data-k')); });
+      it.addEventListener('click', function () { location.href = '/opportunities/?add=' + encodeURIComponent(it.getAttribute('data-k')); });
     });
     try {
       var addQ = new URLSearchParams(location.search).get('add');
