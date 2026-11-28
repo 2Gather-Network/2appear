@@ -384,7 +384,7 @@ h1.t{color:#fff;font-size:28px;font-weight:800;margin:0 0 4px}
     function render(){if(!root)return;root.innerHTML='';app=root;
      if(S.screen==='start'){start();return;}
      var st=0,incl=false;S.hist.forEach(function(E,i){if(E.s==='review'){st=i;incl=false;}else if(E.s==='exchange'){st=i;incl=true;}});if(!incl&&st>0&&S.hist[S.hist.length-1].s!=='review')st=st+1;
-     S.hist.forEach(function(E,i){if(i<st)return;var last=i===S.hist.length-1;var prevE=S.hist[i-1];var d=el('div',{cls:'sec'+(last?'':' past'+(E.s==='add'||E.s==='explore'?'':' lock'))+(prevE&&prevE.s==='add'?' noline':'')});root.appendChild(d);app=d;section(E,last);if(last){var f=d.querySelector('.foot');if(!f){f=el('div',{cls:'foot'});d.appendChild(f);}f.insertBefore(btn('Back','cw-btn ghost form',back),f.firstChild);if(E.s!=='add'&&E.s!=='review'){var cd=makeCard();if(cd)d.insertBefore(cd,f);}}});
+     S.hist.forEach(function(E,i){if(i<st)return;var last=i===S.hist.length-1;var prevE=S.hist[i-1];var d=el('div',{cls:'sec'+(last?'':' past'+(E.s==='add'||E.s==='explore'?'':' lock'))+(prevE&&prevE.s==='add'?' noline':'')});root.appendChild(d);app=d;section(E,last);if(last){var f=d.querySelector('.foot');if(!f){f=el('div',{cls:'foot'});d.appendChild(f);}if(E.s!=='add'&&E.s!=='review'){var cd=makeCard();if(cd)d.insertBefore(cd,f);}}});
      app=root;}
     function start(){var m=el('div');
      var HQ={seek:'What are you seeking?',offer:'What are you offering?'};
@@ -400,7 +400,7 @@ h1.t{color:#fff;font-size:28px;font-weight:800;margin:0 0 4px}
      if(!S.lk&&!S.askCat){exBox.appendChild(el('p',{cls:'fq'},['Explore:']));exBox.appendChild(el('p',{cls:'prompt',style:'margin:0 0 10px'},[S.kind==='offer'?"I'm offering ...":"I'm seeking ..."]));
       [['to create something','Creating'],['to play something','Playing'],['to experience something','Experiencing'],['to care for something','Caring'],['to fix something','Fixing']].forEach(function(x){r2.appendChild(btn(x[0],'pill',function(){S.top=x[1];S.path=[x[1]];S.word=null;S.tick={};S.own={};S.otherKey=null;S.hist=[{s:'add',chosen:x[1],fromMenu:true},{s:'explore'}];S.screen='explore';render();}));});
       exBox.appendChild(r2);m.appendChild(exBox);fi.addEventListener('input',function(){exBox.style.display=fi.value.trim()?'none':'';});}
-     var bk=el('div',{cls:'foot'});bk.appendChild(btn('Back','cw-btn ghost form',function(){if(S.lk||S.askCat||S.pendingWord){S.lk=null;S.lj=null;S.askCat=false;S.pendingWord=null;S.lkApplied={};render();return;}if(fi.value.trim()){render();return;}onCancel();}));m.appendChild(bk);
+     S.startBack=function(){if(S.lk||S.askCat||S.pendingWord){S.lk=null;S.lj=null;S.askCat=false;S.pendingWord=null;S.lkApplied={};render();return;}if(fi.value.trim()){render();return;}onCancel();};
      app.appendChild(m);}
     function section(E,last){var s=E.s;
      if(s==='add'){
@@ -437,7 +437,7 @@ h1.t{color:#fff;font-size:28px;font-weight:800;margin:0 0 4px}
       app.appendChild(el('div',{cls:'foot'},[el('span',{cls:'r'},[btn('Skip','link',function(){S.way='skipped';S.ways=[];S.wpick={};wayNext();}),btn('Continue','cw-btn solid form',function(){var keys=waysFor().filter(function(k){return S.wpick[k];});var w=keys.map(function(k){return isThing()?TW[S.kind][k]:lc(k);});S.ways=keys;S.way=w.length?listOf(w):'skipped';S.wpick={};wayNext();})])]));return;}
     }
     function pick3(){if(isThingSeek()&&!S.way)return go('way');go('vis');}
-    return { mount: function (r) { root = r; render(); } };
+    return { mount: function (r) { root = r; render(); }, goBack: function () { if (S.screen === 'start') { if (S.startBack) S.startBack(); } else back(); } };
   }
   function niceTitle(t) { return String(t || '').replace(/^(I'm (?:offering|seeking)) (?:a thing|a skill or service|a place|an experience|a job|a project): /i, '$1: ').replace(/(?:, | - )to (?=[a-z])/, ' to '); }
   function shortTitle(t) { var x = niceTitle(t).replace(/^I'm (?:offering|seeking): /i, ''); x = x.split(/ to (?=[a-z])| because |, |\.$/)[0].replace(/\.$/, '').trim(); return x ? x.charAt(0).toUpperCase() + x.slice(1) : 'Opportunity'; }
@@ -628,7 +628,7 @@ h1.t{color:#fff;font-size:28px;font-weight:800;margin:0 0 4px}
       return h + '<p class="cw-pq">Your opportunity is live</p><p class="cw-statement">We are looking for who matches. You will get an email when someone is interested. ' + (S.ans.stay.indexOf('anonymous') > -1 ? 'No name or photo shows until you both say yes.' : 'People you are connected with, and people in a group or at an event with you, see your name and photo. Everyone else sees them when you both say yes.') + '</p><a class="cw-btn solid sm" data-act="list">See opportunities</a></div>';
     }
     if (S.note) h += '<div class="cw-status info" style="margin-top:14px">' + esc(S.note) + '</div>';
-    return h + '<div class="cw-foot" style="margin-top:44px"><a class="cw-btn ghost form" data-act="back">Back</a><a class="cw-btn solid form" data-act="next">' + (s === N ? (S.busy ? 'Saving...' : 'Publish and match') : 'Continue') + '</a></div></div>';
+    return h + '<div class="cw-foot" style="margin-top:44px;justify-content:flex-end"><a class="cw-btn solid form" data-act="next">' + (s === N ? (S.busy ? 'Saving...' : 'Publish and match') : 'Continue') + '</a></div></div><div style="margin-top:16px"><a class="backb" data-act="back">Back</a></div>';
   }
   function mineList() {
     var h = crumb('', 'My opportunities') + '<div class="cw-card"><h2 style="margin:0 0 4px;font-size:22px;font-weight:800">My opportunities</h2><p class="cw-fhelp">Only you see who has answered, and only as a count until you both say yes.</p><div class="sw"><span class="tg' + (S.mailOff ? '' : ' on') + '" role="switch" aria-checked="' + (S.mailOff ? 'false' : 'true') + '" tabindex="0" data-act="mail"></span><span>Email me when someone is interested in my opportunity</span></div>';
@@ -688,7 +688,7 @@ h1.t{color:#fff;font-size:28px;font-weight:800;margin:0 0 4px}
     var st = document.getElementById('stage');
     if (!ME) { st.innerHTML = signedOut(); return; }
     var top = '<div class="cw-tabs"><button type="button" data-act="list" class="' + (S.screen === 'list' ? 'on' : '') + '">Opportunities</button><button type="button" data-act="mine" class="' + (S.screen === 'mine' || S.screen === 'manage' ? 'on' : '') + '">My opportunities</button><button type="button" data-act="share" class="' + (S.screen === 'share' ? 'on' : '') + '">Share an opportunity</button></div>';
-    if (S.screen === 'flow') { if (!document.getElementById('aofroot')) { st.innerHTML = crumb('', 'Share an opportunity') + '<div class="cw-card aof" id="aofroot"></div>'; S.flow.mount(document.getElementById('aofroot')); } return; }
+    if (S.screen === 'flow') { if (!document.getElementById('aofroot')) { st.innerHTML = crumb('', 'Share an opportunity') + '<div class="cw-card aof" id="aofroot"></div><div style="margin-top:16px"><a class="backb" id="aofback">Back</a></div>'; S.flow.mount(document.getElementById('aofroot')); document.getElementById('aofback').addEventListener('click', function () { S.flow.goBack(); }); } return; }
     var body = ({ list: list, post: post, share: share, add: addMenu, mine: mineList, manage: manage, group: groupList })[S.screen]();
     st.innerHTML = body;
   }
