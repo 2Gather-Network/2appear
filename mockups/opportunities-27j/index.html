@@ -497,6 +497,24 @@ label.cw-lp{display:inline-flex;align-items:center;gap:8px;box-sizing:border-box
     });
     return h + '<div class="row"><a class="cw-btn solid sm" data-act="share">Share an opportunity</a></div></div>';
   }
+  function personView() {
+    var P = S.person || {}, seek = P.dir === 'seek', own = !!(P.data && P.data.own), word = seek ? 'seeking' : 'offering';
+    var head = own ? 'What I\u2019m ' + word : (P.data && P.data.name ? esc(P.data.name) + ' is ' + word : (seek ? 'Seeking' : 'Offering'));
+    var h = crumb('', own ? 'My ' + word : (seek ? 'Seeking' : 'Offering')) + '<div class="cw-card"><h2 style="margin:0 0 12px;font-size:22px;font-weight:800">' + head + '</h2>';
+    if (!P.data) return h + '<span class="cw-savestat">Loading information...</span></div>';
+    var list = P.data.posts || [];
+    if (!list.length) h += '<p class="cw-statement">Nothing to show here yet.</p>';
+    list.forEach(function (x) {
+      var tag = x.state === 'draft' ? 'Not published' : x.state === 'private' ? 'Hidden from others' : x.state === 'closed' ? 'Closed' : '';
+      h += '<div class="person" style="grid-template-columns:1fr"><div><div class="tag">' + (x.kind ? '<span class="cw-chip">' + esc(x.kind) + '</span>' : '') + (x.category ? '<span class="cw-chip">' + esc(x.category) + '</span>' : '') + (tag ? '<span class="cw-chip">' + tag + '</span>' : '') + '</div><h3>' + esc(niceTitle(x.title)) + '</h3>' + (x.line ? '<p class="cw-savestat" style="margin:4px 0 0">' + esc(x.line) + '</p>' : '') + '</div></div>';
+    });
+    if (own) h += '<div class="row"><a class="cw-btn solid sm" data-act="addme" data-v="' + (seek ? 'Seeking it' : 'Offering it') + '">Add something I\u2019m ' + word + '</a><a class="cw-btn ghost sm" data-act="copylink">' + (S.copied ? 'Link copied' : 'Copy link to share') + '</a></div>';
+    return h + '</div>' + back();
+  }
+  function openPerson(code, dir) {
+    S.person = { code: code, dir: dir, data: null }; S.copied = false; S.screen = 'person'; draw();
+    send('getPersonPosts', { code: code, dir: dir }).then(function (j) { if (S.person && S.person.code === code) { S.person.data = j && j.status === 'ok' ? j : { own: false, posts: [] }; draw(); } }).catch(function () { if (S.person) { S.person.data = { own: false, posts: [] }; draw(); } });
+  }
   function loadMine() {
     S.mine = null; S.err = ''; draw();
     ask('getMyOpportunities', {}).then(function (j) { if (!j || !j.ok) S.err = 'We could not load your opportunities. Please try again later.'; else { S.mine = j.posts || []; S.mailOff = !!j.mailOff; } draw(); }).catch(function () { S.err = 'We could not load your opportunities. Please try again later.'; draw(); });
@@ -516,7 +534,7 @@ label.cw-lp{display:inline-flex;align-items:center;gap:8px;box-sizing:border-box
     if (!ME) { st.innerHTML = signedOut(); return; }
     var top = '<div class="cw-tabs"><button type="button" data-act="list" class="' + (S.screen === 'list' ? 'on' : '') + '">Opportunities</button><button type="button" data-act="mine" class="' + (S.screen === 'mine' || S.screen === 'manage' ? 'on' : '') + '">My opportunities</button><button type="button" data-act="share" class="' + (S.screen === 'share' ? 'on' : '') + '">Share an opportunity</button></div>';
     if (S.screen === 'share') { if (!document.getElementById('addroot')) { st.innerHTML = crumb('', 'Share an opportunity') + '<div class="cw-card" id="addroot"></div><div style="margin-top:16px" id="addbackw"><a class="backb" id="addback">Back</a></div>'; S.addm = CWAdd.start(document.getElementById('addroot'), { dir: S.addDir, gs: GS_URL, send: send, group: S.group, onExit: function () { setPath('/opportunities/'); S.screen = 'list'; if (S.list === null) load(); else draw(); }, onSaved: function () { S.list = null; }, onMine: function () { setPath('/opportunities/'); S.screen = 'mine'; S.note = ''; loadMine(); }, onList: function () { setPath('/opportunities/'); S.screen = 'list'; S.note = ''; if (S.list === null) load(); else draw(); }, onChange: function (sc) { var w = document.getElementById('addbackw'); if (w) w.style.display = sc === 'done' ? 'none' : ''; } }); document.getElementById('addback').addEventListener('click', function () { if (S.addm) S.addm.back(); }); } return; }
-    var body = ({ list: list, post: post, add: addMenu, mine: mineList, manage: manage, group: groupList })[S.screen]();
+    var body = ({ list: list, post: post, person: personView, add: addMenu, mine: mineList, manage: manage, group: groupList })[S.screen]();
     st.innerHTML = body;
   }
   function load() {
@@ -536,7 +554,7 @@ label.cw-lp{display:inline-flex;align-items:center;gap:8px;box-sizing:border-box
   function myCode() { try { return ME && CW.refCode ? String(CW.refCode(ME) || '') : ''; } catch (e) { return ''; } }
   var ON_MEMBERS = location.pathname.indexOf('/opportunities/') === 0;
   function setPath(p) { if (!ON_MEMBERS) return; try { if (location.pathname !== p) history.replaceState(null, '', p + location.search.replace(/([?&])add=[^&]*&?/, '$1').replace(/[?&]$/, '')); } catch (e) {} }
-  function startFlow(dk) { S.addDir = dk; S.addm = null; S.screen = 'share'; S.note = ''; if (myCode()) setPath('/opportunities/' + myCode() + '/' + (dk === 'offer' ? 'offering' : 'seeking')); draw(); window.scrollTo(0, 0); }
+  function startFlow(dk) { S.addDir = dk; S.addm = null; S.screen = 'share'; S.note = ''; setPath('/opportunities/'); draw(); window.scrollTo(0, 0); }
   document.addEventListener('input', function (e) {
     if (e.target && e.target.id === 'lpq') { S.locQ = e.target.value; draw(); var lq = document.getElementById('lpq'); if (lq) { lq.focus(); var lv = lq.value; lq.value = ''; lq.value = lv; } return; }
     if (!e.target || e.target.id !== 'mp-search') return;
@@ -565,6 +583,7 @@ label.cw-lp{display:inline-flex;align-items:center;gap:8px;box-sizing:border-box
       return;
     }
     else if (a === 'add') { S.screen = 'add'; S.note = ''; window.scrollTo(0, 0); }
+    else if (a === 'copylink') { var u = 'https://2appear.network/opportunities/' + myCode() + '/' + (S.person && S.person.dir === 'seek' ? 'seeking' : 'offering'); try { navigator.clipboard.writeText(u).then(function () { S.copied = true; draw(); }); } catch (e) {} return; }
     else if (a === 'addme') { startFlow(v === 'Offering it' ? 'offer' : 'seek'); return; }
     else if (a === 'share') { S.screen = 'add'; S.note = ''; window.scrollTo(0, 0); }
     else if (a === 'mine') { setPath('/opportunities/'); S.screen = 'mine'; S.note = ''; loadMine(); return; }
@@ -593,15 +612,16 @@ label.cw-lp{display:inline-flex;align-items:center;gap:8px;box-sizing:border-box
     else if (a === 'pubsaved') { if (S.busy) return; S.busy = true; S.note = ''; draw(); send('saveOpportunity', { postId: S.mp.postId }).then(function (j) { S.busy = false; if (j && j.ok) { var id = S.mp.postId; S.mp.status = 'open'; (S.mine || []).forEach(function (x) { if (x.postId === id) x.status = 'open'; }); S.list = null; openMine(id); S.note = 'Published. Matching has started.'; draw(); } else { S.note = 'That did not work. Please try again.'; draw(); } }).catch(function () { S.busy = false; S.note = 'That did not work. Please try again.'; draw(); }); return; }
     draw();
   });
+  var PM = null;
   loadCats();
   window.addEventListener('hashchange', function () { var hq = ME && window.CWAdd && CWAdd.fromHash && CWAdd.fromHash(); if (hq) startFlow(hq.dir); });
   if (ME && S.group) { S.screen = 'group'; draw(); loadGroup(); }
   else if (ME && new URLSearchParams(location.search).get('mine')) { S.screen = 'mine'; draw(); loadMine(); load(); }
   else if (ME && window.CWAdd && CWAdd.fromHash && CWAdd.fromHash()) { load(); startFlow(CWAdd.fromHash().dir); }
-  else if (ME && (location.pathname.match(/^\/opportunities\/([0-9a-z]{6})\/(seeking|offering)\/?$/) || [])[1] === myCode() && myCode()) { load(); startFlow(/\/offering\/?$/.test(location.pathname) ? 'offer' : 'seek'); }
+  else if (ME && (PM = location.pathname.match(/^\/opportunities\/([0-9a-z]{6})\/(seeking|offering)\/?$/) || (new URLSearchParams(location.search).get('person') || '').match(/^([0-9a-z]{6})\/(seeking|offering)$/))) { openPerson(PM[1], PM[2] === 'offering' ? 'offer' : 'seek'); load(); }
   else if (ME && /^(need|offer)$/.test(new URLSearchParams(location.search).get('add') || '')) { load(); startFlow(new URLSearchParams(location.search).get('add') === 'offer' ? 'offer' : 'seek'); }
   else if (ME && /^(theyneed|theyoffer)$/.test(new URLSearchParams(location.search).get('add') || '')) { S.screen = 'add'; draw(); load(); }
-  else { if (/^\/opportunities\/[0-9a-z]{6}\//.test(location.pathname)) setPath('/opportunities/'); draw(); if (ME) load(); }
+  else { draw(); if (ME) load(); }
 })();
 </script>
 </body>
