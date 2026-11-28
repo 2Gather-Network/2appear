@@ -532,6 +532,8 @@ label.cw-lp{display:inline-flex;align-items:center;gap:8px;box-sizing:border-box
   loadCats();
   if (ME && S.group) { S.screen = 'group'; draw(); loadGroup(); }
   else if (ME && new URLSearchParams(location.search).get('mine')) { S.screen = 'mine'; draw(); loadMine(); load(); }
+  else if (ME && /^(need|offer)$/.test(new URLSearchParams(location.search).get('add') || '')) { load(); startFlow(new URLSearchParams(location.search).get('add') === 'offer' ? 'offer' : 'seek'); }
+  else if (ME && /^(theyneed|theyoffer)$/.test(new URLSearchParams(location.search).get('add') || '')) { S.screen = 'add'; draw(); load(); }
   else { draw(); if (ME) load(); }
 })();
 </script>
