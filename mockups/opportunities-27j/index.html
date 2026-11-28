@@ -126,7 +126,7 @@ h1.t{color:#fff;font-size:28px;font-weight:800;margin:0 0 4px}
 .mp-key{display:flex;flex-wrap:wrap;gap:16px;font-size:12px;color:#2F3D4F;padding:10px 0 14px;margin-bottom:4px;border-bottom:1px solid #DDE4EE}
 .mp-key span{display:inline-flex;align-items:center;gap:6px}
 .dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;display:inline-block}
-.dot.share{background:#2E9E7A}.dot.comp{background:#D9781A}.dot.coseek{background:#7F77DD}
+.dot.share{background:#2E9E7A}.dot.seekme{background:#1F699E}.dot.comp{background:#D9781A}.dot.coseek{background:#7F77DD}
 .mp-row{display:flex;align-items:flex-start;gap:12px;padding:14px 0;border-top:1px solid #DDE4EE}
 .mp-key + .mp-row,.mp-search-wrap + .mp-row{border-top:none;padding-top:6px}
 .mp-photo{width:44px;height:44px;border-radius:50%;object-fit:cover;flex-shrink:0;background:#EBF3FA;color:#185FA5;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:600;overflow:hidden}
@@ -511,8 +511,8 @@ h1.t{color:#fff;font-size:28px;font-weight:800;margin:0 0 4px}
     var it = function (cls, t) { return '<div class="mp-item"><span class="dot ' + cls + '"></span><div class="mp-item-text">' + esc(t) + '</div></div>'; };
     (texts || []).forEach(function (t) {
       var x = String(t || ''), m;
-      if ((m = x.match(/^Seeking (.+), which you offer$/))) { g.seek.push(it('comp', 'Seeking: ' + cap(m[1]))); cats.theySeek = 1; }
-      else if (x === 'They are seeking something you offer') { g.seek.push(it('comp', 'Seeking something you offer')); cats.theySeek = 1; }
+      if ((m = x.match(/^Seeking (.+), which you offer$/))) { g.seek.push(it('seekme', 'Seeking: ' + cap(m[1]))); cats.theySeek = 1; }
+      else if (x === 'They are seeking something you offer') { g.seek.push(it('seekme', 'Seeking something you offer')); cats.theySeek = 1; }
       else if ((m = x.match(/^You are both seeking (.+)$/))) { g.both.push(it('coseek', 'Both seeking: ' + cap(m[1]))); cats.bothSeek = 1; }
       else if ((m = x.match(/^Offers (.+), which you are seeking$/))) { g.offer.push(it('comp', 'Offering: ' + cap(m[1]))); cats.theyOffer = 1; }
       else if (x === 'They offer something you are seeking') { g.offer.push(it('comp', 'Offering something you are seeking')); cats.theyOffer = 1; }
@@ -563,7 +563,7 @@ h1.t{color:#fff;font-size:28px;font-weight:800;margin:0 0 4px}
     var total = rows.length, list = rows.filter(function (r) { return (!q || r.hay.indexOf(q) > -1) && (!S.statOf || (r.cats && r.cats[S.statOf])); });
     if (!total) return out + (d.needTopics ? '' : '<p class="cw-statement">No matches yet.</p>');
     var cnt = function (c) { return rows.filter(function (r) { return r.cats && r.cats[c]; }).length; };
-    var st = [[cnt('theySeek'), 'comp', ' person is seeking what you offer', ' people are seeking what you offer', 'theySeek'], [cnt('theyOffer'), 'comp', ' person offers what you\u2019re seeking', ' people offer what you\u2019re seeking', 'theyOffer'], [cnt('bothSeek'), 'coseek', ' person shares what you\u2019re seeking', ' people share what you\u2019re seeking', 'bothSeek'], [cnt('common'), 'share', ' person in common', ' people in common', 'common']].filter(function (x) { return x[0] > 0; });
+    var st = [[cnt('theySeek'), 'seekme', ' person is seeking what you offer', ' people are seeking what you offer', 'theySeek'], [cnt('theyOffer'), 'comp', ' person offers what you\u2019re seeking', ' people offer what you\u2019re seeking', 'theyOffer'], [cnt('bothSeek'), 'coseek', ' person shares what you\u2019re seeking', ' people share what you\u2019re seeking', 'bothSeek'], [cnt('common'), 'share', ' person in common', ' people in common', 'common']].filter(function (x) { return x[0] > 0; });
     out += '<div class="mp-stats">' + st.map(function (x) { return '<a class="mp-stat' + (S.statOf === x[4] ? ' on' : '') + '" data-act="statof" data-v="' + x[4] + '"><span class="dot ' + x[1] + '"></span>' + x[0] + (x[0] === 1 ? x[2] : x[3]) + '</a>'; }).join('') + (q ? '<span class="mp-sub">' + list.length + ' of ' + total + ' shown</span>' : '') + '</div>';
     if (total > 5) out += '<div class="mp-search-wrap"><input type="text" class="mp-search" id="mp-search" placeholder="Search your matches" aria-label="Search your matches" value="' + esc(S.pq || '') + '"></div>';
     out += list.length ? list.map(function (r) { return r.html; }).join('') : '<p class="mp-sub" style="padding:20px 0">No matches for "' + esc(q) + '".</p>';
