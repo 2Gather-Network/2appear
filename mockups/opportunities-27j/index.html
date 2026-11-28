@@ -583,7 +583,7 @@ h1.t{color:#fff;font-size:28px;font-weight:800;margin:0 0 4px}
   }
   function post() {
     var p = S.post;
-    if (!p) return crumb('', 'Opportunity') + '<div class="cw-card"><span class="cw-savestat">Loading information...</span></div>' + back();
+    if (!p) return crumb('', S.postTitle || 'Opportunity') + '<div class="cw-card">' + (S.note ? '<div class="cw-status info">' + esc(S.note) + '</div>' : '<span class="cw-savestat">Loading information...</span>') + '</div>' + back();
     var h = crumb('', p.title) + '<div class="cw-card"><div class="top"><span class="cw-chip">' + esc(p.dir) + '</span><span class="cw-chip">' + esc(p.kind) + '</span><span class="cw-chip">' + esc(p.ex) + '</span></div><h1 style="font-size:24px;margin:8px 0 2px">' + esc(p.title) + '</h1>' + (p.place || p.poster ? '<p class="cw-savestat" style="margin:0 0 14px">' + (p.poster ? 'Shared by ' + esc(p.poster.name) + (p.poster.known ? ', someone you know. ' : (p.poster.group ? ', in ' + esc(p.poster.group) + ' with you. ' : ', at ' + esc(p.poster.event) + ' with you. ')) : '') + esc(p.place || '') + '</p>' : '');
     if (p.reasons && p.reasons[0]) h += '<p class="cw-statement" style="margin:0 0 12px"><b>' + esc(p.reasons[0].text) + '</b></p>';
     h += '<div class="cols"><div class="cw-fbox"><h4>What you\'re looking for</h4><ul>' + (p.mine || []).map(function (x) { return '<li>' + esc(x) + '</li>'; }).join('') + '</ul></div><div class="cw-fbox"><h4>What they\'re looking for</h4><ul>' + (p.theirs || []).map(function (x) { return '<li>' + esc(x) + '</li>'; }).join('') + '</ul></div></div>';
@@ -694,6 +694,8 @@ h1.t{color:#fff;font-size:28px;font-weight:800;margin:0 0 4px}
     }).catch(function () { S.err = 'We could not load opportunities. Please try again later.'; draw(); });
   }
   function openPost(id) {
+    var lp = (S.list || []).filter(function (x) { return x.postId === id; })[0];
+    S.postTitle = lp ? String(lp.title || '') : '';
     S.screen = 'post'; S.post = null; S.note = ''; S.asking = false; draw(); window.scrollTo(0, 0);
     ask('getOpportunity', { postId: id }).then(function (j) { S.post = j && j.ok ? j.post : null; if (!S.post) S.note = 'This opportunity is not available.'; draw(); }).catch(function () { S.note = 'This opportunity is not available.'; draw(); });
   }
