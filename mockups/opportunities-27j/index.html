@@ -345,7 +345,7 @@ h1.t{color:#fff;font-size:28px;font-weight:800;margin:0 0 4px}
      if(!S.leafFlag)return t+'…';
      if(isSvc()){if(S.level)t+=' '+(S.kind==='offer'?LVO:LVS)[S.level];if(S.way&&S.way!=='skipped')t+=', '+S.way;}
      else if(withVia&&!isThingOffer()){var bw=becWords();if(bw.length)t+=(isThingSeek()?' because I\'d like it for ':' because I\'d like to ')+listAnd(bw);}
-     if(isThing()&&S.way&&S.way!=='skipped')t+=' - to '+S.way;
+     if(isThing()&&S.way&&S.way!=='skipped')t+=' to '+S.way;
      return t+'.'+(S.leafWords.length&&cat?' This includes '+listAnd(S.leafWords)+'.':'');}
     function sentence(){return build(true);}
     function lev(a,b){var m=[],i,j;for(i=0;i<=b.length;i++)m[i]=[i];for(j=0;j<=a.length;j++)m[0][j]=j;for(i=1;i<=b.length;i++)for(j=1;j<=a.length;j++)m[i][j]=Math.min(m[i-1][j]+1,m[i][j-1]+1,m[i-1][j-1]+(b[i-1]===a[j-1]?0:1));return m[b.length][a.length];}
@@ -439,7 +439,8 @@ h1.t{color:#fff;font-size:28px;font-weight:800;margin:0 0 4px}
     function pick3(){if(isThingSeek()&&!S.way)return go('way');go('vis');}
     return { mount: function (r) { root = r; render(); } };
   }
-  function niceTitle(t) { return String(t || '').replace(/^(I'm (?:offering|seeking)) (?:a thing|a skill or service|a place|an experience|a job|a project): /i, '$1: ').replace(/, to (?=[a-z])/, ' - to '); }
+  function niceTitle(t) { return String(t || '').replace(/^(I'm (?:offering|seeking)) (?:a thing|a skill or service|a place|an experience|a job|a project): /i, '$1: ').replace(/(?:, | - )to (?=[a-z])/, ' to '); }
+  function shortTitle(t) { var x = niceTitle(t).replace(/^I'm (?:offering|seeking): /i, ''); x = x.split(/ to (?=[a-z])| because |, |\.$/)[0].replace(/\.$/, '').trim(); return x ? x.charAt(0).toUpperCase() + x.slice(1) : 'Opportunity'; }
   function crumb(mid, now) { return '<div class="cw-breadcrumb"><a href="https://2appear.network/dashboard/">Dashboard</a> / ' + (mid || now !== 'Opportunities' ? '<a href="/mockups/opportunities-27j/">Opportunities</a> / ' : '') + (mid ? esc(mid) + ' / ' : '') + '<span class="now">' + esc(now) + '</span></div>'; }
   var IC = {
     need: '<path d="M4 12v8h16v-8"/><path d="M12 3v11"/><path d="M8 10l4 4 4-4"/>',
@@ -585,7 +586,7 @@ h1.t{color:#fff;font-size:28px;font-weight:800;margin:0 0 4px}
   function post() {
     var p = S.post;
     if (!p) return crumb('', S.postTitle || 'Opportunity') + '<div class="cw-card">' + (S.note ? '<div class="cw-status info">' + esc(S.note) + '</div>' : '<span class="cw-savestat">Loading information...</span>') + '</div>' + back();
-    var h = crumb('', niceTitle(p.title)) + '<div class="cw-card"><div class="top"><span class="cw-chip">' + esc(p.dir) + '</span><span class="cw-chip">' + esc(p.kind) + '</span><span class="cw-chip">' + esc(p.ex) + '</span></div><h1 style="font-size:24px;margin:8px 0 2px">' + esc(niceTitle(p.title)) + '</h1>' + (p.place || p.poster ? '<p class="cw-savestat" style="margin:0 0 14px">' + (p.poster ? 'Shared by ' + esc(p.poster.name) + (p.poster.known ? ', someone you know. ' : (p.poster.group ? ', in ' + esc(p.poster.group) + ' with you. ' : ', at ' + esc(p.poster.event) + ' with you. ')) : '') + esc(p.place || '') + '</p>' : '');
+    var h = crumb('', shortTitle(p.title)) + '<div class="cw-card"><h1 style="font-size:24px;margin:8px 0 2px">' + esc(niceTitle(p.title)) + '</h1>' + (p.place || p.poster ? '<p class="cw-savestat" style="margin:0 0 14px">' + (p.poster ? 'Shared by ' + esc(p.poster.name) + (p.poster.known ? ', someone you know. ' : (p.poster.group ? ', in ' + esc(p.poster.group) + ' with you. ' : ', at ' + esc(p.poster.event) + ' with you. ')) : '') + esc(p.place || '') + '</p>' : '');
     h += '<div class="cols"><div class="cw-fbox"><h4>You\'re seeking</h4><ul>' + (p.mine || []).map(function (x) { return '<li>' + esc(x) + '</li>'; }).join('') + '</ul></div><div class="cw-fbox"><h4>They\'re seeking</h4><ul>' + (p.theirs || []).map(function (x) { return '<li>' + esc(x) + '</li>'; }).join('') + '</ul></div></div>';
     (p.gaps || []).forEach(function (g) { h += '<div class="cw-status info" style="margin-bottom:8px">' + esc(g) + '</div>'; });
     if (p.both) {
@@ -634,9 +635,9 @@ h1.t{color:#fff;font-size:28px;font-weight:800;margin:0 0 4px}
   }
   function manage() {
     var p = S.mp;
-    var h = crumb('My opportunities', p ? niceTitle(p.title) : 'Opportunity') + '<div class="cw-card">';
+    var h = crumb('My opportunities', p ? shortTitle(p.title) : 'Opportunity') + '<div class="cw-card">';
     if (!p) return h + '<span class="cw-savestat">Loading information...</span></div><div style="margin-top:16px"><a class="backb" data-act="mine">Back</a></div>';
-    h += '<div class="top"><span class="cw-chip">' + esc(p.dir) + '</span><span class="cw-chip">' + esc(p.kind) + '</span><span class="cw-chip">' + esc(p.ex) + '</span></div><h1 style="font-size:24px;margin:8px 0 14px">' + esc(niceTitle(p.title)) + '</h1>';
+    h += '<h1 style="font-size:24px;margin:8px 0 14px">' + esc(niceTitle(p.title)) + '</h1>';
     h += '<p class="cw-pq" style="font-size:18px">People who are interested</p><p class="cw-fhelp">You see the category and city only. Names and photos open to the two of you when you both say yes.</p>';
     if (S.resp === null) h += '<div style="min-height:37px"><span class="cw-savestat">Loading information...</span></div>';
     else if (!S.resp.length) h += '<p class="cw-statement">No one has answered yet. You will get an email when someone is.</p>';
@@ -695,7 +696,7 @@ h1.t{color:#fff;font-size:28px;font-weight:800;margin:0 0 4px}
   }
   function openPost(id) {
     var lp = (S.list || []).filter(function (x) { return x.postId === id; })[0];
-    S.postTitle = lp ? niceTitle(lp.title) : '';
+    S.postTitle = lp ? shortTitle(lp.title) : '';
     S.screen = 'post'; S.post = null; S.note = ''; S.asking = false; draw(); window.scrollTo(0, 0);
     ask('getOpportunity', { postId: id }).then(function (j) { S.post = j && j.ok ? j.post : null; if (!S.post) S.note = 'This opportunity is not available.'; draw(); }).catch(function () { S.note = 'This opportunity is not available.'; draw(); });
   }
