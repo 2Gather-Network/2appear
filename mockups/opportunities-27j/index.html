@@ -597,7 +597,7 @@ h1.t{color:#fff;font-size:28px;font-weight:800;margin:0 0 4px}
       h += '<div class="row"><a class="cw-btn solid sm" data-act="openmine" data-id="' + esc(p.postId) + '">See who is interested</a></div>';
     } else {
       h += '<div class="row"><a class="cw-btn solid sm" data-act="interest">I\'m interested</a><a class="cw-btn ghost sm" data-act="ask">Ask a question</a></div>';
-      if (S.asking) h += '<div class="cw-fbox" style="margin-top:14px"><p class="cw-fq">Your question</p><p class="cw-fhelp">Your name is not shared.</p><div class="cw-search" style="max-width:none;border-radius:14px"><input id="qtext" maxlength="500" placeholder="Type your question"></div><div class="row"><a class="cw-btn solid sm" data-act="sendq">Send</a><a data-act="ask" style="color:#1F699E;font:700 14px \'Nunito Sans\',sans-serif;padding:12px 8px;cursor:pointer">Cancel</a></div></div>';
+      if (S.asking) h += '<div class="cw-fbox" style="margin-top:14px"><p class="cw-fq">Your question</p><p class="cw-fhelp">Your name is not shared.</p><div class="cw-search" style="max-width:none;border-radius:14px"><input id="qtext" maxlength="500" placeholder="Type your question"></div><div class="row" style="align-items:center"><a class="cw-btn solid sm" data-act="sendq">Send</a><a data-act="ask" style="color:#1F699E;font:700 14px \'Nunito Sans\',sans-serif;padding:12px 8px;cursor:pointer">Cancel</a></div></div>';
     }
     if (S.note) h += '<div class="cw-status info" style="margin-top:14px">' + esc(S.note) + '</div>';
     return h + '</div>' + back();
