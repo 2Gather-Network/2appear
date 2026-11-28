@@ -511,15 +511,15 @@ h1.t{color:#fff;font-size:28px;font-weight:800;margin:0 0 4px}
     var it = function (cls, t) { return '<div class="mp-item"><span class="dot ' + cls + '"></span><div class="mp-item-text">' + esc(t) + '</div></div>'; };
     (texts || []).forEach(function (t) {
       var x = String(t || ''), m;
-      if ((m = x.match(/^Seeking (.+), which you offer$/))) { g.seek.push(it('seekme', 'Seeking: ' + cap(m[1]))); cats.theySeek = 1; }
+      if ((m = x.match(/^Seeking (.+), which you offer$/))) { g.seek.push(it('seekme', 'Seeking your offer: ' + cap(m[1]))); cats.theySeek = 1; }
       else if (x === 'They are seeking something you offer') { g.seek.push(it('seekme', 'Seeking something you offer')); cats.theySeek = 1; }
       else if ((m = x.match(/^You are both seeking (.+)$/))) { g.both.push(it('coseek', 'Both seeking: ' + cap(m[1]))); cats.bothSeek = 1; }
-      else if ((m = x.match(/^Offers (.+), which you are seeking$/))) { g.offer.push(it('comp', 'Offering: ' + cap(m[1]))); cats.theyOffer = 1; }
+      else if ((m = x.match(/^Offers (.+), which you are seeking$/))) { g.offer.push(it('comp', 'Offering what you seek: ' + cap(m[1]))); cats.theyOffer = 1; }
       else if (x === 'They offer something you are seeking') { g.offer.push(it('comp', 'Offering something you are seeking')); cats.theyOffer = 1; }
-      else if ((m = x.match(/^You both enjoy (.+)$/))) { g.joy.push(it('share', cap(m[1]))); cats.common = 1; }
-      else if ((m = x.match(/^You both care about (.+)$/))) { g.care.push(it('share', cap(m[1]))); cats.common = 1; }
-      else if ((m = x.match(/^You both work in (.+)$/))) { g.sector.push(it('share', cap(m[1]))); cats.common = 1; }
-      else if ((m = x.match(/^You both offer (.+)$/))) { g.skill.push(it('share', cap(m[1]))); cats.common = 1; }
+      else if ((m = x.match(/^You both enjoy (.+)$/))) { g.joy.push(it('share', 'In common: ' + cap(m[1]))); cats.common = 1; }
+      else if ((m = x.match(/^You both care about (.+)$/))) { g.care.push(it('share', 'In common: ' + cap(m[1]))); cats.common = 1; }
+      else if ((m = x.match(/^You both work in (.+)$/))) { g.sector.push(it('share', 'In common: ' + cap(m[1]))); cats.common = 1; }
+      else if ((m = x.match(/^You both offer (.+)$/))) { g.skill.push(it('share', 'In common: ' + cap(m[1]))); cats.common = 1; }
       else { g.joy.push(it('share', x)); cats.common = 1; }
     });
     var left = g.seek.concat(g.offer, g.both, g.joy), right = g.care.concat(g.sector, g.skill);
